@@ -4,13 +4,21 @@
 
 ##### Must
 - Students can apply for becoming a TA.
-- Lecturers can examine students that applied for their respective course.
-- Users can login using a NetID and a password.
-- Lecturers can select candidates s.t. they will become TAs
-- Students should be able to enter their passing-grade for the course and their past TA'ing experiences.
- - Lecturers gets an overview of past TA'ing experience and past-grades for their course, along with their ratings by other lecturers.
-- Application starts instantly after opening a course.
-- Students should have passed the course before being able to apply.
+- Lecturers can view candidates' information, so that they can select their future employees.
+- A user can login using a NetID and a password, so that they can securely access the application.
+- Lecturers can select candidates so that they will become TAs.
+- Lecturers should be able to enter students' grades for their own courses.
+- Lecturers should be able to enter students' past TA'ing experiences.
+- Lecturers gets an overview of past TA'ing experience and past-grades for their course, along with their ratings by other lecturers.
+- Lecturers can rate their TAs, so that TAs can be recommended for their future applications.
+- Application starts instantly after a course has been created.
+- Students should have passed the course before being able to apply for a position as a TA.
+- Admin can delete courses, so he can manage the database.
+- Admin can modify courses, so he can manage the database.
+- Admin can add courses, so he can manage the database.
+- Lecturer can delete their own courses, in case the course finishes.
+- Lecturer can add their own courses, so that students can apply as a TA for them.
+- Lecturer can modify their own courses, in case new information should become available.
 
 
 
@@ -18,14 +26,16 @@
 
 
 ##### Should
-- Students will receive a notification after the selection proceidure has happend.
-- The max capacity for a course is 1 TA / 20 Students.
-- Students should only be able to TA a max of 3 courses per quarter.
-- After a student has been selected they should be sent a contract containing the coursename, the period, amount of hours and information on their tasks as a TA.
+- Students will receive a notification after the selection procedure has happened, so that they will know their results.
+- The maximum capacity for a course is 1 TA for every 20 students.
+- Students should only be able to TA a maximum of 3 courses per quarter.
+- After a student has been selected, they should be sent a contract containing the coursename, the period, amount of hours and information on their tasks as a TA, so they can officially be hired.
 - Students should only be able to apply and withdraw 3 weeks before the course starts.
-- There needs to a recommendation option, so that prominent students will be recommended to  lecturer. (upon request)
-- TAs can declare their hours.
+- Lecturers can only select candidates after the application closes (3 weeks before course start date).
+- Lecturers can receive recommendations of prominent TAs to help them in the selection procedure.
+- TAs can declare their hours, so that they can receive the correct payment.
 - Declared hours should not exceed the hours on the contract of the course.
+- Admin should be able to recover the system after a crash.
 
 
 
@@ -33,13 +43,11 @@
 
 
 ##### Could
-- Lecturers should be able to rate TA's after a quarter, which is reserverd only for lecturers' eyes.
-- Lecturers can enter details on the tasks they want the TA to preform on the contract. 
-- TA's can enter time spent on a course to give future TA's an idea of what their getting themselves into.
+- Lecturers can enter task descriptions on the contract so that the TA will have an overview of the requirements. 
+- TA's can enter time spent on a course to give future TA's an idea of what is to be expected.
 - Applicants should see the indication of how much time a course will take to TA.
-- Selected candidates can send their signed contracts back.
-- Hours declared should be approved by a lecturer.
-- The lecturer can filter the list of students (e.g. mimimum grade). 
+- Hours declared should be approved by a lecturer, so that the lecturer has control over payment.
+- The lecturer can view candidates based on a minimum grade preference. 
 
 
  
