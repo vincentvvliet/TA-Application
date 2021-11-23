@@ -13,9 +13,6 @@
 - Lecturers can rate their TAs, so that TAs can be recommended for their future applications.
 - Application starts instantly after a course has been created.
 - Students should have passed the course before being able to apply for a position as a TA.
-- Admin can delete courses, so he can manage the database.
-- Admin can modify courses, so he can manage the database.
-- Admin can add courses, so he can manage the database.
 - Lecturer can delete their own courses, in case the course finishes.
 - Lecturer can add their own courses, so that students can apply as a TA for them.
 - Lecturer can modify their own courses, in case new information should become available.
@@ -35,7 +32,6 @@
 - Lecturers can receive recommendations of prominent TAs to help them in the selection procedure.
 - TAs can declare their hours, so that they can receive the correct payment.
 - Declared hours should not exceed the hours on the contract of the course.
-- Admin should be able to recover the system after a crash.
 
 
 
@@ -48,7 +44,10 @@
 - Applicants should see the indication of how much time a course will take to TA.
 - Hours declared should be approved by a lecturer, so that the lecturer has control over payment.
 - The lecturer can view candidates based on a minimum grade preference. 
-
+- Admin can delete courses, so he can manage the database.
+- Admin can modify courses, so he can manage the database.
+- Admin can add courses, so he can manage the database.
+- Admin should be able to recover the system after a crash.
 
  
 
