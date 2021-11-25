@@ -1,8 +1,8 @@
 ## Meeting 1
 
 #### UML Diagramme
-UML-diagramme: looks good\\
--> NVM: convert to lolipop notation\\
+UML-diagramme: looks good//
+-> NVM: convert to lolipop notation//
 We have quite a lot of microservices: Add _Authentification_ to _Users_
 Four services works. \\ 
 
