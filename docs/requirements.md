@@ -47,8 +47,6 @@
 - Admin can delete courses, so he can manage the database.
 - Admin can modify courses, so he can manage the database.
 - Admin can add courses, so he can manage the database.
-- Admin should be able to recover the system after a crash.
-
  
 
 
@@ -63,4 +61,4 @@
 - We want the system to be API-based.
 - We want the system to use microservices.
 - We want to use Spring Security for the system.
-
+- We want a persistent database.
