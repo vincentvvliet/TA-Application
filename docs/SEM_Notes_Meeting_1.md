@@ -1,4 +1,3 @@
-#SEM
 ## Meeting 1
 
 #### UML Diagramme
