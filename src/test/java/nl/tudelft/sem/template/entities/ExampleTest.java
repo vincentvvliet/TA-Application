@@ -1,9 +1,8 @@
 package nl.tudelft.sem.template.entities;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import nl.tudelft.sem.template.entities.Example;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExampleTest {
 

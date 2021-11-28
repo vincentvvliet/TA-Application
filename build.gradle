@@ -82,6 +82,7 @@ checkstyle {
 
 pmd {
 	incrementalAnalysis = true
+	ignoreFailures = true
 }
 
 apply plugin: 'info.solidsoft.pitest'
