@@ -1,3 +1,4 @@
 rootProject.name = 'template'
 include 'TA'
 include 'Application'
+include 'Course'
