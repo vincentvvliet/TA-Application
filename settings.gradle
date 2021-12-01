@@ -1,5 +1,5 @@
 rootProject.name = 'template'
-include 'TA'
+include 'TAs'
 include 'Application'
 include 'Course'
 include 'User'

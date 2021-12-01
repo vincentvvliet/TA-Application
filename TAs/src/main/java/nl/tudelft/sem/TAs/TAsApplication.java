@@ -1,13 +1,13 @@
-package nl.tudelft.sem.TA;
+package nl.tudelft.sem.TAs;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TaApplication {
+public class TAsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TaApplication.class, args);
+		SpringApplication.run(TAsApplication.class, args);
 	}
 
 }
