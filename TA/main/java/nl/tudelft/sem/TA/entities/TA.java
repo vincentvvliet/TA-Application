@@ -1,4 +1,4 @@
-package entities;
+package nl.tudelft.sem.TA.entities;
 import javax.persistence.*;
 
 @Entity

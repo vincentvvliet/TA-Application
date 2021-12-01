@@ -64,7 +64,7 @@ jacocoTestCoverageVerification() {
         rule {
             enabled = true
             element = 'CLASS'
-            includes = ['nl.tudelft.sem.template.*']
+            includes = ['nl.tudelft.sem.TA.*']
 
             limit {
                 counter = 'BRANCH'
