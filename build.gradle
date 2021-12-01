@@ -6,13 +6,12 @@ buildscript {
     }
     dependencies {
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.2.RELEASE'
     }
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.3.5.RELEASE'
-    id 'io.spring.dependency-management'version '1.0.10.RELEASE'
+   // id 'org.springframework.boot' version '2.3.5.RELEASE'
+    //id 'io.spring.dependency-management'version '1.0.10.RELEASE'
     id 'java'
     // Test coverage
     id 'jacoco'
@@ -24,10 +23,10 @@ plugins {
     id 'pmd'
 
     // PITest
-//    id 'info.solidsoft.pitest' version '1.5.2'
+   id 'info.solidsoft.pitest' version '1.5.2'
 }
 
-group = 'nl.tudelft.cse.sem.TA.*'
+group = 'sem_repo_17a'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -50,7 +49,7 @@ test {
     useJUnitPlatform()
     jacoco {
         enabled = true
-        includes = ['nl.tudelft.sem.TA.*']
+        includes = ['sem_repo_17a']
         excludes = []
     }
 }
@@ -65,7 +64,7 @@ jacocoTestCoverageVerification() {
         rule {
             enabled = true
             element = 'CLASS'
-            includes = ['nl.tudelft.sem.TA.*']
+            includes = ['sem_repo_17a']
 
             limit {
                 counter = 'BRANCH'
@@ -91,7 +90,7 @@ pitest {
     //adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
     junit5PluginVersion = '0.12'
 
-    targetClasses = ['nl.tudelft.sem.TA.*']  //by default "${project.group}.*"
+    targetClasses = ['sem_repo_17a']  //by default "${project.group}.*"
     pitestVersion = '1.5.1' //not needed when a default PIT version should be used
     threads = 4
     outputFormats = ['XML', 'HTML']
