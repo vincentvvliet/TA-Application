@@ -1,1 +1,5 @@
 rootProject.name = 'template'
+include 'TAs'
+include 'Application'
+include 'Course'
+include 'User'
