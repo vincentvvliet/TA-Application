@@ -62,7 +62,7 @@ public class TAController {
      */
     @RequestMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean sendQuestion(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
+    public boolean addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
          TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
          Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new NoSuchElementException());
          ta.setContract(contract);
