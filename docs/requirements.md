@@ -7,15 +7,10 @@
 - Lecturers can view candidates' information, so that they can select their future employees.
 - A user can login using a NetID and a password, so that they can securely access the application.
 - Lecturers can select candidates so that they will become TAs.
-- Lecturers should be able to enter students' grades for their own courses.
-- Lecturers should be able to enter students' past TA'ing experiences.
 - Lecturers gets an overview of past TA'ing experience and past-grades for their course, along with their ratings by other lecturers.
 - Lecturers can rate their TAs, so that TAs can be recommended for their future applications.
 - Application starts instantly after a course has been created.
 - Students should have passed the course before being able to apply for a position as a TA.
-- Lecturer can delete their own courses, in case the course finishes.
-- Lecturer can add their own courses, so that students can apply as a TA for them.
-- Lecturer can modify their own courses, in case new information should become available.
 
 
 
