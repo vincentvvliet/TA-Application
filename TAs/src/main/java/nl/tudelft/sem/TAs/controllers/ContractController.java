@@ -107,7 +107,7 @@ public class ContractController {
      * @return boolean representing if the deletion was successful or not
      */
     @DeleteMapping("deleteContract/{id}")
-    public boolean deleteRoom(@PathVariable (value = "id") UUID id) {
+    public boolean deleteContract(@PathVariable (value = "id") UUID id) {
         try {
             contractRepository.deleteById(id);
             return true;
