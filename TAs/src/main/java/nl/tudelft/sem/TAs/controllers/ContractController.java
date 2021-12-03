@@ -55,7 +55,7 @@ public class ContractController {
      */
     @PatchMapping("addHours/{id}/{maxHours}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addHoursbyId(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) {
+    public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) {
         Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         contract.setMaxHours(hours);
         contractRepository.save(contract);
