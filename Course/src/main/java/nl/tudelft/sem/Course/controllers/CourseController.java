@@ -14,13 +14,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/Course/")
+@RequestMapping("/course/")
 public class CourseController {
-    @Autowired
-    private CourseRepository courseRepository;
 
     @Autowired
-    private GradeRepository gradeRepository;
+    private CourseRepository courseRepository;
 
     /**
      * GET endpoint retrieves course by id

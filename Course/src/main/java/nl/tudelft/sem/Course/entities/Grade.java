@@ -34,4 +34,12 @@ public class Grade {
         this.course = course;
         this.grade = grade;
     }
+
+    public double getGrade() {
+        return grade;
+    }
+
+    public void setGrade(double grade) {
+        this.grade = grade;
+    }
 }
