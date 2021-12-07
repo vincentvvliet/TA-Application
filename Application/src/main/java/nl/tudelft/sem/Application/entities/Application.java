@@ -2,6 +2,7 @@ package nl.tudelft.sem.Application.entities;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import javax.management.InvalidApplicationException;
 import javax.persistence.*;
 import java.util.UUID;
 
@@ -34,6 +35,20 @@ public class Application {
         this.id = UUID.randomUUID();
         this.courseId = courseId;
         this.studentId = studentId;
+    }
+
+    private boolean validate(Application application){
+        Boolean isValid = false;
+        try{
+            Validator validator = new IsCourseOpen(); // create chain of responsibility
+            validator.setLast(new IsGradeSufficient());
+            validator.setLast(new IsUniqueApplication());
+
+            isValid = validator.handle(application);
+        } catch (InvalidApplicationException e){
+            e.printStackTrace();
+        }
+        return isValid;
     }
 
 }
