@@ -31,6 +31,22 @@ public class CourseController {
     }
 
     /**
+     * GET endpoint retrieves startDate of course by id
+     * @param id (UUID) of the course
+     * @return optional of course
+     */
+    @GetMapping("/getCourseStartDate/{id}")
+    public Optional<LocalDate> getCourseStartDateById(@PathVariable(value = "id") UUID id) {
+        Optional<Course> course = courseRepository.findById(id);
+        Optional<LocalDate> date = Optional.empty();
+        if(course.isPresent()){
+            date = Optional.of(course.get().getStartDate());
+        }
+        return date;
+    }
+
+
+    /**
      * GET endpoint retrieves all existing courses
      * @return list of courses
      */
