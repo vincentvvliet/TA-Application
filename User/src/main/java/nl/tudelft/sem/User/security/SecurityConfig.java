@@ -1,4 +1,4 @@
-package nl.tudelft.sem.User;
+package nl.tudelft.sem.User.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,28 +14,47 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static java.util.Objects.requireNonNull;
+
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    TokenAuthenticationProvider provider;
+
+    SecurityConfig(final TokenAuthenticationProvider provider) {
+//        super();
+        this.provider = requireNonNull(provider);
+    }
+
+    @Override
+    protected void configure(final AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(provider);
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .anyRequest().authenticated()
-//                .antMatchers("/admin/**")
+//                .anyRequest().authenticated()
+                .antMatchers("/user/login", "/user/register")
+                .permitAll()
+//                .antMatchers("/user/register")
+//                .permitAll()
 //                .hasRole("ADMIN")
 //                .antMatchers("/protected/**")
 //                .hasRole("USER");
-                .and()
-                .formLogin()
+//                .and()
+//                .formLogin()
 //                .loginPage("/login")
-                .permitAll()
+//                .permitAll()
                 .and()
-                .logout()
-                .permitAll();
+                .csrf().disable()
+                .formLogin().disable()
+                .httpBasic().disable()
+                .logout().disable();
     }
 
     @Autowired
@@ -66,20 +85,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         .roles("USER")
                         .build();
 
-        UserDetails admin =
-                User.withDefaultPasswordEncoder()
-                        .username("admin")
-                        .password("password")
-                        .roles("ADMIN")
-                        .build();
-
-        UserDetails lecturer =
-                User.withDefaultPasswordEncoder()
-                        .username("lecturer")
-                        .password("password")
-                        .roles("LECTURER")
-                        .build();
-
-        return new InMemoryUserDetailsManager(user, admin, lecturer);
+        return new InMemoryUserDetailsManager(user);
     }
 }

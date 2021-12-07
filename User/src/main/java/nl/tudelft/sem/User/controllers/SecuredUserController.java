@@ -1,8 +1,11 @@
 package nl.tudelft.sem.User.controllers;
 
+import lombok.NonNull;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
+import nl.tudelft.sem.User.security.UserAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/user/")
 public class SecuredUserController {
+
+    @NonNull
+    UserAuthenticationService authentication;
 
     @Autowired
     private UserRepository userRepository;
@@ -41,5 +47,16 @@ public class SecuredUserController {
     @GetMapping("/getUsers")
     public List<User> getCourses() {
         return userRepository.findAll();
+    }
+
+    /**
+     * GET endpoint to logout
+     *
+     * @return boolean
+     */
+    @GetMapping("/logout")
+    boolean logout(@AuthenticationPrincipal final User user) {
+        authentication.logout(user);
+        return true;
     }
 }

@@ -1,4 +1,4 @@
-package nl.tudelft.sem.User;
+package nl.tudelft.sem.User.security;
 
 
 import nl.tudelft.sem.User.entities.User;
