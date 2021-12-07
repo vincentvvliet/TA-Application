@@ -69,6 +69,21 @@ public class TAController {
          taRepository.save(ta);
          return true;
     }
+
+    /**
+     * PATCH endpoint sets TA rating
+     * @param id of TA
+     * @param rating of the TA
+     */
+    @PatchMapping("addRating/{id}/{rating}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void addRatingbyId(@PathVariable (value = "id")  UUID id, @PathVariable(value = "rating") int rating) {
+        TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        ta.setRating(rating);
+        taRepository.save(ta);
+    }
+
+
     /**
      * DELETE endpoint deletes a TA by id
      * @param id of the TA

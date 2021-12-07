@@ -41,4 +41,11 @@ public class TA {
         this.studentId = studentId;
     }
 
+    public void setContract(Contract c){
+        this.contract  = c;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
 }
