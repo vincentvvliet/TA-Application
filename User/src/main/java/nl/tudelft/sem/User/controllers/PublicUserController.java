@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/user/")
 public class PublicUserController {
-    @NonNull
-    UserAuthenticationService authentication;
+//    @NonNull
+//    UserAuthenticationService authentication;
 
     @Autowired
     UserRepository users;
@@ -28,19 +28,19 @@ public class PublicUserController {
      * @param password of the user
      * @return optional of user
      */
-    @PostMapping("/register")
-    String register(@RequestParam("username") final String username,
-                    @RequestParam("password") final String password) {
-        users.save(
-                User
-                        .builder()
-                        .username(username)
-                        .password(password)
-                        .build()
-        );
-
-        return login(username, password);
-    }
+//    @PostMapping("/register")
+//    String register(@RequestParam("username") final String username,
+//                    @RequestParam("password") final String password) {
+//        users.save(
+//                User
+//                        .builder()
+//                        .username(username)
+//                        .password(password)
+//                        .build()
+//        );
+//
+//        return login(username, password);
+//    }
 
     /**
      * POST endpoint registers user by username and password
@@ -49,11 +49,11 @@ public class PublicUserController {
      * @param password of the user
      * @return optional of user
      */
-    @PostMapping("/login")
-    String login(@RequestParam("username") final String username,
-                 @RequestParam("password") final String password) {
-        return authentication
-                .login(username, password)
-                .orElseThrow(() -> new RuntimeException("invalid login and/or password"));
-    }
+//    @PostMapping("/login")
+//    String login(@RequestParam("username") final String username,
+//                 @RequestParam("password") final String password) {
+//        return authentication
+//                .login(username, password)
+//                .orElseThrow(() -> new RuntimeException("invalid login and/or password"));
+//    }
 }
