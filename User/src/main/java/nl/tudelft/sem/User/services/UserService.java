@@ -23,7 +23,7 @@ public class UserService {
      * @param applicationId of the TA application to be accepted
      * @return true if application successfully accepted, false otherwise
      */
-    public boolean selectTaApplication(UUID applicationId) {
+    public boolean acceptTaApplication(UUID applicationId) {
         WebClient client = WebClient.create();
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = client.method(HttpMethod.POST);
         WebClient.RequestBodySpec bodySpec = uriSpec.uri(URI.create("localhost:47112/application/acceptApplication/" + applicationId ));

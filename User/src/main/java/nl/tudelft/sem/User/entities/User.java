@@ -31,14 +31,19 @@ public class User implements UserDetails {
     @JsonProperty(value = "password")
     private String password;
 
+    @Column(name = "role")
+    @JsonProperty(value = "role")
+    private Role role;
+
     public User() {
         this.id = UUID.randomUUID();
     }
 
-    public User(String username, String password) {
+    public User(String username, String password, Role role) {
         this.id = UUID.randomUUID();
         this.username = username;
         this.password = password;
+        this.role = role;
     }
 
     @JsonIgnore

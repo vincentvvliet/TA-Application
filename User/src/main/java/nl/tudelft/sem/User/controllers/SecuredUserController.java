@@ -1,16 +1,17 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
+import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
+import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
@@ -27,6 +28,9 @@ public class SecuredUserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * GET endpoint retrieves user by id
@@ -58,5 +62,19 @@ public class SecuredUserController {
     boolean logout(@AuthenticationPrincipal final User user) {
         authentication.logout(user);
         return true;
+    }
+
+    /**PATCH endpoint to accept a TA application
+     * @param userId of the lecturer who accepts the application
+     * @param applicationId of the application to be accepted
+     * @return true if the application was successfully accepted, false otherwise
+     */
+    @RequestMapping("/acceptApplication/{userId}/{applicationId}")
+    public boolean acceptApplication(@PathVariable(value = "userId") UUID userId,@PathVariable(value = "applicationId") UUID applicationId) throws Exception {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+        if (user.getRole() != Role.LECTURER) {
+            throw new Exception("invalid role: only lecturers can accept applications");
+        }
+        return userService.acceptTaApplication(applicationId);
     }
 }
