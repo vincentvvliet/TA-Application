@@ -7,8 +7,8 @@ import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.repositories.TARepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,6 +24,17 @@ public class TAController {
     @Autowired
     private TARepository taRepository;
 
+    /**
+     * GET endpoint retrieves TA rating by id
+     * @param id (UUID) of the TA
+     * @return rating
+     */
+    @GetMapping("/getRating/{id}")
+    public Mono<Integer> getRatingById(@PathVariable(value = "id") UUID id) {
+        Optional<TA> TA = taRepository.findById(id);
+        if(TA.isPresent()) return Mono.just(TA.get().getRating());
+        return Mono.empty();
+    }
     /**
      * GET endpoint retrieves TA by id
      * @param id (UUID) of the TA
