@@ -78,7 +78,7 @@ public class ApplicationController {
     @GetMapping("/applications")
     @ResponseStatus(value = HttpStatus.OK)
     public List<Application> getApplications() {
-        return applicationRepository.findAll();
+        return applicationService.getApplications();
     }
 
     /** GET applications for specific course.
@@ -88,6 +88,6 @@ public class ApplicationController {
     @GetMapping("/applications/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public List<Application> getApplicationsByCourse(@PathVariable(value = "course_id") UUID course) {
-        return applicationRepository.findAllApplicationsByCourseId(course);
+        return applicationService.getApplicationsByCourse(course);
     }
 }

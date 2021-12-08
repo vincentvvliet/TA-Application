@@ -7,6 +7,7 @@ import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +19,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -90,5 +92,13 @@ public class ApplicationService {
             e.printStackTrace();
         }
         return isValid;
+    }
+
+    public List<Application> getApplications() {
+        return applicationRepository.findAll();
+    }
+
+    public List<Application> getApplicationsByCourse(UUID course) {
+        return applicationRepository.findAllApplicationsByCourseId(course);
     }
 }
