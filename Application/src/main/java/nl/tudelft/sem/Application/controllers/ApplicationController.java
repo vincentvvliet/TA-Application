@@ -3,6 +3,7 @@ package nl.tudelft.sem.Application.controllers;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.Application.services.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,9 @@ public class ApplicationController {
 
     @Autowired
     ApplicationRepository applicationRepository;
+
+    @Autowired
+    ApplicationService applicationService;
 
     /**
      * GET endpoint to retrieve an application based on studentId and courseId

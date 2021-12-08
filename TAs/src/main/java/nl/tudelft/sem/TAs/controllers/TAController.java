@@ -25,13 +25,14 @@ public class TAController {
     private TARepository taRepository;
 
     /**
-     * GET endpoint retrieves TA rating by id
-     * @param id (UUID) of the TA
+     * GET endpoint retrieves TA rating by id combination student + course
+     * @param studentId (UUID) of the student
+     * @param courseId (UUID) of the course
      * @return rating
      */
-    @GetMapping("/getRating/{id}")
-    public Mono<Integer> getRatingById(@PathVariable(value = "id") UUID id) {
-        Optional<TA> TA = taRepository.findById(id);
+    @GetMapping("/getRating/{studentid}/{courseid}")
+    public Mono<Integer> getRating(@PathVariable(value = "studentid") UUID studentId, @PathVariable(value = "courseid") UUID courseId) {
+        Optional<TA> TA = taRepository.findByStudentIdAndCourseId(studentId,courseId);
         if(TA.isPresent()) return Mono.just(TA.get().getRating());
         return Mono.empty();
     }

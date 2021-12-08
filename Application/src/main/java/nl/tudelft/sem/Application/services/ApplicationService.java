@@ -9,10 +9,10 @@ import java.util.UUID;
 @Service
 public class ApplicationService {
 
-    public int getRatingForTA(UUID TAid){
+    public int getRatingForTA(UUID studentId, UUID courseId){
         WebClient webClient = WebClient.create("http://localhost:47110");
         Mono<Integer> rating = webClient.get()
-                .uri("/getRating/" + TAid)
+                .uri("/getRating/" + studentId + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Integer.class);
         return rating.block();
