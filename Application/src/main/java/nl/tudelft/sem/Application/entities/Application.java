@@ -58,6 +58,10 @@ public class Application {
         return accepted;
     }
 
+    public void setAccepted(boolean accepted) {
+        this.accepted = accepted;
+    }
+
     public boolean validate(){
         Boolean isValid = false;
         try{
