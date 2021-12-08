@@ -1,24 +1,25 @@
 package nl.tudelft.sem.Application.entities;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import org.springframework.web.client.RestTemplate;
 
-import javax.management.InvalidApplicationException;
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import lombok.Data;
+
+
 
 @Entity
 @Data
-@Table(name = "application" , schema = "applicationschema")
+@Table(name = "application" ,schema = "applicationschema")
 public class Application {
     @Id
-    @Column(name = "id" , nullable = false)
+    @Column(name = "id" ,nullable = false)
     @JsonProperty(value = "id")
     private final UUID id;
 
-    @Column(name = "studentid" )
+    @Column(name = "studentid")
     @JsonProperty(value = "studentId")
     private UUID studentId;
 
@@ -30,20 +31,20 @@ public class Application {
     @JsonProperty(value = "accepted")
     private boolean accepted;
 
-    private final RestTemplate restTemplate = new RestTemplate();
 
     public Application() {
         this.id = UUID.randomUUID();
     }
 
+    /** the constructor of the Application class.
+     *
+     * @param courseId the id of the linked course
+     * @param studentId the id of the linked student
+     */
     public Application(UUID courseId , UUID studentId) {
         this.id = UUID.randomUUID();
         this.courseId = courseId;
         this.studentId = studentId;
-    }
-
-    public UUID getId() {
-        return id;
     }
 
     public UUID getStudentId() {
@@ -53,6 +54,8 @@ public class Application {
     public UUID getCourseId() {
         return courseId;
     }
+<<<<<<< HEAD
+=======
 
     public boolean isAccepted() {
         return accepted;
@@ -88,5 +91,6 @@ public class Application {
         return result;
     }
 
+>>>>>>> Implement_apply_application
 }
 

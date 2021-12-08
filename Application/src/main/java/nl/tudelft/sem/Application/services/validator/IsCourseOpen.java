@@ -1,12 +1,22 @@
-package nl.tudelft.sem.Application.entities;
+package nl.tudelft.sem.Application.services.validator;
+
+import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.services.ApplicationServices;
+import org.springframework.stereotype.Service;
 
 import javax.management.InvalidApplicationException;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Optional;
 
+@Service
 public class IsCourseOpen extends BaseValidator{
+    @SuppressWarnings("FieldCanBeLocal")
     private final long openForApplicationPeriod = 3; // how long the application period is in weeks
+    private final ApplicationServices applicationServices;
+
+    public IsCourseOpen() {
+        applicationServices = new ApplicationServices();
+    }
 
     /** checks if the application is made in the application period of the course
      *
@@ -17,7 +27,7 @@ public class IsCourseOpen extends BaseValidator{
     @Override
     public Boolean handle(Application application) throws InvalidApplicationException {
         LocalDate current = LocalDate.now(); // get current date
-        Optional<LocalDate> startCourse1 = application.getCourseStartDate(); // get startDate course from the course microservice
+        Optional<LocalDate> startCourse1 = applicationServices.getCourseStartDate(application.getCourseId()); // get startDate course from the course microservice
         if(startCourse1.isEmpty()){
             throw new InvalidApplicationException("Could not retrieve startDate that was linked to the given courseId");
         }

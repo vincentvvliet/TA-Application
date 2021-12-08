@@ -1,4 +1,6 @@
-package nl.tudelft.sem.Application.entities;
+package nl.tudelft.sem.Application.services.validator;
+
+import nl.tudelft.sem.Application.entities.Application;
 
 import javax.management.InvalidApplicationException;
 
