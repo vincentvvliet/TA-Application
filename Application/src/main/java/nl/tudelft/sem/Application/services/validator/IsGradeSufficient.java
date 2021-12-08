@@ -2,7 +2,7 @@ package nl.tudelft.sem.Application.services.validator;
 
 
 import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.services.ApplicationServices;
+import nl.tudelft.sem.Application.services.ApplicationService;
 import org.springframework.stereotype.Service;
 
 import javax.management.InvalidApplicationException;
@@ -10,10 +10,10 @@ import java.util.Optional;
 
 @Service
 public class IsGradeSufficient extends BaseValidator {
-    private final ApplicationServices applicationServices;
+    private final ApplicationService applicationServices;
 
     public IsGradeSufficient() {
-        applicationServices = new ApplicationServices();
+        applicationServices = new ApplicationService();
     }
 
     /**

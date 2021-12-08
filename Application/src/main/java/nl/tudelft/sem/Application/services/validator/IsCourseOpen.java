@@ -1,7 +1,7 @@
 package nl.tudelft.sem.Application.services.validator;
 
 import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.services.ApplicationServices;
+import nl.tudelft.sem.Application.services.ApplicationService;
 import org.springframework.stereotype.Service;
 
 import javax.management.InvalidApplicationException;
@@ -12,10 +12,10 @@ import java.util.Optional;
 public class IsCourseOpen extends BaseValidator{
     @SuppressWarnings("FieldCanBeLocal")
     private final long openForApplicationPeriod = 3; // how long the application period is in weeks
-    private final ApplicationServices applicationServices;
+    private final ApplicationService applicationServices;
 
     public IsCourseOpen() {
-        applicationServices = new ApplicationServices();
+        applicationServices = new ApplicationService();
     }
 
     /** checks if the application is made in the application period of the course

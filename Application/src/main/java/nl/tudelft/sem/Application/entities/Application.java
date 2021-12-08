@@ -54,8 +54,6 @@ public class Application {
     public UUID getCourseId() {
         return courseId;
     }
-<<<<<<< HEAD
-=======
 
     public boolean isAccepted() {
         return accepted;
@@ -65,32 +63,5 @@ public class Application {
         this.accepted = accepted;
     }
 
-    public boolean validate(){
-        Boolean isValid = false;
-        try{
-            Validator validator = new IsCourseOpen(); // create chain of responsibility
-            validator.setLast(new IsGradeSufficient());
-            validator.setLast(new IsUniqueApplication());
-
-            isValid = validator.handle(this);
-        } catch (InvalidApplicationException e){
-            e.printStackTrace();
-        }
-        return isValid;
-    }
-
-    public Optional<Double> getGrade(){
-        String uri = "localhost:47112/grade/getGrade/" + this.studentId  + "/" + this.courseId ;
-        Optional<Double> result = restTemplate.getForObject(uri, Optional.class);
-        return result;
-    }
-
-    public Optional<LocalDate> getCourseStartDate(){
-        String uri = "localhost:47112/course/getCourseStartDate/" + this.courseId;
-        Optional<LocalDate> result = restTemplate.getForObject(uri, Optional.class);
-        return result;
-    }
-
->>>>>>> Implement_apply_application
 }
 

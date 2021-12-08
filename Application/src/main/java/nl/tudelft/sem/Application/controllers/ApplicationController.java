@@ -2,20 +2,11 @@ package nl.tudelft.sem.Application.controllers;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-<<<<<<< HEAD
-import nl.tudelft.sem.Application.services.ApplicationServices;
-=======
 import nl.tudelft.sem.Application.services.ApplicationService;
->>>>>>> Implement_apply_application
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-<<<<<<< HEAD
-=======
 import java.util.NoSuchElementException;
-import java.util.Optional;
->>>>>>> Implement_apply_application
 import java.util.UUID;
 
 @RestController
@@ -37,7 +28,7 @@ public class ApplicationController {
     @PostMapping("/createApplication/{student_id}/{course_id}")
     public boolean createApplicationByStudentAndCourse(@PathVariable(value = "student_id") UUID studentId, @PathVariable(value = "course_id") UUID courseId) {
         Application application = new Application(courseId, studentId);
-        if(ApplicationServices.validate(application)){
+        if(ApplicationService.validate(application)){
             applicationRepository.save(application);
             return true;
         }
