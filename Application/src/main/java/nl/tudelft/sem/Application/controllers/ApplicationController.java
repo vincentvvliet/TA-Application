@@ -6,6 +6,8 @@ import nl.tudelft.sem.Application.services.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -51,7 +53,7 @@ public class ApplicationController {
      * @param id of the application to be accepted
      * @return true if the application was successfully accepted, false otherwise
      */
-    @RequestMapping("/acceptApplication/{id}")
+    @PatchMapping("/acceptApplication/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public boolean acceptApplication(@PathVariable(value = "id") UUID id) throws Exception {
         Application application = applicationRepository.findById(id).orElseThrow(() -> new NoSuchElementException("application does not exist"));
@@ -68,5 +70,24 @@ public class ApplicationController {
         application.setAccepted(true);
         applicationRepository.save(application);
         return true;
+    }
+
+    /** GET endpoint for getting all applications
+     * @return all applications
+     */
+    @GetMapping("/applications")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<Application> getApplications() {
+        return applicationRepository.findAll();
+    }
+
+    /** GET applications for specific course.
+     * @param course UUID for course.
+     * @return list of applications for specific course.
+     */
+    @GetMapping("/applications/{course_id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<Application> getApplicationsByCourse(@PathVariable(value = "course_id") UUID course) {
+        return applicationRepository.findAllApplicationsByCourseId(course);
     }
 }
