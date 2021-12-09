@@ -1,13 +1,8 @@
 package nl.tudelft.sem.Application.services;
 
-import java.net.URI;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import javax.management.InvalidApplicationException;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
@@ -15,7 +10,6 @@ import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -26,11 +20,14 @@ public class ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    private Validator validator;
+    private final Validator validator;
 
 
+    /**Constructor of the ApplicationService class.
+     *
+     */
     public ApplicationService() {
-        Validator validator = new IsCourseOpen(); // create chain of responsibility
+        validator = new IsCourseOpen(); // create chain of responsibility
         validator.setLast(new IsGradeSufficient());
         validator.setLast(new IsUniqueApplication());
     }
@@ -40,7 +37,7 @@ public class ApplicationService {
      *
      * @return true is ratio is already met, false otherwise.
      */
-    public boolean isTASpotAvailable(UUID courseId) {
+    public boolean isTASpotAvailable(@SuppressWarnings("unused") UUID courseId) {
         return true;
     }
 

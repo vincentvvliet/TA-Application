@@ -12,10 +12,10 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "application" ,schema = "applicationschema")
+@Table(name = "application", schema = "applicationschema")
 public class Application {
     @Id
-    @Column(name = "id" ,nullable = false)
+    @Column(name = "id", nullable = false)
     @JsonProperty(value = "id")
     private final UUID id;
 
@@ -41,7 +41,7 @@ public class Application {
      * @param courseId the id of the linked course
      * @param studentId the id of the linked student
      */
-    public Application(UUID courseId , UUID studentId) {
+    public Application(UUID courseId, UUID studentId) {
         this.id = UUID.randomUUID();
         this.courseId = courseId;
         this.studentId = studentId;
