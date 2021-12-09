@@ -88,7 +88,7 @@ public class ApplicationService {
      *
      * @return true if valid, false if not.
      */
-    public static boolean validate(Application application) {
+    public boolean validate(Application application) {
         Boolean isValid = false;
         try {
             Validator validator = new IsCourseOpen(); // create chain of responsibility

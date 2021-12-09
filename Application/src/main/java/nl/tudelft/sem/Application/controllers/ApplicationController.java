@@ -30,7 +30,7 @@ public class ApplicationController {
     @PostMapping("/createApplication/{student_id}/{course_id}")
     public boolean createApplicationByStudentAndCourse(@PathVariable(value = "student_id") UUID studentId, @PathVariable(value = "course_id") UUID courseId) {
         Application application = new Application(courseId, studentId);
-        if(ApplicationService.validate(application)){
+        if(applicationService.validate(application)){
             applicationRepository.save(application);
             return true;
         }
