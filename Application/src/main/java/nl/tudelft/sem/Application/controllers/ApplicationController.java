@@ -51,7 +51,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<Application> getApplicationsByCourse(
         @PathVariable(value = "course_id") UUID course) {
-        return applicationService.getApplicationsByCourse(course);
+        return applicationRepository.findApplicationsByCourseId(course);
     }
 
 }
