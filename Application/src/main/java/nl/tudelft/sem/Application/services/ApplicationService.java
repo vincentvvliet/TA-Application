@@ -47,13 +47,12 @@ public class ApplicationService {
      * @return true if the TA was successfully created.
      */
     public boolean createTA(UUID studentId, UUID courseId) {
-        WebClient client = WebClient.create();
-        WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = client.method(HttpMethod.POST);
-        URI uri = URI.create("localhost:47112/TA/createTA/" + studentId  + "/" + courseId);
-        WebClient.RequestBodySpec bodySpec = uriSpec.uri(uri);
-        Mono<Boolean> response = bodySpec.retrieve().bodyToMono(Boolean.class);
-        Optional<Boolean> result = response.blockOptional(Duration.of(1000, ChronoUnit.MILLIS));
-        return result.orElse(false);
+        WebClient webClient = WebClient.create("localhost:47110");
+        Mono<Boolean> rating = webClient.get()
+                .uri("/TA/createTA/" + studentId  + "/" + courseId)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        return rating.block();
     }
 
     /** Ask the Course microservice for the grade corresponding to
