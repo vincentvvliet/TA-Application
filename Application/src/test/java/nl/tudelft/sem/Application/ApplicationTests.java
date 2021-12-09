@@ -1,6 +1,5 @@
 package nl.tudelft.sem.Application;
 
-import com.jayway.jsonpath.internal.function.json.Append;
 import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -14,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.*;
 

@@ -17,14 +17,14 @@ public class IsUniqueApplication extends BaseValidator{
      *
      * @param application the application that is checked
      * @return true if there is no instance of this application present in the database
-     * @throws InvalidApplicationException when there is an instance of this application in the database
+     * @throws Exception when there is an instance of this application in the database
      */
     @Override
-    public Boolean handle(Application application) throws InvalidApplicationException {
+    public Boolean handle(Application application) throws Exception {
          Optional<Application> application1 = applicationRepository
                  .findApplicationByStudentIdAndCourseId(application.getStudentId(),application.getCourseId());
          if(application1.isPresent()){
-             throw new InvalidApplicationException("There already exists identical application");
+             throw new Exception("There already exists an application with that student and courseID");
          }
         return super.checkNext(application);
     }

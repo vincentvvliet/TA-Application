@@ -96,7 +96,7 @@ public class ApplicationService {
             validator.setLast(new IsUniqueApplication());
 
             isValid = validator.handle(application);
-        } catch (InvalidApplicationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return isValid;

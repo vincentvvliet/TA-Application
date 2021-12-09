@@ -21,7 +21,7 @@ public abstract class BaseValidator implements Validator{
         if(this.next == null){
             setNext(next);
         }else {
-            setLast(next);
+            this.next.setLast(next);
         }
     }
 
@@ -29,10 +29,10 @@ public abstract class BaseValidator implements Validator{
      * @return boolean
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    protected boolean checkNext(Application application) throws InvalidApplicationException {
+    protected boolean checkNext(Application application) throws Exception {
         if(next == null){
             return true;
         }
-        return handle(application);
+        return next.handle(application);
     }
 }
