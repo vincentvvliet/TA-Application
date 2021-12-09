@@ -24,11 +24,10 @@ public class IsGradeSufficient extends BaseValidator {
      */
     @Override
     public Boolean handle(Application application) throws InvalidApplicationException {
-        Optional<Double> grade1 = applicationServices.getGrade(application.getStudentId(), application.getCourseId());
-        if(grade1.isEmpty()){
+        Double grade = applicationServices.getGrade(application.getStudentId(), application.getCourseId());
+        if(grade == null){
             throw new InvalidApplicationException("could not retrieve course grade with the given student and course IDs");
         }
-        double grade = grade1.get();
         if(grade < 6){
             throw new InvalidApplicationException("Grade was not sufficient");
         }

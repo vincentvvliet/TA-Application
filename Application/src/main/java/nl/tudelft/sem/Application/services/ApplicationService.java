@@ -15,10 +15,8 @@ import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -28,12 +26,8 @@ public class ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    //TODO implement webclient in course services
-    private final RestTemplate restTemplate;
 
-    public ApplicationService() {
-        restTemplate = new RestTemplate();
-    }
+    //public ApplicationService() { }
 
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
@@ -67,9 +61,13 @@ public class ApplicationService {
      *
      * @return A Optional double
      */
-    public Optional<Double> getGrade(UUID studentId, UUID courseId) {
-        String uri = "localhost:47112/grade/getGrade/" + studentId  + "/" + courseId;
-        return restTemplate.getForObject(uri, Optional.class);
+    public Double getGrade(UUID studentId, UUID courseId) {
+        WebClient webClient = WebClient.create("localhost:47112");
+        Mono<Double> rating = webClient.get()
+                .uri("/grade/getGrade/" + studentId + "/" + courseId)
+                .retrieve()
+                .bodyToMono(Double.class);
+        return rating.block();
     }
 
     /** Ask the Course microservice for the startDate corresponding to
@@ -77,9 +75,13 @@ public class ApplicationService {
      *
      * @return An optional LocalDate
      */
-    public Optional<LocalDate> getCourseStartDate(UUID courseId) {
-        String uri = "localhost:47112/course/getCourseStartDate/" + courseId;
-        return restTemplate.getForObject(uri, Optional.class);
+    public LocalDate getCourseStartDate(UUID courseId) {
+        WebClient webClient = WebClient.create("localhost:47112");
+        Mono<LocalDate> rating = webClient.get()
+                .uri("/course/getCourseStartDate/" + courseId)
+                .retrieve()
+                .bodyToMono(LocalDate.class);
+        return rating.block();
     }
 
     /** Check if the application is valid.

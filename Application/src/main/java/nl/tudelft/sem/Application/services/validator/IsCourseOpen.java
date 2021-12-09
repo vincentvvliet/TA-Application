@@ -27,11 +27,10 @@ public class IsCourseOpen extends BaseValidator{
     @Override
     public Boolean handle(Application application) throws InvalidApplicationException {
         LocalDate current = LocalDate.now(); // get current date
-        Optional<LocalDate> startCourse1 = applicationServices.getCourseStartDate(application.getCourseId()); // get startDate course from the course microservice
-        if(startCourse1.isEmpty()){
+        LocalDate startCourse = applicationServices.getCourseStartDate(application.getCourseId()); // get startDate course from the course microservice
+        if(startCourse == null){
             throw new InvalidApplicationException("Could not retrieve startDate that was linked to the given courseId");
         }
-        LocalDate startCourse = startCourse1.get();
         if(startCourse.minusWeeks(openForApplicationPeriod).isAfter(current) // check if applications have opened yet
                 && !startCourse.minusWeeks(openForApplicationPeriod).equals(current)){
             throw new InvalidApplicationException("The course is not yet open to applications");
