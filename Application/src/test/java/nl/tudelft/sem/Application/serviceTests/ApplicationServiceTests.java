@@ -32,12 +32,15 @@ class ApplicationServiceTests {
 	Application app2 = 	new Application(courseId, UUID.randomUUID());
 	Application app_different_course = 	new Application(UUID.randomUUID(), UUID.randomUUID());
 
-	@Test
-	void requestApplicationsByCourseId_twoApplications() {
-		// Assign
+	@BeforeEach
+	void setup() {
 		Mockito.when(applicationRepository.findApplicationsByCourseId(courseId)).thenReturn(
 			List.of(app1, app2)
 		);
+	}
+	@Test
+	void requestApplicationsByCourseId_twoApplications() {
+		// Assign
 		// Act
 		List<Application> result = applicationService.getApplicationsByCourse(courseId);
 		// Assert
@@ -48,11 +51,12 @@ class ApplicationServiceTests {
 	@Test
 	void requestApplicationsByCourseId_noApplications() {
 		// Assign
-		Mockito.when(applicationRepository.findApplicationsByCourseId(courseId)).thenReturn(
+		UUID unknown = UUID.randomUUID();
+		Mockito.when(applicationRepository.findApplicationsByCourseId(unknown)).thenReturn(
 			List.of()
 		);
 		// Act
-		List<Application> result = applicationService.getApplicationsByCourse(courseId);
+		List<Application> result = applicationService.getApplicationsByCourse(unknown);
 		// Assert
 		assertTrue(result.isEmpty());
 	}
