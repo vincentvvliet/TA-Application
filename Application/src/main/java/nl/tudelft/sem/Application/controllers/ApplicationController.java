@@ -72,15 +72,6 @@ public class ApplicationController {
         return true;
     }
 
-    /** GET endpoint for getting all applications
-     * @return all applications
-     */
-    @GetMapping("/applications")
-    @ResponseStatus(value = HttpStatus.OK)
-    public List<Application> getApplications() {
-        return applicationService.getApplications();
-    }
-
     /** GET applications for specific course.
      * @param course UUID for course.
      * @return list of applications for specific course.

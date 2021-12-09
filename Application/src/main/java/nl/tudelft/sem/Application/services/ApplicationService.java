@@ -94,10 +94,10 @@ public class ApplicationService {
         return isValid;
     }
 
-    public List<Application> getApplications() {
-        return applicationRepository.findAll();
-    }
-
+    /** Get a list of applications by CourseId.
+     *
+     * @return List of Applications
+     */
     public List<Application> getApplicationsByCourse(UUID course) {
         return applicationRepository.findAllApplicationsByCourseId(course);
     }
