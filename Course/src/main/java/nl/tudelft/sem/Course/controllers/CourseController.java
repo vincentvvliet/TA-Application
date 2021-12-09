@@ -56,6 +56,15 @@ public class CourseController {
     }
 
     /**
+     * GET endpoint retrieves all open courses
+     * @return list of courses
+     */
+    @GetMapping("/getOpenCourses")
+    public List<Course> getOpenCourses() {
+        return courseRepository.findAllByStart_dateIsBefore(LocalDate.now());
+    }
+
+    /**
      * POST endpoint creating a course (identified by studentId and courseId)
      * @param course_code of the course
      * @param nr_participants of the course
