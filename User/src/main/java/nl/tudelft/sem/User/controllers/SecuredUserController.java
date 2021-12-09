@@ -77,4 +77,19 @@ public class SecuredUserController {
         }
         return userService.acceptTaApplication(applicationId);
     }
+
+    /**PATCH endpoint to accept a TA application
+     * @param userId of the user the application is of
+     * @param courseId the course the application is for
+     * @return true if the application was successfully created, false otherwise
+     */
+    @PostMapping("/createApplication/{userId}/{courseId}")
+    public boolean createApplication(@PathVariable(value = "userId") UUID userId,@PathVariable(value = "courseId") UUID courseId) throws Exception {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+        if (user.getRole() != Role.STUDENT) {
+            throw new Exception("invalid role: only students can create applications");
+        }
+        return userService.createApplication(userId, courseId);
+    }
+
 }

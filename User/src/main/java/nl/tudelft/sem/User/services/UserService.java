@@ -31,4 +31,13 @@ public class UserService {
         Optional<Boolean> result = response.blockOptional(Duration.of(1000, ChronoUnit.MILLIS));
         return result.orElse(false);
     }
+
+    public boolean createApplication(UUID userId, UUID courseId) {
+        WebClient client = WebClient.create();
+        WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = client.method(HttpMethod.POST);
+        WebClient.RequestBodySpec bodySpec = uriSpec.uri(URI.create("localhost:47112/application/createApplication/" + userId +"/" + courseId ));
+        Mono<Boolean> response = bodySpec.retrieve().bodyToMono(Boolean.class);
+        Optional<Boolean> result = response.blockOptional(Duration.of(1000, ChronoUnit.MILLIS));
+        return result.orElse(false);
+    }
 }
