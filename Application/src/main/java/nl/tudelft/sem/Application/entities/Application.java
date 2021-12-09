@@ -36,5 +36,28 @@ public class Application {
         this.studentId = studentId;
     }
 
+    public UUID getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(UUID studentId) {
+        this.studentId = studentId;
+    }
+
+    public UUID getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(UUID courseId) {
+        this.courseId = courseId;
+    }
+
+    public boolean isAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(boolean accepted) {
+        this.accepted = accepted;
+    }
 }
 
