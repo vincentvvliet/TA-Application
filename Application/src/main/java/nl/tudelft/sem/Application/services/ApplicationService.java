@@ -38,13 +38,4 @@ public class ApplicationService {
         }
         return result.get();
     }
-
-    /** getApplicationsByCourse method.
-     *
-     * @param course CourseId.
-     * @return all related applications.
-     */
-    public List<Application> getApplicationsByCourse(UUID course) {
-        return applicationRepository.findApplicationsByCourseId(course);
-    }
 }
