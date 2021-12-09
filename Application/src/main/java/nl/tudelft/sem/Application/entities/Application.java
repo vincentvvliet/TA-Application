@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -59,5 +60,18 @@ public class Application {
     public void setAccepted(boolean accepted) {
         this.accepted = accepted;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Application that = (Application) o;
+        return id.equals(that.id);
+    }
+
 }
 
