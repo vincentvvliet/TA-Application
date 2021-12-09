@@ -1,8 +1,7 @@
-package nl.tudelft.sem.Application.serviceTests;
+package nl.tudelft.sem.Application.services;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.ApplicationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -38,27 +37,6 @@ class ApplicationServiceTests {
 			List.of(app1, app2)
 		);
 	}
-	@Test
-	void requestApplicationsByCourseId_twoApplications() {
-		// Assign
-		// Act
-		List<Application> result = applicationService.getApplicationsByCourse(courseId);
-		// Assert
-		assertEquals(List.of(app1, app2), result);
-		assertFalse(result.contains(app_different_course));
-	}
 
-	@Test
-	void requestApplicationsByCourseId_noApplications() {
-		// Assign
-		UUID unknown = UUID.randomUUID();
-		Mockito.when(applicationRepository.findApplicationsByCourseId(unknown)).thenReturn(
-			List.of()
-		);
-		// Act
-		List<Application> result = applicationService.getApplicationsByCourse(unknown);
-		// Assert
-		assertTrue(result.isEmpty());
-	}
 
 }
