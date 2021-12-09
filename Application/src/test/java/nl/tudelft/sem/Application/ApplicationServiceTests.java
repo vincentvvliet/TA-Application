@@ -4,6 +4,10 @@ import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
+import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
+import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
+import nl.tudelft.sem.Application.services.validator.Validator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +33,10 @@ public class ApplicationServiceTests {
     @Mock
     ApplicationRepository applicationRepository;
 
+    @Mock
+    Validator validator;
+
+
     List<Application> applicationList;
     UUID id;
     UUID courseId;
@@ -43,6 +51,29 @@ public class ApplicationServiceTests {
         studentId = UUID.randomUUID();
         application = new Application(courseId, studentId);
         applicationList.add(application);
+    }
+
+    @Test
+    public void validateSuccessfulTest() throws Exception {
+        when(validator.handle(application)).thenReturn(true);
+
+        Assertions.assertEquals(applicationService.validate(application), true);
+    }
+
+    @Test
+    public void validateNotValidTest() throws Exception {
+        Exception e = mock(Exception.class);
+        when(validator.handle(application)).thenThrow(e);
+
+        Assertions.assertEquals(applicationService.validate(application), false);
+        verify(e).printStackTrace();
+    }
+
+    @Test
+    public void getApplicationsByCourseTest() throws Exception {
+        when(applicationRepository.findAllApplicationsByCourseId(courseId)).thenReturn(applicationList);
+
+        Assertions.assertEquals(applicationService.getApplicationsByCourse(courseId), applicationList);
     }
 
 }
