@@ -69,7 +69,7 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.OK)
     public boolean modifyCourseCode(@PathVariable(value = "id") UUID id, @PathVariable(value = "course_code") String course_code) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        course.setCourseCode(course_code);
+        course.setCourse_code(course_code);
         courseRepository.save(course);
         return true;
     }
@@ -86,7 +86,7 @@ public class CourseController {
         if (nr_participants < 0) {
             throw new IllegalArgumentException("number of participants is negative");
         }
-        course.setNrParticipants(nr_participants);
+        course.setNr_participants(nr_participants);
         courseRepository.save(course);
         return true;
     }
@@ -100,10 +100,10 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.OK)
     public boolean modifyStartDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "start_date") LocalDate start_date) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        if (start_date.isAfter(course.getEndDate())) {
+        if (start_date.isAfter(course.getEnd_date())) {
             throw new IllegalArgumentException("start date is after end date of the course");
         }
-        course.setStartDate(start_date);
+        course.setStart_date(start_date);
         courseRepository.save(course);
         return true;
     }
@@ -117,10 +117,10 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.OK)
     public boolean modifyEndDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "end_date") LocalDate end_date) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        if (end_date.isBefore(course.getStartDate())) {
+        if (end_date.isBefore(course.getStart_date())) {
             throw new IllegalArgumentException("end date is before start date of the course");
         }
-        course.setEndDate(end_date);
+        course.setEnd_date(end_date);
         courseRepository.save(course);
         return true;
     }
