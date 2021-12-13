@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -70,19 +71,27 @@ public class CourseController {
      * POST endpoint creating a course (identified by studentId and courseId)
      * @param course_code of the course
      * @param nr_participants of the course
-     * @param start_date of the course
-     * @param end_date of the course
+     * @param start_date of the course (yyyy-MM-dd)
+     * @param end_date of the course (yyyy-MM-dd)
      * @return true if the course is successfully created and saved in the database, false otherwise
      */
     @PostMapping("/createCourse/{course_code}/{nr_participants}/{start_date}/{end_date}")
-    public boolean createCourse(@PathVariable(value = "course_code") String course_code, @PathVariable(value = "nr_participants") int nr_participants, @PathVariable(value = "start_date") LocalDate start_date, @PathVariable(value = "end_date") LocalDate end_date) {
-        if (start_date.isAfter(end_date)) {
+    public boolean createCourse(@PathVariable(value = "course_code") String course_code, @PathVariable(value = "nr_participants") int nr_participants, @PathVariable(value = "start_date") String start_date, @PathVariable(value = "end_date") String end_date) {
+        LocalDate startDate;
+        LocalDate endDate;
+        try {
+            startDate = LocalDate.parse(start_date);
+            endDate = LocalDate.parse(end_date);
+        } catch (DateTimeParseException exception) {
+            return false;
+        }
+        if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("start date is after end date of the course");
         }
         if (nr_participants < 0) {
             throw new IllegalArgumentException("number of participants is negative");
         }
-        Course course = new Course(course_code, nr_participants, start_date, end_date);
+        Course course = new Course(course_code, nr_participants, startDate, endDate);
         courseRepository.save(course);
         return true;
     }
@@ -120,34 +129,46 @@ public class CourseController {
 
     /**PATCH Endpoint to change the start date of a course
      * @param id of the course
-     * @param start_date new start date of the course
+     * @param start_date new start date of the course (yyyy-MM-dd)
      * @return true if the object was successfully modified
      */
     @RequestMapping("/modifyStartDate/{id}/{start_date}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean modifyStartDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "start_date") LocalDate start_date) {
+    public boolean modifyStartDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "start_date") String start_date) {
+        LocalDate startDate;
+        try {
+            startDate = LocalDate.parse(start_date);
+        } catch (DateTimeParseException exception) {
+            return false;
+        }
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        if (start_date.isAfter(course.getEndDate())) {
+        if (startDate.isAfter(course.getEndDate())) {
             throw new IllegalArgumentException("start date is after end date of the course");
         }
-        course.setStartDate(start_date);
+        course.setStartDate(startDate);
         courseRepository.save(course);
         return true;
     }
 
     /**PATCH Endpoint to change the end date of a course
      * @param id of the course
-     * @param end_date new end date of the course
+     * @param end_date new end date of the course (yyyy-MM-dd)
      * @return true if the object was successfully modified
      */
     @RequestMapping("/modifyEndDate/{id}/{end_date}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean modifyEndDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "end_date") LocalDate end_date) {
+    public boolean modifyEndDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "end_date") String end_date) {
+        LocalDate endDate;
+        try {
+            endDate = LocalDate.parse(end_date);
+        } catch (DateTimeParseException exception) {
+            return false;
+        }
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        if (end_date.isBefore(course.getStartDate())) {
+        if (endDate.isBefore(course.getStartDate())) {
             throw new IllegalArgumentException("end date is before start date of the course");
         }
-        course.setEndDate(end_date);
+        course.setEndDate(endDate);
         courseRepository.save(course);
         return true;
     }
