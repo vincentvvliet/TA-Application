@@ -1,4 +1,4 @@
-package nl.tudelft.sem.Application;
+package nl.tudelft.sem.Application.services;
 
 import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;

@@ -44,35 +44,4 @@ public class Course {
         this.end_date = end_date;
     }
 
-    public String getCourseCode() {
-        return course_code;
-    }
-
-    public int getNrParticipants() {
-        return nr_participants;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return end_date;
-    }
-
-    public void setCourseCode(String course_code) {
-        this.course_code = course_code;
-    }
-
-    public void setStartDate(LocalDate start_date) {
-        this.startDate = start_date;
-    }
-
-    public void setEndDate(LocalDate end_date) {
-        this.end_date = end_date;
-    }
-
-    public void setNrParticipants(int nr_participants) {
-        this.nr_participants = nr_participants;
-    }
 }
