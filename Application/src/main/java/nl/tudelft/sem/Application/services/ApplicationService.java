@@ -20,7 +20,7 @@ public class ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    private final Validator validator;
+    private Validator validator;
 
 
     /**Constructor of the ApplicationService class.

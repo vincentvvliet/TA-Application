@@ -20,6 +20,8 @@ public class CourseController {
     @Autowired
     private CourseRepository courseRepository;
 
+    private final int selectionPeriod = 3; // amount of time before start of course a student can register
+
     /**
      * GET endpoint retrieves course by id
      * @param id (UUID) of the course
@@ -61,7 +63,7 @@ public class CourseController {
      */
     @GetMapping("/getOpenCourses")
     public List<Course> getOpenCourses() {
-        return courseRepository.findAllByStart_dateIsBefore(LocalDate.now());
+        return courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod));
     }
 
     /**

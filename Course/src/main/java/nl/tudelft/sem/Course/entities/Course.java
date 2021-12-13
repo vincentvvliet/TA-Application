@@ -24,9 +24,9 @@ public class Course {
     @JsonProperty(value = "nr_participants")
     private int nr_participants;
 
-    @Column(name = "start_date")
-    @JsonProperty(value = "start_date")
-    private LocalDate start_date;
+    @Column(name = "startDate")
+    @JsonProperty(value = "startDate")
+    private LocalDate startDate;
 
     @Column(name = "end_date")
     @JsonProperty(value = "end_date")
@@ -36,11 +36,11 @@ public class Course {
         this.id = UUID.randomUUID();
     }
 
-    public Course(String course_code, int nr_participants, LocalDate start_date, LocalDate end_date) {
+    public Course(String course_code, int nr_participants, LocalDate startDate, LocalDate end_date) {
         this.id = UUID.randomUUID();
         this.course_code = course_code;
         this.nr_participants = nr_participants;
-        this.start_date = start_date;
+        this.startDate = startDate;
         this.end_date = end_date;
     }
 
@@ -53,7 +53,7 @@ public class Course {
     }
 
     public LocalDate getStartDate() {
-        return start_date;
+        return startDate;
     }
 
     public LocalDate getEndDate() {
@@ -65,7 +65,7 @@ public class Course {
     }
 
     public void setStartDate(LocalDate start_date) {
-        this.start_date = start_date;
+        this.startDate = start_date;
     }
 
     public void setEndDate(LocalDate end_date) {
