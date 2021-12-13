@@ -55,7 +55,7 @@ public class ApplicationService {
                 .uri("/TA/createTA/" + studentId  + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return rating.block();
+        return rating.blockOptional().orElse(false);
     }
 
     /** Ask the Course microservice for the grade corresponding to
