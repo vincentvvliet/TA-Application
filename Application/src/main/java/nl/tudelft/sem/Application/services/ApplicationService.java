@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import nl.tudelft.sem.Application.DTOs.ApplyingStudentDTO;
-import nl.tudelft.sem.Application.DTOs.TAExperienceDTO;
+
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.TAExperienceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -97,8 +98,7 @@ public class ApplicationService {
     }
 
     /**
-     * Gets courses a stuent has perviously TA'd for, along with the rating for each course.
-     * TODO: not usable as previously TA'd courses are currently not being stored
+     * Gets courses a student has perviously TA'd for, along with the rating for each course.
      *
      * @param studentId of TA.
      */

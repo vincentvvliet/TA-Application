@@ -1,11 +1,9 @@
 package nl.tudelft.sem.Application.controllers;
 
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import nl.tudelft.sem.Application.DTOs.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
@@ -62,7 +60,7 @@ public class ApplicationController {
      * @param course UUID for course.
      * @return list of applications for specific course.
      */
-    @GetMapping("/retrieveAll/{course_id}")
+    @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public List<ApplyingStudentDTO> getApplicationsByCourseDTO(
             @PathVariable(value = "course_id") UUID course) {

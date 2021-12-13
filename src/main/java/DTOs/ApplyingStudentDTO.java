@@ -1,9 +1,10 @@
-package nl.tudelft.sem.Application.DTOs;
+package DTOs;
+
+import lombok.Data;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.Data;
 
 @Data
 public class ApplyingStudentDTO {

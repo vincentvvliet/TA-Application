@@ -1,10 +1,7 @@
-package nl.tudelft.sem.Application.DTOs;
+package nl.tudelft.sem.DTO;
 
 import java.util.UUID;
-import lombok.Data;
 
-
-@Data
 public class ApplicationDTO {
     UUID id;
     UUID courseId;
