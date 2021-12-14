@@ -2,8 +2,10 @@ package nl.tudelft.sem.Application.services;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
@@ -50,7 +52,7 @@ public class ApplicationService {
      * @return true if the TA was successfully created.
      */
     public boolean createTA(UUID studentId, UUID courseId) {
-        WebClient webClient = WebClient.create("localhost:47110");
+        WebClient webClient = WebClient.create("http://localhost:47110");
         Mono<Boolean> rating = webClient.get()
                 .uri("/TA/createTA/" + studentId  + "/" + courseId)
                 .retrieve()
@@ -63,13 +65,18 @@ public class ApplicationService {
      *
      * @return A Optional double
      */
-    public Double getGrade(UUID studentId, UUID courseId) {
-        WebClient webClient = WebClient.create("localhost:47112");
+    public Double getGrade(UUID studentId, UUID courseId) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:47112");
         Mono<Double> rating = webClient.get()
                 .uri("/grade/getGrade/" + studentId + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Double.class);
-        return rating.block();
+        Optional<Double> result = rating.blockOptional();
+        if (result.isEmpty()) {
+            throw new EmptyResourceException("no grade found");
+        }
+
+        return result.get();
     }
 
     /** Ask the Course microservice for the startDate corresponding to
@@ -77,13 +84,18 @@ public class ApplicationService {
      *
      * @return An optional LocalDate
      */
-    public LocalDate getCourseStartDate(UUID courseId) {
-        WebClient webClient = WebClient.create("localhost:47112");
+    public LocalDate getCourseStartDate(UUID courseId) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:47112");
         Mono<LocalDate> rating = webClient.get()
                 .uri("/course/getCourseStartDate/" + courseId)
                 .retrieve()
                 .bodyToMono(LocalDate.class);
-        return rating.block();
+
+        Optional<LocalDate> result = rating.blockOptional();
+        if (result.isEmpty()) {
+            throw new EmptyResourceException("no TA rating found");
+        }
+        return result.get();
     }
 
     /** Check if the application is valid.

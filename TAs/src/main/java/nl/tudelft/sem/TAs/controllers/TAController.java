@@ -31,17 +31,20 @@ public class TAController {
      * @return mono optional of TA
      */
     @GetMapping("/getTA/{id}")
-    public Mono<Optional<TA>> getTAById(@PathVariable(value = "id") UUID id) {
+    public Mono<TA> getTAById(@PathVariable(value = "id") UUID id) {
         Optional<TA> ta = taRepository.findById(id);
-        return Mono.just(ta);
+        if(ta.isEmpty()){
+            return Mono.empty();
+        }
+        return Mono.just(ta.get());
     }
     /**
      * GET endpoint retrieves all existing TA
      * @return list of TAs
      */
     @GetMapping("/getTAs")
-    public List<TA> getTAs() {
-        return taRepository.findAll();
+    public Mono<List<TA>> getTAs() {
+        return Mono.just(taRepository.findAll());
     }
 
     /**
@@ -77,12 +80,12 @@ public class TAController {
      * @return boolean representing if the deletion was successful or not
      */
     @DeleteMapping("deleteTA/{id}")
-    public boolean deleteTA(@PathVariable (value = "id") UUID id) {
+    public Mono<Boolean> deleteTA(@PathVariable (value = "id") UUID id) {
         try {
             taRepository.deleteById(id);
-            return true;
+            return Mono.just(true);
         } catch (Exception e) {
-            return false;
+            return Mono.just(false);
         }
     }
 

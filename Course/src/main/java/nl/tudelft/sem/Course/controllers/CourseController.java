@@ -6,6 +6,7 @@ import nl.tudelft.sem.Course.repositories.GradeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -29,8 +30,12 @@ public class CourseController {
      * @return optional of course
      */
     @GetMapping("/getCourse/{id}")
-    public Optional<Course> getCourseById(@PathVariable(value = "id") UUID id) {
-        return courseRepository.findById(id);
+    public Mono<Course> getCourseById(@PathVariable(value = "id") UUID id) {
+        Optional<Course> course = courseRepository.findById(id);
+        if(course.isEmpty()){
+            return Mono.empty();
+        }
+        return Mono.just(course.get());
     }
 
     /**
@@ -39,13 +44,12 @@ public class CourseController {
      * @return optional of course
      */
     @GetMapping("/getCourseStartDate/{id}")
-    public Optional<LocalDate> getCourseStartDateById(@PathVariable(value = "id") UUID id) {
+    public Mono<LocalDate> getCourseStartDateById(@PathVariable(value = "id") UUID id) {
         Optional<Course> course = courseRepository.findById(id);
-        Optional<LocalDate> date = Optional.empty();
         if(course.isPresent()){
-            date = Optional.of(course.get().getStartDate());
+           return Mono.just(course.get().getStartDate());
         }
-        return date;
+        return Mono.empty();
     }
 
 
@@ -54,8 +58,8 @@ public class CourseController {
      * @return list of courses
      */
     @GetMapping("/getCourses")
-    public List<Course> getCourses() {
-        return courseRepository.findAll();
+    public Mono<List<Course>> getCourses() {
+        return Mono.just(courseRepository.findAll());
     }
 
     /**
@@ -63,8 +67,8 @@ public class CourseController {
      * @return list of courses
      */
     @GetMapping("/getOpenCourses")
-    public List<Course> getOpenCourses() {
-        return courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod));
+    public Mono<List<Course>> getOpenCourses() {
+        return Mono.just(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
     }
 
     /**
@@ -76,14 +80,14 @@ public class CourseController {
      * @return true if the course is successfully created and saved in the database, false otherwise
      */
     @PostMapping("/createCourse/{course_code}/{nr_participants}/{start_date}/{end_date}")
-    public boolean createCourse(@PathVariable(value = "course_code") String course_code, @PathVariable(value = "nr_participants") int nr_participants, @PathVariable(value = "start_date") String start_date, @PathVariable(value = "end_date") String end_date) {
+    public Mono<Boolean> createCourse(@PathVariable(value = "course_code") String course_code, @PathVariable(value = "nr_participants") int nr_participants, @PathVariable(value = "start_date") String start_date, @PathVariable(value = "end_date") String end_date) {
         LocalDate startDate;
         LocalDate endDate;
         try {
             startDate = LocalDate.parse(start_date);
             endDate = LocalDate.parse(end_date);
         } catch (DateTimeParseException exception) {
-            return false;
+            return Mono.just(false);
         }
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("start date is after end date of the course");
@@ -93,7 +97,7 @@ public class CourseController {
         }
         Course course = new Course(course_code, nr_participants, startDate, endDate);
         courseRepository.save(course);
-        return true;
+        return Mono.just(true);
     }
 
     /**PATCH Endpoint to change the code of a course
@@ -103,11 +107,11 @@ public class CourseController {
      */
     @RequestMapping("/modifyCourseCode/{id}/{course_code}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean modifyCourseCode(@PathVariable(value = "id") UUID id, @PathVariable(value = "course_code") String course_code) {
+    public Mono<Boolean> modifyCourseCode(@PathVariable(value = "id") UUID id, @PathVariable(value = "course_code") String course_code) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         course.setCourseCode(course_code);
         courseRepository.save(course);
-        return true;
+        return Mono.just(true);
     }
 
     /**PATCH Endpoint to change the number of participants of a course
@@ -117,14 +121,14 @@ public class CourseController {
      */
     @RequestMapping("/modifyNrParticipants/{id}/{nr_participants}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean modifyNrParticipants(@PathVariable(value = "id") UUID id, @PathVariable(value = "nr_participants") int nr_participants) {
+    public Mono<Boolean> modifyNrParticipants(@PathVariable(value = "id") UUID id, @PathVariable(value = "nr_participants") int nr_participants) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         if (nr_participants < 0) {
             throw new IllegalArgumentException("number of participants is negative");
         }
         course.setNrParticipants(nr_participants);
         courseRepository.save(course);
-        return true;
+        return Mono.just(true);
     }
 
     /**PATCH Endpoint to change the start date of a course
@@ -134,12 +138,12 @@ public class CourseController {
      */
     @RequestMapping("/modifyStartDate/{id}/{start_date}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean modifyStartDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "start_date") String start_date) {
+    public Mono<Boolean> modifyStartDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "start_date") String start_date) {
         LocalDate startDate;
         try {
             startDate = LocalDate.parse(start_date);
         } catch (DateTimeParseException exception) {
-            return false;
+            return Mono.just(false);
         }
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         if (startDate.isAfter(course.getEndDate())) {
@@ -147,7 +151,7 @@ public class CourseController {
         }
         course.setStartDate(startDate);
         courseRepository.save(course);
-        return true;
+        return Mono.just(true);
     }
 
     /**PATCH Endpoint to change the end date of a course
@@ -157,12 +161,12 @@ public class CourseController {
      */
     @RequestMapping("/modifyEndDate/{id}/{end_date}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean modifyEndDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "end_date") String end_date) {
+    public Mono<Boolean> modifyEndDate(@PathVariable(value = "id") UUID id, @PathVariable(value = "end_date") String end_date) {
         LocalDate endDate;
         try {
             endDate = LocalDate.parse(end_date);
         } catch (DateTimeParseException exception) {
-            return false;
+            return Mono.just(false);
         }
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
         if (endDate.isBefore(course.getStartDate())) {
@@ -170,7 +174,7 @@ public class CourseController {
         }
         course.setEndDate(endDate);
         courseRepository.save(course);
-        return true;
+        return Mono.just(true);
     }
 
     /**
@@ -179,12 +183,12 @@ public class CourseController {
      * @return true if the deletion was successful, false otherwise
      */
     @DeleteMapping("deleteCourse/{id}")
-    public boolean deleteCourse(@PathVariable (value = "id") UUID id) {
+    public Mono<Boolean> deleteCourse(@PathVariable (value = "id") UUID id) {
         try {
             courseRepository.deleteById(id);
-            return true;
+            return Mono.just(true);
         } catch (Exception e) {
-            return false;
+            return Mono.just(false);
         }
     }
 }

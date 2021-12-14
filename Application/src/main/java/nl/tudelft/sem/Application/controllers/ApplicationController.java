@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 
 @RestController
@@ -34,15 +35,15 @@ public class ApplicationController {
      * @return boolean
      */
     @PostMapping("/createApplication/{student_id}/{course_id}")
-    public boolean createApplicationByStudentAndCourse(
+    public Mono<Boolean> createApplicationByStudentAndCourse(
             @PathVariable(value = "student_id") UUID studentId,
             @PathVariable(value = "course_id") UUID courseId) {
         Application application = new Application(courseId, studentId);
         if (applicationService.validate(application)) {
             applicationRepository.save(application);
-            return true;
+            return Mono.just(true);
         }
-        return false;
+        return Mono.just(false);
     }
 
     //    /**
@@ -67,7 +68,7 @@ public class ApplicationController {
      */
     @PatchMapping("/acceptApplication/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean acceptApplication(@PathVariable(value = "id") UUID id) throws Exception {
+    public Mono<Boolean> acceptApplication(@PathVariable(value = "id") UUID id) throws Exception {
         Application application = applicationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("application does not exist"));
         if (application.isAccepted()) {
@@ -79,11 +80,11 @@ public class ApplicationController {
         boolean successfullyCreated = applicationService
                 .createTA(application.getStudentId(), application.getCourseId());
         if (! successfullyCreated) {
-            return false;
+            return Mono.just(false);
         }
         application.setAccepted(true);
         applicationRepository.save(application);
-        return true;
+        return Mono.just(true);
     }
 
     /** GET applications for specific course.
@@ -93,8 +94,8 @@ public class ApplicationController {
      */
     @GetMapping("/applications/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
+    public Mono<List<Application>> getApplicationsByCourse(@PathVariable(value = "course_id")
                                                                  UUID course) {
-        return applicationService.getApplicationsByCourse(course);
+        return Mono.just(applicationService.getApplicationsByCourse(course));
     }
 }

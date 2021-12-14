@@ -33,8 +33,8 @@ public class ContractController {
      * @return list of contracts
      */
     @GetMapping("/getContracts")
-    public List<Contract> getContracts() {
-        return contractRepository.findAll();
+    public Mono<List<Contract>> getContracts() {
+        return Mono.just(contractRepository.findAll());
     }
 
     /**
@@ -109,12 +109,12 @@ public class ContractController {
      * @return boolean representing if the deletion was successful or not
      */
     @DeleteMapping("deleteContract/{id}")
-    public boolean deleteContract(@PathVariable (value = "id") UUID id) {
+    public Mono<Boolean> deleteContract(@PathVariable (value = "id") UUID id) {
         try {
             contractRepository.deleteById(id);
-            return true;
+            return Mono.just(true);
         } catch (Exception e) {
-            return false;
+            return Mono.just(false);
         }
     }
 }
