@@ -75,7 +75,7 @@ public class ApplicationService {
      */
     public double getGradeByStudentAndCourse(UUID studentId, UUID courseId)
             throws EmptyResourceException {
-        WebClient webClient = WebClient.create("localhost:47112");
+        WebClient webClient = WebClient.create("http://localhost:47112");
         Mono<Double> rating = webClient.get()
                 .uri("/grade/getGrade/" + studentId + "/" + courseId)
                 .retrieve()
