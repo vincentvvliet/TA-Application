@@ -1,6 +1,8 @@
 package nl.tudelft.sem.TAs.controllers;
 
 
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
@@ -24,18 +26,28 @@ public class TAController {
     @Autowired
     private TARepository taRepository;
 
+
     /**
-     * GET endpoint retrieves TA rating by id combination student + course
+     * GET endpoint retrieves TAs average rating by studentId.
      * @param studentId (UUID) of the student
-     * @param courseId (UUID) of the course
      * @return rating
      */
-    @GetMapping("/getRating/{studentid}/{courseid}")
-    public Mono<Integer> getRating(@PathVariable(value = "studentid") UUID studentId, @PathVariable(value = "courseid") UUID courseId) {
-        Optional<TA> TA = taRepository.findByStudentIdAndCourseId(studentId,courseId);
-        if(TA.isPresent()) return Mono.just(TA.get().getRating());
+    @GetMapping("/getRating/{studentid}")
+    public Mono<RatingDTO> getAverageRating(@PathVariable(value = "studentid") UUID studentId) {
+        List<TA> TAs = taRepository.findAllByStudentId(studentId);
+        if(!TAs.isEmpty()) {
+            int sum = 0;
+            for(TA ta:TAs) {
+                sum += ta.getRating();
+            }
+            RatingDTO dto = new RatingDTO();
+            dto.setRating(Optional.of(sum / TAs.size()));
+            dto.setStudentId(studentId);
+            return Mono.just(dto);
+        }
         return Mono.empty();
     }
+
     /**
      * GET endpoint retrieves TA by id
      * @param id (UUID) of the TA
@@ -75,8 +87,8 @@ public class TAController {
     @RequestMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
     public boolean addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
-         TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new NoSuchElementException());
+         TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
+         Contract contract = contractRepository.findById(contractId).orElseThrow(NoSuchElementException::new);
          ta.setContract(contract);
          taRepository.save(ta);
          return true;

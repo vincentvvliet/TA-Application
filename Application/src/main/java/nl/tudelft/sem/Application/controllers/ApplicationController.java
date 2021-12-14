@@ -3,10 +3,13 @@ package nl.tudelft.sem.Application.controllers;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.DTO.RatingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,6 +69,17 @@ public class ApplicationController {
             @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         return  applicationService.getApplicationDetails(applications);
+    }
+
+    @GetMapping("/getRatings/{student_id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id)
+    {
+        try {
+            return applicationService.getRatingForTA(student_id);
+        } catch (EmptyResourceException e) {
+            return null;
+        }
     }
 
 }

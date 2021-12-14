@@ -1,7 +1,7 @@
 package nl.tudelft.sem.DTO;
 
-import lombok.Data;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,8 +12,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApplyingStudentDTO {
+public class RatingDTO {
     private UUID studentId;
-    private double grade;
     private Optional<Integer> rating;
 }
