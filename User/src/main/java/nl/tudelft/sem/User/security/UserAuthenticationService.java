@@ -1,9 +1,7 @@
 package nl.tudelft.sem.User.security;
 
 
-import nl.tudelft.sem.User.entities.RealUser;
 import nl.tudelft.sem.User.entities.User;
-
 import java.util.Optional;
 
 public interface UserAuthenticationService {
@@ -23,7 +21,7 @@ public interface UserAuthenticationService {
      * @param token user dao key
      * @return
      */
-    Optional<RealUser> findByToken(String token);
+    Optional<User> findByToken(String token);
 
     /**
      * Logs out the given input {@code user}.
