@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -13,7 +12,6 @@ import nl.tudelft.sem.DTO.TAExperienceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -63,15 +61,11 @@ public class ApplicationService {
                 ret.add(new ApplyingStudentDTO(
                         a.getStudentId(),
                         getGradeByStudentAndCourse(a.getStudentId(), a.getCourseId()),
-                        getPastTAExperience(a.getStudentId()),
                         Optional.of(getRatingForTA(a.getStudentId(), a.getCourseId()))
                 ));
             } catch (EmptyResourceException e) {
                 System.out.println("failed to get application details: " + e.getMessage());
             }
-            //TODO: make service and controller methods in TA microservice
-            // to retrieve Experience DTO
-            //TODO: modify method user that requests DTOS to add names itself
         }
         return ret;
     }
@@ -97,20 +91,6 @@ public class ApplicationService {
         return result.get();
     }
 
-    /**
-     * Gets courses a student has perviously TA'd for, along with the rating for each course.
-     *
-     * @param studentId of TA.
-     */
-    public List<TAExperienceDTO> getPastTAExperience(UUID studentId) {
-        WebClient webClient = WebClient.create("localhost:47110");
-        Flux<TAExperienceDTO> rating = webClient.get()
-                .uri("/TA/getExperience/" + studentId)
-                .retrieve()
-                .bodyToFlux(TAExperienceDTO.class);
-        return rating.collectList().block();
-
-    }
 
 
 
