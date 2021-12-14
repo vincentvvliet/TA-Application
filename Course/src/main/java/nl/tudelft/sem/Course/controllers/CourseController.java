@@ -105,7 +105,7 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.OK)
     public boolean modifyCourseCode(@PathVariable(value = "id") UUID id, @PathVariable(value = "course_code") String course_code) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        course.setCourse_code(course_code);
+        course.setCourseCode(course_code);
         courseRepository.save(course);
         return true;
     }
@@ -122,7 +122,7 @@ public class CourseController {
         if (nr_participants < 0) {
             throw new IllegalArgumentException("number of participants is negative");
         }
-        course.setNr_participants(nr_participants);
+        course.setNrParticipants(nr_participants);
         courseRepository.save(course);
         return true;
     }
@@ -142,7 +142,7 @@ public class CourseController {
             return false;
         }
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        if (startDate.isAfter(course.getEnd_date())) {
+        if (startDate.isAfter(course.getEndDate())) {
             throw new IllegalArgumentException("start date is after end date of the course");
         }
         course.setStartDate(startDate);
@@ -168,7 +168,7 @@ public class CourseController {
         if (endDate.isBefore(course.getStartDate())) {
             throw new IllegalArgumentException("end date is before start date of the course");
         }
-        course.setEnd_date(endDate);
+        course.setEndDate(endDate);
         courseRepository.save(course);
         return true;
     }

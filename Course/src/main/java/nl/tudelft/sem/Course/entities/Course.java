@@ -18,19 +18,19 @@ public class Course {
 
     @Column(name = "course_code")
     @JsonProperty(value = "course_code")
-    private String course_code;
+    private String courseCode;
 
     @Column(name = "nr_participants")
     @JsonProperty(value = "nr_participants")
-    private int nr_participants;
+    private int nrParticipants;
 
-    @Column(name = "startDate")
-    @JsonProperty(value = "startDate")
+    @Column(name = "start_date")
+    @JsonProperty(value = "start_date")
     private LocalDate startDate;
 
     @Column(name = "end_date")
     @JsonProperty(value = "end_date")
-    private LocalDate end_date;
+    private LocalDate endDate;
 
     public Course() {
         this.id = UUID.randomUUID();
@@ -38,10 +38,10 @@ public class Course {
 
     public Course(String course_code, int nr_participants, LocalDate startDate, LocalDate end_date) {
         this.id = UUID.randomUUID();
-        this.course_code = course_code;
-        this.nr_participants = nr_participants;
+        this.courseCode = course_code;
+        this.nrParticipants = nr_participants;
         this.startDate = startDate;
-        this.end_date = end_date;
+        this.endDate= end_date;
     }
 
 }
