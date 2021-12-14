@@ -1,7 +1,6 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
-import nl.tudelft.sem.User.entities.RealUser;
 import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;

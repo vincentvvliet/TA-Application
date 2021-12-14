@@ -2,6 +2,7 @@ package nl.tudelft.sem.User.security;
 
 
 import nl.tudelft.sem.User.entities.RealUser;
+import nl.tudelft.sem.User.entities.User;
 
 import java.util.Optional;
 
@@ -29,5 +30,5 @@ public interface UserAuthenticationService {
      *
      * @param user the user to logout
      */
-    void logout(RealUser user);
+    void logout(User user);
 }
