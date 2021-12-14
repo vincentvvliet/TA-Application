@@ -3,5 +3,4 @@ include 'TAs'
 include 'Application'
 include 'Course'
 include 'User'
-include 'Common'
-
+include 'shared'

@@ -36,8 +36,8 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -45,10 +45,9 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
 	testImplementation('org.assertj:assertj-core:3.14.0')
+	compile 'org.springframework.boot:spring-boot-starter-webflux'
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok:1.18.8'
-	compile 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation project(':shared')
 	annotationProcessor 'org.projectlombok:lombok:1.18.8'
 }
 
@@ -59,6 +58,14 @@ test {
 		includes = ['nl.tudelft.sem']
 		excludes = []
 	}
+}
+
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
 }
 
 repositories {
@@ -91,8 +98,6 @@ pmd {
 	incrementalAnalysis = true
 	ignoreFailures = true
 }
-
-
 
 apply plugin: 'info.solidsoft.pitest'
 pitest {
