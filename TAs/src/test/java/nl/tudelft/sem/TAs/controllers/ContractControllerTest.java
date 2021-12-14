@@ -44,7 +44,7 @@ public class ContractControllerTest {
 
     @Test
     public void findByIdTest() {
-        Assertions.assertEquals(contractController.getContractById(id), Optional.ofNullable(contract));
+        Assertions.assertEquals(contractController.getContractById(id).block(), Optional.ofNullable(contract));
     }
 
     @Test
