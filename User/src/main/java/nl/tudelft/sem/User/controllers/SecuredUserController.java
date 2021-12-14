@@ -39,7 +39,7 @@ public class SecuredUserController {
      * @return optional of user
      */
     @GetMapping("/getUser/{id}")
-    public Optional<RealUser> getUserById(@PathVariable(value = "id") UUID id) {
+    public Optional<User> getUserById(@PathVariable(value = "id") UUID id) {
         return userRepository.findById(id);
     }
 
@@ -49,7 +49,7 @@ public class SecuredUserController {
      * @return list of courses
      */
     @GetMapping("/getUsers")
-    public List<RealUser> getCourses() {
+    public List<User> getCourses() {
         return userRepository.findAll();
     }
 
@@ -59,7 +59,7 @@ public class SecuredUserController {
      * @return boolean
      */
     @GetMapping("/logout")
-    boolean logout(@AuthenticationPrincipal final RealUser user) {
+    boolean logout(@AuthenticationPrincipal final User user) {
         authentication.logout(user);
         return true;
     }
@@ -73,7 +73,7 @@ public class SecuredUserController {
      */
     @RequestMapping("/acceptApplication/{userId}/{applicationId}")
     public boolean acceptApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "applicationId") UUID applicationId) throws Exception {
-        RealUser user = (RealUser) userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
         if (user.getRole() != Role.LECTURER) {
             throw new Exception("invalid role: only lecturers can accept applications");
         }
@@ -89,7 +89,7 @@ public class SecuredUserController {
      */
     @PostMapping("/createApplication/{userId}/{courseId}")
     public boolean createApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "courseId") UUID courseId) throws Exception {
-        RealUser user = (RealUser) userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
         if (user.getRole() != Role.STUDENT) {
             throw new Exception("invalid role: only students can create applications");
         }
