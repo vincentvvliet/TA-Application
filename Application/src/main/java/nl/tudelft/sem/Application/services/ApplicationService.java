@@ -20,17 +20,16 @@ public class ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    private Validator validator;
+    @Autowired
+    private IsCourseOpen isCourseOpen;
+
+    @Autowired
+    private IsUniqueApplication isUniqueApplication;
+
+    @Autowired
+    private IsGradeSufficient isGradeSufficient;
 
 
-    /**Constructor of the ApplicationService class.
-     *
-     */
-    public ApplicationService() {
-        validator = new IsCourseOpen(); // create chain of responsibility
-        validator.setLast(new IsGradeSufficient());
-        validator.setLast(new IsUniqueApplication());
-    }
 
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
@@ -91,6 +90,9 @@ public class ApplicationService {
      * @return true if valid, false if not.
      */
     public boolean validate(Application application) {
+        Validator validator = isCourseOpen; // create chain of responsibility
+        validator.setLast(isGradeSufficient);
+        validator.setLast(isUniqueApplication);
         Boolean isValid = false;
         try {
             isValid = validator.handle(application);
