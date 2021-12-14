@@ -51,20 +51,20 @@ public class ApplicationControllerTests {
     @Test
     public void getApplicationsByCourseTest() {
         when(applicationService.getApplicationsByCourse(courseId)).thenReturn(applicationList);
-        Assertions.assertEquals(applicationController.getApplicationsByCourse(courseId), applicationList);
+        Assertions.assertEquals(applicationController.getApplicationsByCourse(courseId).block(), applicationList);
     }
 
     @Test
     public void createApplicationByStudentAndCourseIsNotValidTest() {
         when(applicationService.validate(any(Application.class))).thenReturn(false);
-        Assertions.assertEquals(applicationController.createApplicationByStudentAndCourse(studentId,courseId), false);
+        Assertions.assertEquals(applicationController.createApplicationByStudentAndCourse(studentId,courseId).block(), false);
         verify(applicationRepository, never()).save(any(Application.class));
     }
 
     @Test
     public void createApplicationByStudentAndCourseIsValidTest() {
         when(applicationService.validate(any(Application.class))).thenReturn(true);
-        Assertions.assertEquals(applicationController.createApplicationByStudentAndCourse(studentId,courseId), true);
+        Assertions.assertEquals(applicationController.createApplicationByStudentAndCourse(studentId,courseId).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
 
@@ -74,7 +74,7 @@ public class ApplicationControllerTests {
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
         when(applicationService.createTA(studentId,courseId)).thenReturn(true);
-        Assertions.assertEquals(applicationController.acceptApplication(id), true);
+        Assertions.assertEquals(applicationController.acceptApplication(id).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
 
@@ -126,7 +126,7 @@ public class ApplicationControllerTests {
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
         when(applicationService.createTA(studentId,courseId)).thenReturn(false);
-        Assertions.assertEquals(applicationController.acceptApplication(id), false);
+        Assertions.assertEquals(applicationController.acceptApplication(id).block(), false);
         verify(applicationRepository, never()).save(any(Application.class));
     }
 

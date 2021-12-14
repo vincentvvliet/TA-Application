@@ -50,7 +50,7 @@ public class ContractControllerTest {
     @Test
     public void findAllTest() {
         when(contractRepository.findAll()).thenReturn(contractList);
-        Assertions.assertEquals(contractController.getContracts(),contractList);
+        Assertions.assertEquals(contractController.getContracts().block(),contractList);
     }
 
     @Test
