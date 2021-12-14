@@ -8,5 +8,6 @@ public interface Validator {
 
     void setLast(Validator h);
 
+    boolean checkNext(Application application) throws Exception;
     Boolean handle(Application application) throws Exception;
 }

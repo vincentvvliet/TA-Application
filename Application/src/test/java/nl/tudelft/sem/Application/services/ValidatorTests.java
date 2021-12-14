@@ -82,6 +82,20 @@ public class ValidatorTests {
     }
 
     @Test
+    public void isCourseOpenNullTest() throws Exception {
+        LocalDate startDate = LocalDate.now();
+        application = new Application(null, studentId);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> {
+            isCourseOpen.handle(application);
+        });
+        String expectedMessage = "The given application does not contain a course ID";
+        String actualMessage = exception.getMessage();
+
+        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+
+    }
+
+    @Test
     public void isCourseOpenTooEarlyTest() throws Exception {
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(4);
@@ -221,6 +235,8 @@ public class ValidatorTests {
 
         Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
     }
+
+
 
 
 

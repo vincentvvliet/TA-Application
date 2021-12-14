@@ -28,7 +28,7 @@ public abstract class BaseValidator implements Validator {
      * @return boolean
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    protected boolean checkNext(Application application) throws Exception {
+    public boolean checkNext(Application application) throws Exception {
         if (next == null) {
             return true;
         }
