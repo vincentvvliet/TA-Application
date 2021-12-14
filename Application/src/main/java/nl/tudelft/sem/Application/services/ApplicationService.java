@@ -29,6 +29,7 @@ public class ApplicationService {
     @Autowired
     private IsGradeSufficient isGradeSufficient;
 
+    private Validator validator;
 
 
     /**
@@ -90,12 +91,12 @@ public class ApplicationService {
      * @return true if valid, false if not.
      */
     public boolean validate(Application application) {
-        Validator validator = isCourseOpen; // create chain of responsibility
+        validator.setLast(isCourseOpen); // create chain of responsibility
         validator.setLast(isGradeSufficient);
         validator.setLast(isUniqueApplication);
         Boolean isValid = false;
         try {
-            isValid = validator.handle(application);
+            isValid = validator.checkNext(application);
         } catch (Exception e) {
             e.printStackTrace();
         }

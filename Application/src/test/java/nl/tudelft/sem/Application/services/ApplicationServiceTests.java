@@ -51,11 +51,12 @@ public class ApplicationServiceTests {
         studentId = UUID.randomUUID();
         application = new Application(courseId, studentId);
         applicationList.add(application);
+        doNothing().when(validator).setLast(any(Validator.class));
     }
 
     @Test
     public void validateSuccessfulTest() throws Exception {
-        when(validator.handle(application)).thenReturn(true);
+        when(validator.checkNext(application)).thenReturn(true);
 
         Assertions.assertEquals(applicationService.validate(application), true);
     }
@@ -63,7 +64,7 @@ public class ApplicationServiceTests {
     @Test
     public void validateNotValidTest() throws Exception {
         Exception e = mock(Exception.class);
-        when(validator.handle(application)).thenThrow(e);
+        when(validator.checkNext(application)).thenThrow(e);
 
         Assertions.assertEquals(applicationService.validate(application), false);
         verify(e).printStackTrace();
