@@ -34,7 +34,7 @@ public class ApplicationServiceTests {
     ApplicationRepository applicationRepository;
 
     @Mock
-    Validator validator;
+    IsCourseOpen validator;
 
 
     List<Application> applicationList;
@@ -56,7 +56,7 @@ public class ApplicationServiceTests {
 
     @Test
     public void validateSuccessfulTest() throws Exception {
-        when(validator.checkNext(application)).thenReturn(true);
+        when(validator.handle(application)).thenReturn(true);
 
         Assertions.assertEquals(applicationService.validate(application), true);
     }
@@ -64,7 +64,7 @@ public class ApplicationServiceTests {
     @Test
     public void validateNotValidTest() throws Exception {
         Exception e = mock(Exception.class);
-        when(validator.checkNext(application)).thenThrow(e);
+        when(validator.handle(application)).thenThrow(e);
 
         Assertions.assertEquals(applicationService.validate(application), false);
         verify(e).printStackTrace();

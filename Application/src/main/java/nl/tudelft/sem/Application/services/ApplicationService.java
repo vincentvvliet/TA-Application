@@ -34,6 +34,7 @@ public class ApplicationService {
     private Validator validator;
 
 
+
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
      *
@@ -53,11 +54,11 @@ public class ApplicationService {
      */
     public boolean createTA(UUID studentId, UUID courseId) {
         WebClient webClient = WebClient.create("http://localhost:47110");
-        Mono<Boolean> rating = webClient.get()
+        Mono<Boolean> accepted = webClient.get()
                 .uri("/TA/createTA/" + studentId  + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return rating.blockOptional().orElse(false);
+        return accepted.blockOptional().orElse(false);
     }
 
     /** Ask the Course microservice for the grade corresponding to
@@ -67,11 +68,11 @@ public class ApplicationService {
      */
     public Double getGrade(UUID studentId, UUID courseId) throws EmptyResourceException {
         WebClient webClient = WebClient.create("http://localhost:47112");
-        Mono<Double> rating = webClient.get()
+        Mono<Double> grade = webClient.get()
                 .uri("/grade/getGrade/" + studentId + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Double.class);
-        Optional<Double> result = rating.blockOptional();
+        Optional<Double> result = grade.blockOptional();
         if (result.isEmpty()) {
             throw new EmptyResourceException("no grade found");
         }
@@ -86,12 +87,12 @@ public class ApplicationService {
      */
     public LocalDate getCourseStartDate(UUID courseId) throws EmptyResourceException {
         WebClient webClient = WebClient.create("http://localhost:47112");
-        Mono<LocalDate> rating = webClient.get()
+        Mono<LocalDate> startDate = webClient.get()
                 .uri("/course/getCourseStartDate/" + courseId)
                 .retrieve()
                 .bodyToMono(LocalDate.class);
 
-        Optional<LocalDate> result = rating.blockOptional();
+        Optional<LocalDate> result = startDate.blockOptional();
         if (result.isEmpty()) {
             throw new EmptyResourceException("no TA rating found");
         }
@@ -103,12 +104,12 @@ public class ApplicationService {
      * @return true if valid, false if not.
      */
     public boolean validate(Application application) {
-        validator.setLast(isCourseOpen); // create chain of responsibility
+        validator = isCourseOpen; // create chain of responsibility
         validator.setLast(isGradeSufficient);
         validator.setLast(isUniqueApplication);
         Boolean isValid = false;
         try {
-            isValid = validator.checkNext(application);
+            isValid = validator.handle(application);
         } catch (Exception e) {
             e.printStackTrace();
         }

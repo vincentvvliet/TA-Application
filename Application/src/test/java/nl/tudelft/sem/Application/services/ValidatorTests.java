@@ -1,9 +1,7 @@
 package nl.tudelft.sem.Application.services;
 
-import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
@@ -18,11 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import javax.management.InvalidApplicationException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
