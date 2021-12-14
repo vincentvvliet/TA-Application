@@ -1,18 +1,18 @@
 package nl.tudelft.sem.Application.services;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.DTO.TAExperienceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ApplicationService {
@@ -36,8 +36,6 @@ public class ApplicationService {
                 .retrieve()
                 .bodyToMono(Integer.class);
         Optional<Integer> result = rating.blockOptional();
-
-        //TODO does this have to throw an exception? no rating is valid if TA has no past experience
         if (result.isEmpty()) {
             throw new EmptyResourceException("no TA rating found");
         }
@@ -54,9 +52,6 @@ public class ApplicationService {
     public List<ApplyingStudentDTO> getApplicationDetails(List<Application> applications) {
         List<ApplyingStudentDTO> ret = new ArrayList<ApplyingStudentDTO>();
         for (Application a : applications) {
-            double grade;
-            int rating;
-            List<TAExperienceDTO> taExperience;
             try {
                 ret.add(new ApplyingStudentDTO(
                         a.getStudentId(),
