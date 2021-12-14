@@ -27,8 +27,7 @@ public class TA {
     @JsonProperty(value = "rating")
     private int rating;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinTable( name = "contract", joinColumns = @JoinColumn ( name = "id"))
+    @OneToOne(targetEntity = Contract.class, cascade = CascadeType.ALL)
     private Contract contract;
 
     public TA() {

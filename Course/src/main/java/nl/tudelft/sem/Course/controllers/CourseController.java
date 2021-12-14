@@ -105,7 +105,7 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.OK)
     public boolean modifyCourseCode(@PathVariable(value = "id") UUID id, @PathVariable(value = "course_code") String course_code) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        course.setCourseCode(course_code);
+        course.setCourse_code(course_code);
         courseRepository.save(course);
         return true;
     }
@@ -122,7 +122,7 @@ public class CourseController {
         if (nr_participants < 0) {
             throw new IllegalArgumentException("number of participants is negative");
         }
-        course.setNrParticipants(nr_participants);
+        course.setNr_participants(nr_participants);
         courseRepository.save(course);
         return true;
     }
