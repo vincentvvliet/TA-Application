@@ -1,6 +1,8 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
+import nl.tudelft.sem.User.entities.Role;
+import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 
 /**
@@ -20,7 +24,7 @@ public class PublicUserController {
     UserAuthenticationService authentication;
 
     @Autowired
-    UserRepository users;
+    UserRepository userRepository;
 
     /**
      * POST endpoint registers user by username and password
@@ -30,17 +34,12 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/register")
-    String register(@RequestParam("username") final String username,
-                    @RequestParam("password") final String password) {
-//        users.save(
-//                User
-//                        .builder()
-//                        .username(username)
-//                        .password(password)
-//                        .build()
-//        );
+    UUID register(@RequestParam("username") String username,
+                    @RequestParam("password") String password,
+                    @RequestParam("password") String role) {
+        userRepository.save(new User(username, password, Role.valueOf(role)));
 
-        return login(username, password);
+        return login(username, password, role);
     }
 
     /**
@@ -51,13 +50,14 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/login")
-    String login(@RequestParam("username") final String username,
-                 @RequestParam("password") final String password) {
+    UUID login(@RequestParam("username") String username,
+                 @RequestParam("password") String password,
+                 @RequestParam("password") String role) {
         System.out.println(username);
         System.out.println(password);
         System.out.println(authentication);
         return authentication
-                .login(username, password)
+                .login(username, password, role)
                 .orElseThrow(() -> new RuntimeException("invalid login and/or password"));
     }
 }

@@ -22,7 +22,7 @@ final class TokenAuthenticationProvider extends AbstractUserDetailsAuthenticatio
     @Override
     protected UserDetails retrieveUser(final String username, final UsernamePasswordAuthenticationToken authentication) {
         final Object token = authentication.getCredentials();
-        return (UserDetails) Optional
+        return Optional
                 .ofNullable(token)
                 .map(String::valueOf)
                 .flatMap(auth::findByToken)

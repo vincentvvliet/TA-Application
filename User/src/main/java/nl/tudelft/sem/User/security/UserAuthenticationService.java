@@ -3,6 +3,7 @@ package nl.tudelft.sem.User.security;
 
 import nl.tudelft.sem.User.entities.User;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserAuthenticationService {
 
@@ -13,7 +14,7 @@ public interface UserAuthenticationService {
      * @param password
      * @return an {@link Optional} of a user when login succeeds
      */
-    Optional<String> login(String username, String password);
+    Optional<UUID> login(String username, String password, String role);
 
     /**
      * Finds a user by its dao-key.
