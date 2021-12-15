@@ -65,8 +65,8 @@ public class TAController {
     @RequestMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
     public boolean addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
-         TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new NoSuchElementException());
+         TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
+         Contract contract = contractRepository.findById(contractId).orElseThrow(NoSuchElementException::new);
          ta.setContract(contract);
          taRepository.save(ta);
          return true;
@@ -80,7 +80,7 @@ public class TAController {
     @PatchMapping("addRating/{id}/{rating}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addRatingbyId(@PathVariable (value = "id")  UUID id, @PathVariable(value = "rating") int rating) {
-        TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
         ta.setRating(rating);
         taRepository.save(ta);
     }
