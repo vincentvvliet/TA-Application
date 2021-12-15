@@ -15,6 +15,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
+// @AuthenticationPrincipal
+
 @RestController
 @RequestMapping("/TA/")
 public class TAController {
