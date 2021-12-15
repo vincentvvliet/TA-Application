@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.UUID;
 import nl.tudelft.sem.User.repositories.UserRepository;
@@ -85,5 +86,19 @@ public class UserService {
                 .retrieve()
                 .bodyToMono(ApplicationDTO.class);
         return application.block();
+    }
+
+    public boolean addRatingByTAId(UUID ta_id, int rating) throws Exception {
+        // Make request to TA microservice (port: 47110)
+        WebClient webClient = WebClient.create("localhost:47110");
+        Mono<Boolean> application = webClient.patch()
+            .uri("TA/addRating/" + ta_id + "/" + rating)
+            .retrieve()
+            .bodyToMono(Boolean.class);
+        Optional<Boolean> response = application.blockOptional();
+        if(response.isEmpty()) {
+            throw new Exception("No response retrieved!");
+        }
+        return response.get();
     }
 }
