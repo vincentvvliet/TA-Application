@@ -44,13 +44,13 @@ public class ContractControllerTest {
 
     @Test
     public void findByIdTest() {
-        Assertions.assertEquals(contractController.getContractById(id), Optional.ofNullable(contract));
+        Assertions.assertEquals(contractController.getContractById(id).block(), Optional.ofNullable(contract));
     }
 
     @Test
     public void findAllTest() {
         when(contractRepository.findAll()).thenReturn(contractList);
-        Assertions.assertEquals(contractController.getContracts(),contractList);
+        Assertions.assertEquals(contractController.getContracts().block(),contractList);
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,19 +28,23 @@ public class TAController {
     /**
      * GET endpoint retrieves TA by id
      * @param id (UUID) of the TA
-     * @return optional of TA
+     * @return mono optional of TA
      */
     @GetMapping("/getTA/{id}")
-    public Optional<TA> getTAById(@PathVariable(value = "id") UUID id) {
-        return taRepository.findById(id);
+    public Mono<TA> getTAById(@PathVariable(value = "id") UUID id) {
+        Optional<TA> ta = taRepository.findById(id);
+        if(ta.isEmpty()){
+            return Mono.empty();
+        }
+        return Mono.just(ta.get());
     }
     /**
      * GET endpoint retrieves all existing TA
      * @return list of TAs
      */
     @GetMapping("/getTAs")
-    public List<TA> getTAs() {
-        return taRepository.findAll();
+    public Mono<List<TA>> getTAs() {
+        return Mono.just(taRepository.findAll());
     }
 
     /**
@@ -49,10 +54,10 @@ public class TAController {
      * @return true after the TA is created and saved in the database
      */
     @PostMapping("/createTA/{studentid}/{courseid}")
-    public boolean createTA(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
+    public Mono<Boolean> createTA(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
         TA ta = new TA(studentId,courseId);
         taRepository.save(ta);
-        return true;
+        return Mono.just(true);
     }
 
     /**PATCH Endpoint to add contract to TA
@@ -62,12 +67,12 @@ public class TAController {
      */
     @RequestMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public boolean addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
+    public  Mono<Boolean> addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
          TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
          Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new NoSuchElementException());
          ta.setContract(contract);
          taRepository.save(ta);
-         return true;
+        return Mono.just(true);
     }
     /**
      * DELETE endpoint deletes a TA by id
@@ -75,12 +80,12 @@ public class TAController {
      * @return boolean representing if the deletion was successful or not
      */
     @DeleteMapping("deleteTA/{id}")
-    public boolean deleteTA(@PathVariable (value = "id") UUID id) {
+    public Mono<Boolean> deleteTA(@PathVariable (value = "id") UUID id) {
         try {
             taRepository.deleteById(id);
-            return true;
+            return Mono.just(true);
         } catch (Exception e) {
-            return false;
+            return Mono.just(false);
         }
     }
 

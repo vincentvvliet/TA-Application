@@ -21,7 +21,7 @@ public class Contract {
     @JsonProperty(value = "studentId")
     private UUID studentId;
 
-    @Column(name = "courseid" , nullable = false)
+    @Column(name = "courseid", nullable = false)
     @JsonProperty(value = "courseId")
     private UUID courseId;
 
