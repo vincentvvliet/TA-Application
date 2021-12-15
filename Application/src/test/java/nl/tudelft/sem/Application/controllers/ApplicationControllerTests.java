@@ -166,13 +166,12 @@ public class ApplicationControllerTests {
 
     @Test
     void getApplications_twoCompatible_returnsBoth() {
-        when(applicationRepository.findApplicationsByCourseId(courseId)).thenReturn(list);
+        when(applicationService.getApplicationsByCourse(courseId)).thenReturn(list);
         // Act
         Flux<Application> flux = applicationController.getApplicationsByCourse(courseId);
         // Assert
-        verify(applicationRepository).findApplicationsByCourseId(courseId);
         List<Application> result = flux.toStream().collect(Collectors.toList());
-        //assertEquals(list, result);
+        assertEquals(list, result);
     }
 
     @Test
