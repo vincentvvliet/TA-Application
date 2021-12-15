@@ -1,32 +1,117 @@
 package nl.tudelft.sem.User.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface User {
-    public Collection<GrantedAuthority> getAuthorities();
+@Entity
+@Data
+@Table(name = "user", schema = "userschema")
+public class User implements UserDetails {
+    @Id
+    @Column(name = "id", nullable = false)
+    @JsonProperty(value = "id")
+    private final UUID id;
 
-    public boolean isAccountNonExpired();
+    @Column(name = "username")
+    @JsonProperty(value = "username")
+    private String username;
 
-    public boolean isAccountNonLocked();
+    @Column(name = "password")
+    @JsonProperty(value = "password")
+    private String password;
 
-    public boolean isCredentialsNonExpired();
+    @Column(name = "role")
+    @JsonProperty(value = "role")
+    private Role role;
 
-    public boolean isEnabled();
+    /**
+     * Instantiates a new user.
+     */
+    public User() {
+        this.id = UUID.randomUUID();
+    }
 
-    public UUID getId();
+    /**
+     * Instantiates a new user.
+     *
+     * @param username the username
+     * @param password the password
+     * @param role     the role
+     */
+    public User(String username, String password, Role role) {
+        this.id = UUID.randomUUID();
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 
-    public String getUsername();
+    @JsonIgnore
+    @Override
+    public Collection<GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
+    }
 
-    public void setUsername(String username);
+    @JsonIgnore
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
-    public String getPassword();
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-    public void setPassword(String password);
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-    public Role getRole();
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-    public void setRole(Role role);
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }
