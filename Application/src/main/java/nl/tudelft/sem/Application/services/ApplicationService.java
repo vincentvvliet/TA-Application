@@ -127,7 +127,7 @@ public class ApplicationService {
      * @return List of Applications
      */
     public List<Application> getApplicationsByCourse(UUID course) {
-        return applicationRepository.findAllApplicationsByCourseId(course);
+        return applicationRepository.findApplicationsByCourseId(course);
     }
 
     /** getRatingForTA method.

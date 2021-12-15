@@ -57,7 +57,7 @@ public class ApplicationServiceTests {
     public void validateSuccessfulTest() throws Exception {
         when(validator.handle(application)).thenReturn(true);
 
-        Assertions.assertEquals(applicationService.validate(application), true);
+        Assertions.assertTrue(applicationService.validate(application));
     }
 
     @Test
@@ -65,14 +65,13 @@ public class ApplicationServiceTests {
         Exception e = mock(Exception.class);
         when(validator.handle(application)).thenThrow(e);
 
-        Assertions.assertEquals(applicationService.validate(application), false);
+        Assertions.assertFalse(applicationService.validate(application));
         verify(e).printStackTrace();
     }
 
     @Test
-    public void getApplicationsByCourseTest() throws Exception {
-        when(applicationRepository.findAllApplicationsByCourseId(courseId)).thenReturn(applicationList);
-
+    public void getApplicationsByCourseTest() {
+        when(applicationRepository.findApplicationsByCourseId(courseId)).thenReturn(applicationList);
         Assertions.assertEquals(applicationService.getApplicationsByCourse(courseId), applicationList);
     }
 
