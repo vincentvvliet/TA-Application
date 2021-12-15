@@ -5,6 +5,7 @@ import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,8 +23,9 @@ public class ContractController {
      * @return optional of contract
      */
     @GetMapping("/getContract/{id}")
-    public Optional<Contract> getContractById(@PathVariable (value = "id") UUID id) {
-        return contractRepository.findById(id);
+    public Mono<Optional<Contract>> getContractById(@PathVariable (value = "id") UUID id) {
+        Optional<Contract> contract = contractRepository.findById(id);
+        return Mono.just(contract);
     }
 
     /**
@@ -31,8 +33,8 @@ public class ContractController {
      * @return list of contracts
      */
     @GetMapping("/getContracts")
-    public List<Contract> getContracts() {
-        return contractRepository.findAll();
+    public Mono<List<Contract>> getContracts() {
+        return Mono.just(contractRepository.findAll());
     }
 
     /**
@@ -42,10 +44,10 @@ public class ContractController {
      * @return true after the contract is created and saved in the database
      */
     @PostMapping("/createContract/{studentid}/{courseid}")
-    public boolean createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
+    public Mono<Boolean> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
         Contract c = new Contract(studentId,courseId);
         contractRepository.save(c);
-        return true;
+        return Mono.just(true);
     }
 
     /**
@@ -107,12 +109,12 @@ public class ContractController {
      * @return boolean representing if the deletion was successful or not
      */
     @DeleteMapping("deleteContract/{id}")
-    public boolean deleteContract(@PathVariable (value = "id") UUID id) {
+    public Mono<Boolean> deleteContract(@PathVariable (value = "id") UUID id) {
         try {
             contractRepository.deleteById(id);
-            return true;
+            return Mono.just(true);
         } catch (Exception e) {
-            return false;
+            return Mono.just(false);
         }
     }
 }

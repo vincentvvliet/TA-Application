@@ -1,6 +1,7 @@
 package nl.tudelft.sem.Application.controllers;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,10 +14,13 @@ import nl.tudelft.sem.DTO.RatingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 
 
@@ -82,4 +86,10 @@ public class ApplicationController {
         }
     }
 
+    @GetMapping("/applications/{course_id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Mono<List<Application>> getApplicationsByCourse(@PathVariable(value = "course_id")
+                                                                 UUID course) {
+        return Mono.just(applicationService.getApplicationsByCourse(course));
+    }
 }
