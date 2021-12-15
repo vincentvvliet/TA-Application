@@ -1,5 +1,6 @@
 package nl.tudelft.sem.User.controllers;
 
+import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import reactor.core.publisher.Mono;
+
 
 /**
  * Secured proxy for controller only accessible by logged-in users.
@@ -25,9 +29,13 @@ public class ProxyController implements Controller {
      */
     @GetMapping("/getUser/{id}")
     @Override
-    public Optional<User> getUserById(@PathVariable(value = "id") UUID id) {
+    public Mono<User> getUserById(@PathVariable(value = "id") UUID id) {
         check();
-        return controller.getUserById(id);
+        Optional<User> user = controller.getUserById(id);
+        if (user.isEmpty()) {
+            return Mono.empty();
+        }
+        return Mono.just(user.get());
     }
 
     /**
@@ -37,9 +45,9 @@ public class ProxyController implements Controller {
      */
     @GetMapping("/getUsers")
     @Override
-    public List<User> getUsers() {
+    public Mono<List<User>> getUsers() {
         check();
-        return controller.getUsers();
+        return Mono.just(controller.getUsers());
     }
 
     /**
@@ -53,6 +61,24 @@ public class ProxyController implements Controller {
         check();
         return controller.logout(user);
     }
+
+    /**
+     * POST endpoint for creating a user.
+     *
+     * @param username of the user
+     * @param password of the user
+     * @param role     of the user
+     * @return true if the user is properly created and saved in the database
+     */
+    @PostMapping("/createTA/{studentid}/{courseid}")
+    public Mono<Boolean> createUser(@PathVariable(value = "username") String username,
+                                    @PathVariable(value = "password") String password,
+                                    @PathVariable(value = "role") String role) {
+        User user = new User(username, password, Role.valueOf(role));
+        check();
+        return Mono.just(controller.createUser(user));
+    }
+
 
     /**
      * PATCH endpoint to accept a TA application.
@@ -81,6 +107,19 @@ public class ProxyController implements Controller {
         check();
         return controller.createApplication(userId, courseId);
     }
+
+    /**
+     * DELETE endpoint deletes a user by id
+     *
+     * @param id of the user
+     * @return boolean representing if the deletion was successful or not
+     */
+    @DeleteMapping("deleteUser/{id}")
+    public Mono<Boolean> deleteUser(@PathVariable(value = "id") UUID id) {
+        check();
+        return Mono.just(controller.deleteUser(id));
+    }
+
 
     /**
      * Check whether a controller already exists, if not then create new controller.

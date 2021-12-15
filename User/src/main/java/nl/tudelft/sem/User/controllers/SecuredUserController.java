@@ -1,20 +1,17 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
-import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.List;
 
 
 public class SecuredUserController {
@@ -33,6 +30,7 @@ public class SecuredUserController {
     }
 
     public List<User> getUsers() {
+        System.out.println(userRepository);
         return userRepository.findAll();
     }
 
@@ -58,4 +56,17 @@ public class SecuredUserController {
         return userService.createApplication(userId, courseId);
     }
 
+    public boolean deleteUser(UUID id) {
+        try {
+            userRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean createUser(User user) {
+        userRepository.save(user);
+        return true;
+    }
 }

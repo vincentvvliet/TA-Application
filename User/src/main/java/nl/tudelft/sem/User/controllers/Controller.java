@@ -1,19 +1,21 @@
 package nl.tudelft.sem.User.controllers;
 
 import nl.tudelft.sem.User.entities.User;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface Controller {
-    public Optional<User> getUserById(UUID id);
+    public Mono<User> getUserById(UUID id);
 
-    public List<User> getUsers();
+    public Mono<List<User>> getUsers();
 
     boolean logout(User user);
 
     public boolean acceptApplication(UUID userId, UUID applicationId) throws Exception;
 
     public boolean createApplication(UUID userId, UUID courseId) throws Exception;
+
+    public Mono<Boolean> deleteUser(UUID id);
 }
