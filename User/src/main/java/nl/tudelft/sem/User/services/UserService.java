@@ -19,7 +19,7 @@ public class UserService {
      */
 
     public List<ApplicationDTO> getAllApplications() {
-        WebClient webClient = WebClient.create("localhost:47113");
+        WebClient webClient = WebClient.create("http://localhost:47113");
         Flux<ApplicationDTO> applications = webClient.get()
                 .uri("application/retrieveAll")
                 .retrieve()
@@ -36,7 +36,7 @@ public class UserService {
      * @return An application.
      */
     public ApplicationDTO getApplication(UUID studentId, UUID courseId) {
-        WebClient webClient = WebClient.create("localhost:47113");
+        WebClient webClient = WebClient.create("http://localhost:47113");
         Mono<ApplicationDTO> application = webClient.get()
                 .uri("application/getApplication/" + studentId + "/" + courseId)
                 .retrieve()
@@ -50,7 +50,7 @@ public class UserService {
      * @return list of applying students.
      */
     public List<ApplyingStudentDTO> getApplicationsOverview(UUID courseId) {
-        WebClient webClient = WebClient.create("localhost:47113");
+        WebClient webClient = WebClient.create("http://localhost:47113");
         Flux<ApplyingStudentDTO> applications = webClient.get()
                 .uri("application/getApplicationOverview/" + courseId)
                 .retrieve()
