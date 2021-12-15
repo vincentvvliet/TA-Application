@@ -3,7 +3,9 @@ package nl.tudelft.sem.TAs.controllers;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.TARepository;
+import nl.tudelft.sem.TAs.services.TAService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 public class TAControllerTests {
@@ -26,56 +29,25 @@ public class TAControllerTests {
     TAController taController;
 
     @MockBean
+    TAService taService;
+
+    @MockBean
     TARepository taRepository;
 
-    @Test
-    void noJobsYet_throwsException() {
-        // Arrange
-        UUID student = UUID.randomUUID();
-        Mockito.when(taRepository.findAllByStudentId(student)).thenReturn(List.of());
-        // Act
-        Mono<RatingDTO> mono = taController.getAverageRating(student);
-        // Assert
-        RatingDTO result = mono.block();
-        Assertions.assertNull(result);
+    UUID studentId;
+
+    @BeforeEach
+    void setup() {
+        studentId = UUID.randomUUID();
     }
 
     @Test
-    void testSingleJob_returnsCorrectValue() {
-        // Arrange
-        UUID student = UUID.randomUUID();
-        TA ta1 = new TA(UUID.randomUUID(), student);
-        ta1.setRating(4);
-        List<TA> list = new ArrayList<>(List.of(ta1));
-        Mockito.when(taRepository.findAllByStudentId(student)).thenReturn(list);
+    void getAverageRating_test() {
         // Act
-        Mono<RatingDTO> mono = taController.getAverageRating(student);
+        taController.getAverageRating(studentId);
         // Assert
-        RatingDTO result = Objects.requireNonNull(mono.block());
-        assertEquals(result.getStudentId(), student);
-        assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), 4);
+        verify(taService).getAverageRating(studentId);
     }
 
-    @Test
-    void testAverageOfThreeJobs_returnsAverageValue() {
-        // Arrange
-        UUID student = UUID.randomUUID();
-        TA ta1 = new TA(UUID.randomUUID(), student);
-        ta1.setRating(4);
-        TA ta2 = new TA(UUID.randomUUID(), student);
-        ta2.setRating(5);
-        TA ta3 = new TA(UUID.randomUUID(), student);
-        ta3.setRating(5);
-        List<TA> list = new ArrayList<>(List.of(ta1, ta2, ta3));
-        Mockito.when(taRepository.findAllByStudentId(student)).thenReturn(list);
-        // Act
-        Mono<RatingDTO> mono = taController.getAverageRating(student);
-        // Assert
-        RatingDTO result = Objects.requireNonNull(mono.block());
-        assertEquals(result.getStudentId(), student);
-        assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), (5+5+4)/3);
-    }
 
 }
