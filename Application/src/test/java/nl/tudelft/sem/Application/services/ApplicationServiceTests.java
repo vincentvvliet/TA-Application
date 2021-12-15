@@ -1,22 +1,19 @@
 package nl.tudelft.sem.Application.services;
 
-import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
-import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
-import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.*;
 
@@ -25,17 +22,17 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SpringBootTest
 public class ApplicationServiceTests {
 
-    @InjectMocks
+    @Autowired
     ApplicationService applicationService;
 
-    @Mock
+    @MockBean
     ApplicationRepository applicationRepository;
 
-    @Mock
+    @MockBean
     IsCourseOpen validator;
-
 
     List<Application> applicationList;
     UUID id;
@@ -58,7 +55,7 @@ public class ApplicationServiceTests {
     public void validateSuccessfulTest() throws Exception {
         when(validator.handle(application)).thenReturn(true);
 
-        Assertions.assertEquals(applicationService.validate(application), true);
+        Assertions.assertTrue(applicationService.validate(application));
     }
 
     @Test
@@ -66,14 +63,13 @@ public class ApplicationServiceTests {
         Exception e = mock(Exception.class);
         when(validator.handle(application)).thenThrow(e);
 
-        Assertions.assertEquals(applicationService.validate(application), false);
+        Assertions.assertFalse(applicationService.validate(application));
         verify(e).printStackTrace();
     }
 
     @Test
-    public void getApplicationsByCourseTest() throws Exception {
-        when(applicationRepository.findAllApplicationsByCourseId(courseId)).thenReturn(applicationList);
-
+    public void getApplicationsByCourseTest() {
+        when(applicationRepository.findApplicationsByCourseId(courseId)).thenReturn(applicationList);
         Assertions.assertEquals(applicationService.getApplicationsByCourse(courseId), applicationList);
     }
 

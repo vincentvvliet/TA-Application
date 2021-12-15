@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -25,7 +26,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SpringBootTest
 public class ValidatorTests {
+
     @InjectMocks
     IsCourseOpen isCourseOpen;
 
@@ -69,27 +72,23 @@ public class ValidatorTests {
     public void isCourseOpenNoCourseTest() throws Exception {
         LocalDate startDate = LocalDate.now();
         when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(null);
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isCourseOpen.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "Could not retrieve startDate that was linked to the given courseId";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
 
     }
 
     @Test
-    public void isCourseOpenNullTest() throws Exception {
+    public void isCourseOpenNullTest() {
         LocalDate startDate = LocalDate.now();
         application = new Application(null, studentId);
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isCourseOpen.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "The given application does not contain a course ID";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
 
     }
 
@@ -98,13 +97,11 @@ public class ValidatorTests {
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(4);
         when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isCourseOpen.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "The course is not yet open to applications";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
 
     }
 
@@ -133,14 +130,12 @@ public class ValidatorTests {
         startDate = startDate.minusDays(1);
 
         when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isCourseOpen.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
 
         String expectedMessage = "The period for applications has passed";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
@@ -154,49 +149,43 @@ public class ValidatorTests {
     public void IsGradeSufficientGradeTooLowTest() throws Exception {
         when(applicationService.getGrade(studentId, courseId)).thenReturn(5.9);
 
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isGradeSufficient.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isGradeSufficient.handle(application));
 
         String expectedMessage = "Grade was not sufficient";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
     public void IsGradeSufficientNoGradeFoundTest() throws Exception {
         when(applicationService.getGrade(studentId, courseId)).thenReturn(null);
 
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isGradeSufficient.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isGradeSufficient.handle(application));
 
         String expectedMessage = "could not retrieve course grade with the given student and course IDs";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
     public void IsApplicationUniqueSuccessfulTest() throws Exception {
-        when(applicationRepository.findApplicationByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
+        when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 
         Assertions.assertEquals(isUniqueApplication.handle(application) , true);
     }
 
     @Test
-    public void IsApplicationUniqueFalseTest() throws Exception {
-        when(applicationRepository.findApplicationByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.ofNullable(application));
+    public void IsApplicationUniqueFalseTest() {
+        when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.ofNullable(application));
 
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            isUniqueApplication.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isUniqueApplication.handle(application));
 
         String expectedMessage = "There already exists an application with that student and courseID";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
@@ -208,7 +197,7 @@ public class ValidatorTests {
         startDate = startDate.plusWeeks(1);
         when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
         when(applicationService.getGrade(studentId, courseId)).thenReturn(9D);
-        when(applicationRepository.findApplicationByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
+        when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 
         Assertions.assertEquals(isUniqueApplication.handle(application) , true);
     }
@@ -222,16 +211,14 @@ public class ValidatorTests {
         startDate = startDate.plusWeeks(1);
         when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
         when(applicationService.getGrade(studentId, courseId)).thenReturn(5.9);
-        when(applicationRepository.findApplicationByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
+        when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 
-        Exception exception = Assertions.assertThrows(Exception.class, () -> {
-            validator.handle(application);
-        });
+        Exception exception = Assertions.assertThrows(Exception.class, () -> validator.handle(application));
 
         String expectedMessage = "Grade was not sufficient";
         String actualMessage = exception.getMessage();
 
-        Assertions.assertEquals(actualMessage.contains(expectedMessage),true);
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
     }
 
 

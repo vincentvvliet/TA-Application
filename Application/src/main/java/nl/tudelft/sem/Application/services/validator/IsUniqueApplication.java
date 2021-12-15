@@ -21,7 +21,7 @@ public class IsUniqueApplication extends BaseValidator {
     @Override
     public Boolean handle(Application application) throws Exception {
         Optional<Application> application1 = applicationRepository
-                 .findApplicationByStudentIdAndCourseId(application.getStudentId(),
+                 .findByStudentIdAndCourseId(application.getStudentId(),
                          application.getCourseId());
         if (application1.isPresent()) {
             throw new Exception("There already exists an application with that student and courseID");
