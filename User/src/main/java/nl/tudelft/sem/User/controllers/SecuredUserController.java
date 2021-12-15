@@ -35,9 +35,13 @@ public class SecuredUserController {
         return userRepository.findAll();
     }
 
-
     boolean logout(User user) {
         authentication.logout(user);
+        return true;
+    }
+
+    public boolean createUser(User user) {
+        userRepository.save(user);
         return true;
     }
 
@@ -64,10 +68,5 @@ public class SecuredUserController {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public boolean createUser(User user) {
-        userRepository.save(user);
-        return true;
     }
 }
