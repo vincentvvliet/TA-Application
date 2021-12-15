@@ -1,13 +1,17 @@
 package nl.tudelft.sem.TAs.controllers;
 
 
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.repositories.TARepository;
+import nl.tudelft.sem.TAs.services.TAService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -18,12 +22,27 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/TA/")
+@Controller
 public class TAController {
+
     @Autowired
     private ContractRepository contractRepository;
 
     @Autowired
+    private TAService taService;
+
+    @Autowired
     private TARepository taRepository;
+
+    /**
+     * GET endpoint retrieves TAs average rating by studentId.
+     * @param studentId (UUID) of the student
+     * @return rating
+     */
+    @GetMapping("/getRating/{studentid}")
+    public Mono<RatingDTO> getAverageRating(@PathVariable(value = "studentid") UUID studentId) {
+        return taService.getAverageRating(studentId);
+    }
 
     /**
      * GET endpoint retrieves TA by id
@@ -68,8 +87,8 @@ public class TAController {
     @RequestMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
     public  Mono<Boolean> addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
-         TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new NoSuchElementException());
+         TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
+         Contract contract = contractRepository.findById(contractId).orElseThrow(NoSuchElementException::new);
          ta.setContract(contract);
          taRepository.save(ta);
         return Mono.just(true);

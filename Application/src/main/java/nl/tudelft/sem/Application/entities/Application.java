@@ -1,12 +1,13 @@
 package nl.tudelft.sem.Application.entities;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import lombok.Data;
+
 
 
 
@@ -31,7 +32,6 @@ public class Application {
     @JsonProperty(value = "accepted")
     private boolean accepted;
 
-
     public Application() {
         this.id = UUID.randomUUID();
     }
@@ -45,22 +45,6 @@ public class Application {
         this.id = UUID.randomUUID();
         this.courseId = courseId;
         this.studentId = studentId;
-    }
-
-    public UUID getStudentId() {
-        return studentId;
-    }
-
-    public UUID getCourseId() {
-        return courseId;
-    }
-
-    public boolean isAccepted() {
-        return accepted;
-    }
-
-    public void setAccepted(boolean accepted) {
-        this.accepted = accepted;
     }
 
 }
