@@ -13,6 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,15 +29,16 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SpringBootTest
 public class ApplicationControllerTests {
 
-    @InjectMocks
+    @Autowired
     ApplicationController applicationController;
 
-    @Mock
+    @MockBean
     ApplicationService applicationService;
 
-    @Mock
+    @MockBean
     ApplicationRepository applicationRepository;
 
     UUID student1Id = UUID.randomUUID();

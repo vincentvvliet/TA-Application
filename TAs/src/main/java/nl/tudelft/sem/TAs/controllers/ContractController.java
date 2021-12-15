@@ -4,6 +4,7 @@ import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -13,6 +14,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/contract/")
+@Controller
 public class ContractController {
     @Autowired
     private ContractRepository contractRepository;
@@ -58,7 +60,7 @@ public class ContractController {
     @PatchMapping("addHours/{id}/{maxHours}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setMaxHours(hours);
         contractRepository.save(contract);
     }
@@ -71,7 +73,7 @@ public class ContractController {
     @PatchMapping("addTask/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addTaskById(@PathVariable (value = "id")  UUID id, @RequestBody String task) {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setTaskDescription(task);
         contractRepository.save(contract);
     }
@@ -84,7 +86,7 @@ public class ContractController {
     @PatchMapping("addDate/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addDateById(@PathVariable (value = "id")  UUID id, @RequestBody String date) throws ParseException {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         Date d = new SimpleDateFormat("dd/MM/yyyy").parse(date);
         contract.setDate(d);
         contractRepository.save(contract);
@@ -98,7 +100,7 @@ public class ContractController {
     @PatchMapping("addSalary/{id}/{salary}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addSalaryById(@PathVariable (value = "id")  UUID id, @PathVariable(value = "salary") double salary) {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setSalaryPerHour(salary);
         contractRepository.save(contract);
     }
