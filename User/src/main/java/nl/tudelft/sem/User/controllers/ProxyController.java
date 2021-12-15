@@ -2,6 +2,7 @@ package nl.tudelft.sem.User.controllers;
 
 import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/user/")
 public class ProxyController implements Controller {
 
+    @Autowired
     private SecuredUserController controller;
 
     /**
@@ -70,10 +72,8 @@ public class ProxyController implements Controller {
      * @param role     of the user
      * @return true if the user is properly created and saved in the database
      */
-    @PostMapping("/createTA/{studentid}/{courseid}")
-    public Mono<Boolean> createUser(@PathVariable(value = "username") String username,
-                                    @PathVariable(value = "password") String password,
-                                    @PathVariable(value = "role") String role) {
+    @PostMapping("/createUser")
+    public Mono<Boolean> createUser(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
         User user = new User(username, password, Role.valueOf(role));
         check();
         return Mono.just(controller.createUser(user));
@@ -89,9 +89,9 @@ public class ProxyController implements Controller {
      */
     @RequestMapping("/acceptApplication/{userId}/{applicationId}")
     @Override
-    public boolean acceptApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "applicationId") UUID applicationId) throws Exception {
+    public Mono<Boolean> acceptApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "applicationId") UUID applicationId) throws Exception {
         check();
-        return controller.acceptApplication(userId, applicationId);
+        return Mono.just(controller.acceptApplication(userId, applicationId));
     }
 
     /**
@@ -103,9 +103,9 @@ public class ProxyController implements Controller {
      */
     @PostMapping("/createApplication/{userId}/{courseId}")
     @Override
-    public boolean createApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "courseId") UUID courseId) throws Exception {
+    public Mono<Boolean> createApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "courseId") UUID courseId) throws Exception {
         check();
-        return controller.createApplication(userId, courseId);
+        return Mono.just(controller.createApplication(userId, courseId));
     }
 
     /**
@@ -125,6 +125,7 @@ public class ProxyController implements Controller {
      * Check whether a controller already exists, if not then create new controller.
      */
     private void check() {
+        //TODO change to checking whether token is valid
         if (controller == null) {
             controller = new SecuredUserController();
         }

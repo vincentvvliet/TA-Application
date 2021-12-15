@@ -7,13 +7,14 @@ import nl.tudelft.sem.User.repositories.UserRepository;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
-
+@RestController
 public class SecuredUserController {
 
     @NonNull
@@ -30,7 +31,7 @@ public class SecuredUserController {
     }
 
     public List<User> getUsers() {
-        System.out.println(userRepository);
+        System.out.println(userRepository.findAll());
         return userRepository.findAll();
     }
 
