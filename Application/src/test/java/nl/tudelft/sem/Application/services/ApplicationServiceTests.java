@@ -90,6 +90,7 @@ public class ApplicationServiceTests {
         when(applicationRepository.findByStudentIdAndCourseId(studentId,courseId)).thenReturn(Optional.ofNullable(null));
 
         Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
+        verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
 
     }
 
@@ -99,7 +100,7 @@ public class ApplicationServiceTests {
         when(isCourseOpen.handle(application)).thenThrow(new Exception());
 
         Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
-
+        verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
 
 }

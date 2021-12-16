@@ -91,14 +91,12 @@ public class ApplicationControllerTests {
     public void removeApplicationSuccessfullyTest() {
         when(applicationService.removeApplication(studentId,courseId)).thenReturn(true);
         Assertions.assertTrue(applicationController.removeApplication(studentId,courseId).block());
-        verify(applicationRepository).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
 
     @Test
     public void removeApplicationErrorTest() {
         when(applicationService.removeApplication(studentId,courseId)).thenReturn(false);
         Assertions.assertFalse(applicationController.removeApplication(studentId,courseId).block());
-        verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
 
     @Test
