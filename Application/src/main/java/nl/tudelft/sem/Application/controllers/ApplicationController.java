@@ -70,7 +70,7 @@ public class ApplicationController {
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id)
     {
         try {
-            return applicationService.getRatingForTA(student_id);
+            return applicationService.getRatingForTA(student_id, 47110);
         } catch (EmptyResourceException e) {
             return null;
         }

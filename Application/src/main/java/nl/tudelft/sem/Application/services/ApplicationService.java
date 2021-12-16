@@ -155,12 +155,13 @@ public class ApplicationService {
      * Makes request to TA service for a average rating.
      *
      * @param studentId studentId of TA we want the rating for.
+     * @param port of the server on which request is performed (on TA microservice)
      *
      * @return rating of TA for a certain course.
      * @throws EmptyResourceException if the TA service returns an empty result.
      */
-    public RatingDTO getRatingForTA(UUID studentId) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47110");
+    public RatingDTO getRatingForTA(UUID studentId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<RatingDTO> rating = webClient.get()
             .uri("/TA/getRating/" + studentId)
             .retrieve()
@@ -186,8 +187,8 @@ public class ApplicationService {
             try {
                 ret.add(new ApplyingStudentDTO(
                     a.getStudentId(),
-                    getGradeByStudentAndCourse(a.getStudentId(), a.getCourseId()),
-                    getRatingForTA(a.getStudentId()).getRating()
+                    getGradeByStudentAndCourse(a.getStudentId(), a.getCourseId(), 47112),
+                    getRatingForTA(a.getStudentId(), 47110).getRating()
                 ));
             } catch (EmptyResourceException e) {
                 System.out.println("failed to get application details: " + e.getMessage());
@@ -201,11 +202,13 @@ public class ApplicationService {
      *
      * @param studentId id of the student.
      * @param courseId id of the course.
-     * @return Grade of the studet.
+     * @param port of the server on which the request is performed (on the Course microservice)
+     *
+     * @return grade of the student
      */
-    public double getGradeByStudentAndCourse(UUID studentId, UUID courseId)
+    public double getGradeByStudentAndCourse(UUID studentId, UUID courseId, int port)
         throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47112");
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Double> rating = webClient.get()
             .uri("/grade/getGrade/" + studentId + "/" + courseId)
             .retrieve()
