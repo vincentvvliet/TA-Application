@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
-import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
@@ -194,5 +191,18 @@ public class ApplicationService {
             throw new EmptyResourceException("No grade for student found");
         }
         return result.get();
+    }
+
+    public Mono<Boolean> removeApplication(UUID studentId, UUID courseId) throws Exception {
+        Optional<Application> application = applicationRepository
+                .findByStudentIdAndCourseId(studentId, courseId);
+        if (application.isEmpty()) {
+            return Mono.just(false);
+        }
+        if(!isCourseOpen.handle(new Application(courseId,studentId))){
+            return Mono.just(false);
+        }
+        applicationRepository.deleteApplicationByStudentIdAndCourseId(studentId,courseId);
+        return Mono.just(true);
     }
 }

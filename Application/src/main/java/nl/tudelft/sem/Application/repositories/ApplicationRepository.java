@@ -13,4 +13,5 @@ import java.util.UUID;
 public interface ApplicationRepository extends JpaRepository<Application, UUID> {
     Optional<Application> findByStudentIdAndCourseId(UUID student_id, UUID course_id);
     List<Application> findApplicationsByCourseId(UUID courseId);
+    void deleteApplicationByStudentIdAndCourseId(UUID studentId, UUID courseId);
 }
