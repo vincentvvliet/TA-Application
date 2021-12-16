@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
-    List<Course> findByStartDateBetween(LocalDate currentDate, LocalDate selectionPeriod);
+    List<Course> findByStartDateIsAfter(LocalDate currentDate);
 
 }
