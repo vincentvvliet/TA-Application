@@ -5,10 +5,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface Controller {
-    public Mono<Mono> getUserById(UUID id);
+    public Mono<Optional<User>> getUserById(UUID id);
 
     public Flux<List<User>> getUsers();
 

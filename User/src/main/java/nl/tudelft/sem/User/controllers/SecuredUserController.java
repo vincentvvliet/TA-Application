@@ -27,12 +27,9 @@ public class SecuredUserController {
     @Autowired
     private UserService userService;
 
-    public Mono getUserById(UUID id) {
+    public Mono<Optional<User>> getUserById(UUID id) {
         Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
-            return Mono.empty();
-        }
-        return Mono.just(user.get());
+        return Mono.just(user);
     }
 
     public List<User> getUsers() {

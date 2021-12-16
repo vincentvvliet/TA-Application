@@ -43,7 +43,7 @@ public class SecuredUserControllerTest {
 
     @Test
     public void findByIdTest() {
-        Assertions.assertEquals(controller.getUserById(id), Optional.ofNullable(user));
+        Assertions.assertEquals(controller.getUserById(id).block(), Optional.ofNullable(user));
     }
 
     @Test

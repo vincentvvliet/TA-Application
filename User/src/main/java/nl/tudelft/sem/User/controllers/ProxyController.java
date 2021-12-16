@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import reactor.core.publisher.Flux;
@@ -31,7 +32,7 @@ public class ProxyController implements Controller {
      */
     @GetMapping("/getUser/{id}")
     @Override
-    public Mono getUserById(@PathVariable(value = "id") UUID id) {
+    public Mono<Optional<User>> getUserById(@PathVariable(value = "id") UUID id) {
         check();
         return controller.getUserById(id);
     }
