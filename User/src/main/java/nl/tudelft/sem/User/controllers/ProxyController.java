@@ -3,13 +3,14 @@ package nl.tudelft.sem.User.controllers;
 import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,9 +45,9 @@ public class ProxyController implements Controller {
      */
     @GetMapping("/getUsers")
     @Override
-    public Flux<List<User>> getUsers() {
+    public Flux<User> getUsers() {
         check();
-        return Flux.just(controller.getUsers());
+        return Flux.fromIterable(controller.getUsers());
     }
 
     /**
@@ -121,9 +122,12 @@ public class ProxyController implements Controller {
      * Check whether a controller already exists, if not then create new controller.
      */
     private void check() {
-        //TODO change to checking whether token is valid
-        if (controller == null) {
-            controller = new SecuredUserController();
+        //TODO change to checking whether actual token is valid
+        String token = "token";
+        if (token.equals("token")) {
+//            controller = new SecuredUserController();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Token: " + token + " is not correct.");
         }
     }
 }
