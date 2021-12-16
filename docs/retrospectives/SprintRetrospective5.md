@@ -17,3 +17,7 @@ Tasks Gijs:
 	<br />
 	Estimated time: 2-3 hours.<br />
 	Actual time spent: -
+
+Tasks Ravi:<br />
+-	`issue 10`: Students should have passed the course before being able to apply for a position as a TA.<br /> 
+The creation of the application was done using a chain of responsibility. And every class in the chain was responsible for checking certain requirements that often needed data from other microservices. This communication between microservices caused some problems.  We use a WebClient when communicating with other microservices but figuring those out took several iterations. Figuring out if they worked was quite hard because when trying to test it we needed to have at least two microservices up and running which at the time we couldn’t do for some reason. We later figured out that the server we used had a limited number of connections and that when multiple people are connecting to the servers those spots were being used up. To solve this we simply made it so only one person was testing their web clients at the same time.
