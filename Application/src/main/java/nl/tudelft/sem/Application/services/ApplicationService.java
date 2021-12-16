@@ -193,16 +193,24 @@ public class ApplicationService {
         return result.get();
     }
 
-    public Mono<Boolean> removeApplication(UUID studentId, UUID courseId) throws Exception {
+    /** Removes an application from the repository if it is actually there and
+     *
+     * @param studentId The ID of the student linked to the application.
+     * @param courseId The ID of the course linked to the application.
+     * @return A boolean of value true if it was a success and false if not
+     */
+    public Boolean removeApplication(UUID studentId, UUID courseId) {
         Optional<Application> application = applicationRepository
                 .findByStudentIdAndCourseId(studentId, courseId);
         if (application.isEmpty()) {
-            return Mono.just(false);
+            return false;
         }
-        if(!isCourseOpen.handle(new Application(courseId,studentId))){
-            return Mono.just(false);
+        try {
+            isCourseOpen.handle(application.get()); // this always throws an exception when false
+        } catch (Exception exception) {
+            return false;
         }
         applicationRepository.deleteApplicationByStudentIdAndCourseId(studentId,courseId);
-        return Mono.just(true);
+        return true;
     }
 }

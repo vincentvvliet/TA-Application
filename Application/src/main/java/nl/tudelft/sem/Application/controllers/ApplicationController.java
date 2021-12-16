@@ -89,7 +89,7 @@ public class ApplicationController {
     public Mono<Boolean> removeApplication(@PathVariable(value = "student_id") UUID studentId,
             @PathVariable(value = "course_id") UUID courseId) {
         try {
-            return applicationService.removeApplication(studentId, courseId);
+            return Mono.just(applicationService.removeApplication(studentId, courseId));
         } catch (Exception exception) {
             exception.printStackTrace();
             return Mono.just(false);
