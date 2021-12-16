@@ -101,4 +101,24 @@ public class UserService {
                 .bodyToFlux(ApplyingStudentDTO.class);
         return applications.collectList().block();
     }
+
+    /** Requests the Application microservice to remove the application with the corresponding IDs.
+     *
+     * @param studentId the ID of the student that the application is linked to.
+     * @param courseId the ID of the course that the application is linked to.
+     * @return a boolean of whether or not the operation was successful.
+     * @throws Exception is thrown when no boolean value was received.
+     */
+    public Boolean removeApplication(UUID studentId,UUID courseId, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<Boolean> success = webClient.delete()
+                .uri("/application/removeApplication/" + studentId + "/" + courseId)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        Optional<Boolean> result = success.blockOptional();
+        if (result.isEmpty()) {
+            throw new Exception("No boolean received");
+        }
+        return result.get();
+    }
 }
