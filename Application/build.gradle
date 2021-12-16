@@ -50,6 +50,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation project(':shared')
 	annotationProcessor 'org.projectlombok:lombok:1.18.8'
+	compile 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 test {
