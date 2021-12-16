@@ -10,7 +10,6 @@ import javax.persistence.Table;
 
 
 
-
 @Entity
 @Data
 @Table(name = "application", schema = "applicationschema")

@@ -115,11 +115,11 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId())) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId());
+            .createTA(application.getStudentId(), application.getCourseId(), 47110);
         if (! successfullyCreated) {
             return Mono.just(false);
         }

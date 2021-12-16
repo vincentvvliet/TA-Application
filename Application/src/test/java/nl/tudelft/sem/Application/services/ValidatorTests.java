@@ -62,7 +62,7 @@ public class ValidatorTests {
     public void isCourseOpenSuccessfulTest() throws Exception {
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(1);
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
 
 
         Assertions.assertEquals(isCourseOpen.handle(application) , true);
@@ -71,7 +71,7 @@ public class ValidatorTests {
     @Test
     public void isCourseOpenNoCourseTest() throws Exception {
         LocalDate startDate = LocalDate.now();
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(null);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(null);
         Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "Could not retrieve startDate that was linked to the given courseId";
         String actualMessage = exception.getMessage();
@@ -96,7 +96,7 @@ public class ValidatorTests {
     public void isCourseOpenTooEarlyTest() throws Exception {
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(4);
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
         Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "The course is not yet open to applications";
         String actualMessage = exception.getMessage();
@@ -108,7 +108,7 @@ public class ValidatorTests {
     @Test
     public void isCourseOpenOnDeadlineTest1() throws Exception {
         LocalDate startDate = LocalDate.now();
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
 
         Assertions.assertEquals(isCourseOpen.handle(application) , true);
 
@@ -118,7 +118,7 @@ public class ValidatorTests {
     public void isCourseOpenOnDeadlineTest2() throws Exception {
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(3);
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
 
         Assertions.assertEquals(isCourseOpen.handle(application) , true);
 
@@ -129,7 +129,7 @@ public class ValidatorTests {
         LocalDate startDate = LocalDate.now();
         startDate = startDate.minusDays(1);
 
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
         Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
 
         String expectedMessage = "The period for applications has passed";
@@ -140,14 +140,14 @@ public class ValidatorTests {
 
     @Test
     public void IsGradeSufficientSuccessfulTest() throws Exception {
-        when(applicationService.getGrade(studentId, courseId)).thenReturn(9D);
+        when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(9D);
 
         Assertions.assertEquals(isGradeSufficient.handle(application) , true);
     }
 
     @Test
     public void IsGradeSufficientGradeTooLowTest() throws Exception {
-        when(applicationService.getGrade(studentId, courseId)).thenReturn(5.9);
+        when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(5.9);
 
         Exception exception = Assertions.assertThrows(Exception.class, () -> isGradeSufficient.handle(application));
 
@@ -159,7 +159,7 @@ public class ValidatorTests {
 
     @Test
     public void IsGradeSufficientNoGradeFoundTest() throws Exception {
-        when(applicationService.getGrade(studentId, courseId)).thenReturn(null);
+        when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(null);
 
         Exception exception = Assertions.assertThrows(Exception.class, () -> isGradeSufficient.handle(application));
 
@@ -195,8 +195,8 @@ public class ValidatorTests {
         isCourseOpen.setLast(isUniqueApplication);
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(1);
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
-        when(applicationService.getGrade(studentId, courseId)).thenReturn(9D);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+        when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(9D);
         when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 
         Assertions.assertEquals(isUniqueApplication.handle(application) , true);
@@ -209,8 +209,8 @@ public class ValidatorTests {
         isCourseOpen.setLast(isUniqueApplication);
         LocalDate startDate = LocalDate.now();
         startDate = startDate.plusWeeks(1);
-        when(applicationService.getCourseStartDate(application.getCourseId())).thenReturn(startDate);
-        when(applicationService.getGrade(studentId, courseId)).thenReturn(5.9);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+        when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(5.9);
         when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 
         Exception exception = Assertions.assertThrows(Exception.class, () -> validator.handle(application));
