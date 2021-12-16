@@ -14,6 +14,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class LeaveRatingDTO {
     private UUID id;
-    private UUID courseId;
     private Optional<Integer> rating;
 }
