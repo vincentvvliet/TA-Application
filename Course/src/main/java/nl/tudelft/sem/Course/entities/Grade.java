@@ -15,13 +15,11 @@ public class Grade {
     @JsonProperty(value = "id")
     private final UUID id;
 
-    @ManyToOne
-    @JsonProperty(value = "courseid")
-    @JoinTable( name = "course", joinColumns = @JoinColumn ( name = "id"))
+    @ManyToOne(targetEntity = Course.class, cascade = CascadeType.ALL)
     private Course course;
 
     @Column
-    @JsonProperty(value = "studentid")
+    @JsonProperty(value = "student_id")
     private UUID studentId;
 
     @Column
@@ -34,4 +32,5 @@ public class Grade {
         this.course = course;
         this.grade = grade;
     }
+
 }

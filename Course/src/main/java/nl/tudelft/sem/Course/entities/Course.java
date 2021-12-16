@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -18,21 +18,30 @@ public class Course {
 
     @Column(name = "course_code")
     @JsonProperty(value = "course_code")
-    private String course_code;
+    private String courseCode;
 
     @Column(name = "nr_participants")
     @JsonProperty(value = "nr_participants")
-    private int nr_participants;
+    private int nrParticipants;
 
     @Column(name = "start_date")
     @JsonProperty(value = "start_date")
-    private Date start_date;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
     @JsonProperty(value = "end_date")
-    private Date end_date;
+    private LocalDate endDate;
 
     public Course() {
         this.id = UUID.randomUUID();
     }
+
+    public Course(String course_code, int nr_participants, LocalDate startDate, LocalDate end_date) {
+        this.id = UUID.randomUUID();
+        this.courseCode = course_code;
+        this.nrParticipants = nr_participants;
+        this.startDate = startDate;
+        this.endDate= end_date;
+    }
+
 }

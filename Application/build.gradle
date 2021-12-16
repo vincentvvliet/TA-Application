@@ -47,7 +47,10 @@ dependencies {
 	testImplementation('org.assertj:assertj-core:3.14.0')
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok:1.18.8'
+	compile 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation project(':shared')
 	annotationProcessor 'org.projectlombok:lombok:1.18.8'
+	compile 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 test {
@@ -89,6 +92,8 @@ pmd {
 	incrementalAnalysis = true
 	ignoreFailures = true
 }
+
+
 
 apply plugin: 'info.solidsoft.pitest'
 pitest {

@@ -4,7 +4,9 @@ import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,6 +14,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/contract/")
+@Controller
 public class ContractController {
     @Autowired
     private ContractRepository contractRepository;
@@ -22,8 +25,9 @@ public class ContractController {
      * @return optional of contract
      */
     @GetMapping("/getContract/{id}")
-    public Optional<Contract> getContractById(@PathVariable (value = "id") UUID id) {
-        return contractRepository.findById(id);
+    public Mono<Optional<Contract>> getContractById(@PathVariable (value = "id") UUID id) {
+        Optional<Contract> contract = contractRepository.findById(id);
+        return Mono.just(contract);
     }
 
     /**
@@ -31,8 +35,8 @@ public class ContractController {
      * @return list of contracts
      */
     @GetMapping("/getContracts")
-    public List<Contract> getContracts() {
-        return contractRepository.findAll();
+    public Mono<List<Contract>> getContracts() {
+        return Mono.just(contractRepository.findAll());
     }
 
     /**
@@ -42,10 +46,10 @@ public class ContractController {
      * @return true after the contract is created and saved in the database
      */
     @PostMapping("/createContract/{studentid}/{courseid}")
-    public boolean createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
+    public Mono<Boolean> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
         Contract c = new Contract(studentId,courseId);
         contractRepository.save(c);
-        return true;
+        return Mono.just(true);
     }
 
     /**
@@ -56,7 +60,7 @@ public class ContractController {
     @PatchMapping("addHours/{id}/{maxHours}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setMaxHours(hours);
         contractRepository.save(contract);
     }
@@ -69,7 +73,7 @@ public class ContractController {
     @PatchMapping("addTask/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addTaskById(@PathVariable (value = "id")  UUID id, @RequestBody String task) {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setTaskDescription(task);
         contractRepository.save(contract);
     }
@@ -82,7 +86,7 @@ public class ContractController {
     @PatchMapping("addDate/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addDateById(@PathVariable (value = "id")  UUID id, @RequestBody String date) throws ParseException {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         Date d = new SimpleDateFormat("dd/MM/yyyy").parse(date);
         contract.setDate(d);
         contractRepository.save(contract);
@@ -96,7 +100,7 @@ public class ContractController {
     @PatchMapping("addSalary/{id}/{salary}")
     @ResponseStatus(value = HttpStatus.OK)
     public void addSalaryById(@PathVariable (value = "id")  UUID id, @PathVariable(value = "salary") double salary) {
-        Contract contract = contractRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
+        Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setSalaryPerHour(salary);
         contractRepository.save(contract);
     }
@@ -107,12 +111,12 @@ public class ContractController {
      * @return boolean representing if the deletion was successful or not
      */
     @DeleteMapping("deleteContract/{id}")
-    public boolean deleteContract(@PathVariable (value = "id") UUID id) {
+    public Mono<Boolean> deleteContract(@PathVariable (value = "id") UUID id) {
         try {
             contractRepository.deleteById(id);
-            return true;
+            return Mono.just(true);
         } catch (Exception e) {
-            return false;
+            return Mono.just(false);
         }
     }
 }

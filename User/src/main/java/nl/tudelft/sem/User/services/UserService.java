@@ -9,6 +9,8 @@ import java.util.UUID;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import nl.tudelft.sem.DTO.ApplicationDTO;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -57,14 +59,13 @@ public class UserService {
 
     /**
      * Requests all applications from the Applications microservice.
-     *
      *  @return List of all Applications.
      */
 
     public List<ApplicationDTO> getAllApplications() {
-        WebClient webClient = WebClient.create("localhost:47113");
+        WebClient webClient = WebClient.create("http://localhost:47113");
         Flux<ApplicationDTO> applications = webClient.get()
-                .uri("application/getApplications")
+                .uri("application/retrieveAll")
                 .retrieve()
                 .bodyToFlux(ApplicationDTO.class);
         return applications.collectList().block();
@@ -79,11 +80,25 @@ public class UserService {
      * @return An application.
      */
     public ApplicationDTO getApplication(UUID studentId, UUID courseId) {
-        WebClient webClient = WebClient.create("localhost:47113");
+        WebClient webClient = WebClient.create("http://localhost:47113");
         Mono<ApplicationDTO> application = webClient.get()
                 .uri("application/getApplication/" + studentId + "/" + courseId)
                 .retrieve()
                 .bodyToMono(ApplicationDTO.class);
         return application.block();
+    }
+
+    /**
+     * Gets all applications for a course, with details on applying students.
+     * @param courseId id of course.
+     * @return list of applying students.
+     */
+    public List<ApplyingStudentDTO> getApplicationsOverview(UUID courseId) {
+        WebClient webClient = WebClient.create("http://localhost:47113");
+        Flux<ApplyingStudentDTO> applications = webClient.get()
+                .uri("application/getApplicationOverview/" + courseId)
+                .retrieve()
+                .bodyToFlux(ApplyingStudentDTO.class);
+        return applications.collectList().block();
     }
 }
