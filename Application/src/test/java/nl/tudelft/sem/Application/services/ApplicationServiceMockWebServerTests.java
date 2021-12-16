@@ -42,7 +42,7 @@ public class ApplicationServiceMockWebServerTests {
     }
 
     @Test
-    void createTA_successful() throws Exception {
+    void createTA_successfulCreation() {
         Boolean expected  = true;
         UUID studentId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
@@ -52,5 +52,31 @@ public class ApplicationServiceMockWebServerTests {
 
         boolean booleanAccepted = applicationService.createTA(studentId, courseId, mockBackEnd.getPort());
         Assertions.assertEquals(booleanAccepted, expected);
+    }
+
+    @Test
+    void createTA_failedCreation() {
+        Boolean expected  = false;
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(expected.toString()).addHeader("Content-Type", "application/json"));
+
+        boolean booleanAccepted = applicationService.createTA(studentId, courseId, mockBackEnd.getPort());
+        Assertions.assertEquals(booleanAccepted, expected);
+    }
+
+    @Test
+    void createTA_emptyResponse() {
+        Boolean expected = null;
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(expected + "").addHeader("Content-Type", "application/json"));
+
+        boolean booleanAccepted = applicationService.createTA(studentId, courseId, mockBackEnd.getPort());
+        Assertions.assertFalse(booleanAccepted);
     }
 }
