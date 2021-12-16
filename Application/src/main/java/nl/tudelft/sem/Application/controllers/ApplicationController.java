@@ -88,13 +88,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> removeApplication(@PathVariable(value = "student_id") UUID studentId,
             @PathVariable(value = "course_id") UUID courseId) {
-        try {
-            return Mono.just(applicationService.removeApplication(studentId, courseId));
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return Mono.just(false);
-        }
-
+        return Mono.just(applicationService.removeApplication(studentId, courseId));
     }
 
     /** Post endpoint creates new application using studentId and courseId
