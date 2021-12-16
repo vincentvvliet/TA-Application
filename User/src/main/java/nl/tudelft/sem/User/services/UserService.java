@@ -101,4 +101,18 @@ public class UserService {
                 .bodyToFlux(ApplyingStudentDTO.class);
         return applications.collectList().block();
     }
+
+    public boolean addRatingByTAId(UUID ta_id, int rating) throws Exception {
+        // Make request to TA microservice (port: 47110)
+        WebClient webClient = WebClient.create("localhost:47110");
+        Mono<Boolean> application = webClient.patch()
+            .uri("TA/addRating/" + ta_id + "/" + rating)
+            .retrieve()
+            .bodyToMono(Boolean.class);
+        Optional<Boolean> response = application.blockOptional();
+        if(response.isEmpty()) {
+            throw new Exception("No response retrieved!");
+        }
+        return response.get();
+    }
 }
