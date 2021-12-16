@@ -39,6 +39,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-test'
+	implementation 'org.apache.commons:commons-lang3:3.6'
+
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
@@ -48,9 +52,9 @@ dependencies {
 
 	runtimeOnly 'org.postgresql:postgresql'
 	compileOnly 'org.projectlombok:lombok:1.18.8'
-	compile 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation project(':shared')
 	annotationProcessor 'org.projectlombok:lombok:1.18.8'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation project(':shared')
 }
 
 test {
