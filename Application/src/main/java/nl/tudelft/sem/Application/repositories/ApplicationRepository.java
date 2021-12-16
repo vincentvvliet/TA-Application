@@ -15,6 +15,6 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     Optional<Application> findByStudentIdAndCourseId(UUID student_id, UUID course_id);
     List<Application> findApplicationsByCourseId(UUID courseId);
 
-    @Query("SELECT COUNT(Application.id) FROM Application a WHERE a.courseId = ?1 AND a.accepted = true")
+    @Query(value = "SELECT COUNT(Application.id) FROM Application a WHERE a.courseId = ?1 AND a.accepted = true", nativeQuery = true)
     int numberSelectedTAsForCourse(UUID course_id);
 }
