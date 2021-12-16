@@ -6,6 +6,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -13,6 +15,7 @@ import nl.tudelft.sem.DTO.ApplicationDTO;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -114,5 +117,23 @@ public class UserService {
             throw new Exception("No response retrieved!");
         }
         return response.get();
+    }
+
+    public boolean addRatingByTAId(UUID id, UUID courseId, int rating, UUID userId) throws Exception {
+        // Create DTO to be body of request
+        LeaveRatingDTO dto = new LeaveRatingDTO(id, courseId, Optional.of(rating));
+        // Make request to TA microservice (port: 47110)
+        WebClient webClient = WebClient.create("localhost:47110");
+        Mono<Boolean> result = webClient.post()
+            .uri("TA/addRating/" + userId)
+            .body(Mono.just(dto), LeaveRatingDTO.class)
+            .retrieve()
+            .bodyToMono(Boolean.class);
+        Optional<Boolean> succes = result.blockOptional();
+        if(succes.isPresent()) {
+            return succes.get();
+        } else {
+            throw new Exception("No response from microservice!");
+        }
     }
 }
