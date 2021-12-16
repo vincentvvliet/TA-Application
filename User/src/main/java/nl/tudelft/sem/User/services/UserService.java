@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -18,13 +19,13 @@ public class UserService {
      *  @return List of all Applications.
      */
 
-    public List<ApplicationDTO> getAllApplications() {
+    public List<ApplicationDTO> getAllApplications(UUID courseId)  {
         WebClient webClient = WebClient.create("http://localhost:47113");
         Flux<ApplicationDTO> applications = webClient.get()
-                .uri("application/retrieveAll")
+                .uri("application/retrieveAll/" + courseId)
                 .retrieve()
                 .bodyToFlux(ApplicationDTO.class);
-        return applications.collectList().block();
+        return applications.toStream().collect(Collectors.toList());
     }
 
     /**
@@ -55,6 +56,6 @@ public class UserService {
                 .uri("application/getApplicationOverview/" + courseId)
                 .retrieve()
                 .bodyToFlux(ApplyingStudentDTO.class);
-        return applications.collectList().block();
+        return applications.toStream().collect(Collectors.toList());
     }
 }

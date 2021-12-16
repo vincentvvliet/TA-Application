@@ -6,6 +6,7 @@ import nl.tudelft.sem.Course.repositories.GradeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -58,8 +59,8 @@ public class CourseController {
      * @return list of courses
      */
     @GetMapping("/getCourses")
-    public Mono<List<Course>> getCourses() {
-        return Mono.just(courseRepository.findAll());
+    public Flux<Course> getCourses() {
+        return Flux.fromIterable(courseRepository.findAll());
     }
 
     /**
@@ -67,8 +68,8 @@ public class CourseController {
      * @return list of courses
      */
     @GetMapping("/getOpenCourses")
-    public Mono<List<Course>> getOpenCourses() {
-        return Mono.just(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
+    public Flux<Course> getOpenCourses() {
+        return Flux.fromIterable(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
     }
 
     /**
