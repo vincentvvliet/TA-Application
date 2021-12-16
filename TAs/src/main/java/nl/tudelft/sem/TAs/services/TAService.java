@@ -1,5 +1,6 @@
 package nl.tudelft.sem.TAs.services;
 
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.TARepository;
@@ -29,5 +30,19 @@ public class TAService {
             return Mono.just(dto);
         }
         return Mono.empty();
+    }
+
+    public Mono<Boolean> addRating(LeaveRatingDTO ratingDTO) {
+        UUID taId = ratingDTO.getId();
+        int rating = ratingDTO.getRating().get();
+        Optional<TA> rated = taRepository.findById(taId);
+        if (rated.isPresent())
+        {
+            TA ta = rated.get();
+            ta.setRating(rating);
+            taRepository.save(ta);
+            return Mono.just(true);
+        }
+        return Mono.just(false);
     }
 }

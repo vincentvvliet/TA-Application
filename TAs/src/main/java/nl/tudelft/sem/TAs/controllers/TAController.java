@@ -2,6 +2,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -95,6 +97,7 @@ public class TAController {
          taRepository.save(ta);
         return Mono.just(true);
     }
+
     /**
      * DELETE endpoint deletes a TA by id
      * @param id of the TA
@@ -110,5 +113,18 @@ public class TAController {
         }
     }
 
-
+    /**
+     * POST endpoint for adding rating to a certain TA
+     * Careful: Overwrites old rating.
+     *
+     * @param ratingDTO dto contiaing relevant information
+     * @return boolean indicating succes of operation
+     */
+    @PostMapping("addRating")
+    Mono<Boolean> addRating(@RequestBody LeaveRatingDTO ratingDTO) {
+        if (ratingDTO.getRating().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request is incomplete");
+        }
+        return taService.addRating(ratingDTO);
+    }
 }
