@@ -54,7 +54,7 @@ public class ApplicationService {
 
         WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Integer> enrolledStudents = webClient.get()
-                .uri("/User/getEnrolledStudents/" + courseId)
+                .uri("/course/getCourseNrParticipants/" + courseId)
                 .retrieve()
                 .bodyToMono(Integer.class);
 

@@ -41,13 +41,27 @@ public class CourseController {
     /**
      * GET endpoint retrieves startDate of course by id
      * @param id (UUID) of the course
-     * @return optional of course
+     * @return optional of date
      */
     @GetMapping("/getCourseStartDate/{id}")
     public Mono<LocalDate> getCourseStartDateById(@PathVariable(value = "id") UUID id) {
         Optional<Course> course = courseRepository.findById(id);
         if(course.isPresent()){
            return Mono.just(course.get().getStartDate());
+        }
+        return Mono.empty();
+    }
+
+    /**
+     * GET endpoint retrieves number of participants to course by id
+     * @param id (UUID) of the course
+     * @return optional of integer (nr participants)
+     */
+    @GetMapping("/getCourseNrParticipants/{id}")
+    public Mono<Integer> getCourseNrParticipantsById(@PathVariable(value = "id") UUID id) {
+        Optional<Course> course = courseRepository.findById(id);
+        if(course.isPresent()){
+            return Mono.just(course.get().getNrParticipants());
         }
         return Mono.empty();
     }
