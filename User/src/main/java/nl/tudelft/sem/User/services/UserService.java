@@ -4,15 +4,20 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
 import nl.tudelft.sem.DTO.LeaveRatingDTO;
+import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.User.entities.Role;
+import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import nl.tudelft.sem.DTO.ApplicationDTO;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -105,35 +110,37 @@ public class UserService {
         return applications.collectList().block();
     }
 
-    public boolean addRatingByTAId(UUID ta_id, int rating) throws Exception {
-        // Make request to TA microservice (port: 47110)
-        WebClient webClient = WebClient.create("localhost:47110");
-        Mono<Boolean> application = webClient.patch()
-            .uri("TA/addRating/" + ta_id + "/" + rating)
-            .retrieve()
-            .bodyToMono(Boolean.class);
-        Optional<Boolean> response = application.blockOptional();
-        if(response.isEmpty()) {
-            throw new Exception("No response retrieved!");
-        }
-        return response.get();
-    }
-
-    public boolean addRatingByTAId(UUID id, UUID courseId, int rating, UUID userId) throws Exception {
+    /** Add rating to TA by making a request to the TA microservice
+     *
+     * @param id        ID of TA we want to rate
+     * @param rating    rating we would like to add.
+     * @return bool that is true iff operation was successful.
+     * @throws Exception if TA microservice does not respond.
+     */
+    public boolean addRatingByTAId(UUID id, int rating) throws Exception {
         // Create DTO to be body of request
-        LeaveRatingDTO dto = new LeaveRatingDTO(id, courseId, Optional.of(rating));
+        LeaveRatingDTO dto = new LeaveRatingDTO(id, Optional.of(rating));
         // Make request to TA microservice (port: 47110)
         WebClient webClient = WebClient.create("localhost:47110");
         Mono<Boolean> result = webClient.post()
-            .uri("TA/addRating/" + userId)
+            .uri("TA/addRating/")
             .body(Mono.just(dto), LeaveRatingDTO.class)
             .retrieve()
             .bodyToMono(Boolean.class);
-        Optional<Boolean> succes = result.blockOptional();
-        if(succes.isPresent()) {
-            return succes.get();
+        Optional<Boolean> success = result.blockOptional();
+        if(success.isPresent()) {
+            return success.get();
         } else {
             throw new Exception("No response from microservice!");
+        }
+    }
+
+    public boolean validateRole(UUID userId, Role role) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+            return user.getRole() == role;
+        } catch (Exception e) {
+            return false;
         }
     }
 }
