@@ -13,3 +13,8 @@ Tasks Ravi:<br />
 	Actual time spent: 7+ hours
 
 -	The creation of assignment 1 had some revisions after finish time noted in the sprint since some changes were being made to the architecture.
+Tasks Iarina:<br />
+- I finished my tasks and tried to add extra code if possible (we started the project a bit late) since my collegues were busy with exams.
+- I encountered problems in creating the entities at some point because the way I configurated the database needed me to add all columns manually. I had some problems with naming for some columns as well. I solved this problems by googling the errors and  adding some basic controllers to test in postman (for seeing if the databases connection is fine)
+- I also spent a lot of time in creating the microservices’ templates. I encountered problems with the build.gradle , since I never touched that beforehand. Google and stackoverflow helped me to add all modules dependancies I needed and configurate a microservice architecture.
+- For the next sprint I decided to push people to make work and give them more tasks to do together to learn.  The plans we had in mind, I found not what we needed so I also spend a lot of time to think on how microservices interact.
