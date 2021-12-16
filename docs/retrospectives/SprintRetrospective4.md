@@ -13,6 +13,8 @@ Tasks Ravi:<br />
 	Actual time spent: 7+ hours
 
 -	The creation of assignment 1 had some revisions after finish time noted in the sprint since some changes were being made to the architecture.
+
+
 Tasks Iarina:<br />
 - I finished my tasks and tried to add extra code if possible (we started the project a bit late) since my collegues were busy with exams.
 - I encountered problems in creating the entities at some point because the way I configurated the database needed me to add all columns manually. I had some problems with naming for some columns as well. I solved this problems by googling the errors and  adding some basic controllers to test in postman (for seeing if the databases connection is fine)
