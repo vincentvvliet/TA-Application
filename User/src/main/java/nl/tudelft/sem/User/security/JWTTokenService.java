@@ -5,12 +5,14 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Map;
+import org.joda.time.*;
+import java.util.*;
+import java.util.function.Supplier;
 
 import static io.jsonwebtoken.SignatureAlgorithm.HS256;
+import io.jsonwebtoken.CompressionCodec.*;
 import static java.util.Objects.requireNonNull;
-import static lombok.AccessLevel.PRIVATE;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @Service
 final class JWTTokenService {//implements Clock, TokenService {
@@ -47,7 +49,7 @@ final class JWTTokenService {//implements Clock, TokenService {
 //    }
 //
 //    private String newToken(final Map<String, String> attributes, final int expiresInSec) {
-//        final DateTime now = dates.now();
+//        final LocalDateTime now = dates.now();
 //        final Claims claims = Jwts
 //                .claims()
 //                .setIssuer(issuer)
@@ -94,13 +96,13 @@ final class JWTTokenService {//implements Clock, TokenService {
 //    private static Map<String, String> parseClaims(final Supplier<Claims> toClaims) {
 //        try {
 //            final Claims claims = toClaims.get();
-//            final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+//            final Map<String, String> builder = new HashMap<>();
 //            for (final Map.Entry<String, Object> e : claims.entrySet()) {
 //                builder.put(e.getKey(), String.valueOf(e.getValue()));
 //            }
-//            return builder.build();
+//            return builder;
 //        } catch (final IllegalArgumentException | JwtException e) {
-//            return ImmutableMap.of();
+//            return Map.of();
 //        }
 //    }
 //
