@@ -1,5 +1,5 @@
 Sprint week 4
-Tasks Gijs: 
+Tasks Gijs: <br />
 - Set up database. <br />
 	Issues encountered: none really, just navigating Digital Ocean was something new to both me and Iarina.<br />
 	<br />
