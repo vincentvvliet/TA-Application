@@ -8,6 +8,7 @@ import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,8 +27,12 @@ public class SecuredUserController {
     @Autowired
     private UserService userService;
 
-    public Optional<User> getUserById(UUID id) {
-        return userRepository.findById(id);
+    public Mono getUserById(UUID id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            return Mono.empty();
+        }
+        return Mono.just(user.get());
     }
 
     public List<User> getUsers() {

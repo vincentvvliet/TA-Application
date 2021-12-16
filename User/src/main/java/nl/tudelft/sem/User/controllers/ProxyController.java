@@ -7,9 +7,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -31,13 +31,9 @@ public class ProxyController implements Controller {
      */
     @GetMapping("/getUser/{id}")
     @Override
-    public Mono<User> getUserById(@PathVariable(value = "id") UUID id) {
+    public Mono getUserById(@PathVariable(value = "id") UUID id) {
         check();
-        Optional<User> user = controller.getUserById(id);
-        if (user.isEmpty()) {
-            return Mono.empty();
-        }
-        return Mono.just(user.get());
+        return controller.getUserById(id);
     }
 
     /**
@@ -47,9 +43,9 @@ public class ProxyController implements Controller {
      */
     @GetMapping("/getUsers")
     @Override
-    public Mono<List<User>> getUsers() {
+    public Flux<List<User>> getUsers() {
         check();
-        return Mono.just(controller.getUsers());
+        return Flux.just(controller.getUsers());
     }
 
     /**
@@ -74,9 +70,8 @@ public class ProxyController implements Controller {
      */
     @PostMapping("/createUser")
     public Mono<Boolean> createUser(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
-        User user = new User(username, password, Role.valueOf(role));
         check();
-        return Mono.just(controller.createUser(user));
+        return Mono.just(controller.createUser(new User(username, password, Role.valueOf(role))));
     }
 
 
