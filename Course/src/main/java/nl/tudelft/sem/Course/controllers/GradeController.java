@@ -48,6 +48,9 @@ public class GradeController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested course does not exits!");
         }
         List<Grade> grades = gradeRepository.findAllByCourse(course.get());
+        if (grades.isEmpty()) {
+            // throwing is not necessary here I believe.
+        }
         // Transform into a Flux of gradeDTOs
         return Flux.fromStream(
             grades.stream()
