@@ -3,24 +3,22 @@ package nl.tudelft.sem.Application.services;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
+import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
+import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
+import nl.tudelft.sem.Application.services.validator.Validator;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
-import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
-import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
-import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
-import nl.tudelft.sem.Application.services.validator.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 
 @Service

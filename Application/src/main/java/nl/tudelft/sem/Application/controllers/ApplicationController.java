@@ -1,27 +1,22 @@
 package nl.tudelft.sem.Application.controllers;
 
+import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
+import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.RatingDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.ApplicationService;
-import nl.tudelft.sem.DTO.RatingDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 
 
@@ -76,7 +71,13 @@ public class ApplicationController {
         }
     }
 
-    @GetMapping("/applications/{course_id}")
+    /**
+     * get all applications for a course
+     *
+     * @param course id of course
+     * @return list of applications for course.
+     */
+    @GetMapping("/getApplications/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Flux<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
                                                                  UUID course) {
@@ -102,11 +103,14 @@ public class ApplicationController {
         return Mono.just(false);
     }
 
-    /**PATCH Endpoint to accept a TA application.
+    /**PATCH Endpoint to accept a TA application, if the application is not yet accepted,
+     * the application is closed for application and there is a TA spot available.
      *
      * @param id of the application to be accepted
      * @return true if the application was successfully accepted, false otherwise
      */
+    //TODO : implement isTaSpotAvailable
+
     @PatchMapping("/acceptApplication/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> acceptApplication(@PathVariable(value = "id") UUID id) throws Exception {
@@ -115,6 +119,13 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
+        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId());
+       if( LocalDate.now().isBefore(startDate.minusWeeks(3)) ){
+           throw new Exception("application is still open for application");
+        }
+       if(LocalDate.now().isAfter(startDate)){
+           throw new Exception("course has already started");
+       }
         if (! applicationService.isTASpotAvailable(application.getCourseId())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }

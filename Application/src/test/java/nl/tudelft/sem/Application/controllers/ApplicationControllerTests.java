@@ -1,15 +1,13 @@
 package nl.tudelft.sem.Application.controllers;
 
-import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -17,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +49,8 @@ public class ApplicationControllerTests {
     UUID courseId;
     UUID studentId;
     Application application;
+    LocalDate startDateOpen;
+    LocalDate startDateClosed;
 
     @BeforeEach
     public void init() {
@@ -63,10 +63,13 @@ public class ApplicationControllerTests {
         app1 = new Application(courseId, student1Id);
         app2 = new Application(courseId, student2Id);
         list = List.of(app1, app2);
+        startDateOpen = LocalDate.now().plusWeeks(4);
+        startDateClosed = LocalDate.now().plusWeeks(2);
     }
 
     @Test
     public void getApplicationsByCourseTest() {
+        when(applicationService.getApplicationsByCourse(courseId)).thenReturn(applicationList);
         when(applicationService.getApplicationsByCourse(courseId)).thenReturn(applicationList);
         Flux<Application> flux = applicationController.getApplicationsByCourse(courseId);
         List<Application> result = flux.toStream().collect(Collectors.toList());
@@ -93,6 +96,7 @@ public class ApplicationControllerTests {
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
         when(applicationService.createTA(studentId,courseId)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId)).thenReturn(startDateClosed);
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
@@ -121,10 +125,11 @@ public class ApplicationControllerTests {
     }
 
     @Test
-    public void acceptApplicationMaximumTAsReached() {
+    public void acceptApplicationMaximumTAsReached() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId)).thenReturn(false);
+        when(applicationService.getCourseStartDate(courseId)).thenReturn(startDateClosed);
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "maximum number of TA's was already reached for this course";
         String actualMessage = exception.getMessage();
@@ -138,6 +143,7 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId)).thenReturn(startDateClosed);
         when(applicationService.createTA(studentId,courseId)).thenReturn(false);
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), false);
         verify(applicationRepository, never()).save(any(Application.class));
@@ -187,6 +193,36 @@ public class ApplicationControllerTests {
         List<Application> result = flux.toStream().collect(Collectors.toList());
         // Assert
         assertEquals(List.of(), result);
+    }
+
+    @Test
+    void acceptApplicationCourseStillOpen() throws EmptyResourceException {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
+        when(applicationService.createTA(studentId,courseId)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId)).thenReturn(startDateOpen);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "application is still open for application";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    void acceptApplicationCourseHasStarted() throws EmptyResourceException {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
+        when(applicationService.createTA(studentId,courseId)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId)).thenReturn(LocalDate.now().minusWeeks(1));
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "course has already started";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
     }
 
 }
