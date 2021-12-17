@@ -12,7 +12,11 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
+import java.security.Key;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +30,8 @@ public class ProxyController implements Controller {
 
     @Autowired
     private SecuredUserController controller;
+
+    private String token;
 
     /**
      * GET endpoint retrieves user by id.
@@ -50,7 +56,7 @@ public class ProxyController implements Controller {
     @GetMapping("/getUsers/{token}")
     @Override
     public Flux<User> getUsers(@PathVariable(value = "token") String token) {
-        validateToken("token");
+        validateToken(token);
         return Flux.fromIterable(controller.getUsers());
     }
 
@@ -67,7 +73,7 @@ public class ProxyController implements Controller {
     }
 
     /**
-     * POST endpoint for creating a user.
+     * POST endpoint for creating a user. This method also creates a JWT token to be used in further requests.
      *
      * @param username of the user
      * @param password of the user
@@ -75,9 +81,17 @@ public class ProxyController implements Controller {
      * @return true if the user is properly created and saved in the database
      */
     @PostMapping("/createUser")
-    public Mono<Boolean> createUser(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
-        //TODO return JWT token
-        return Mono.just(controller.createUser(new User(username, password, Role.valueOf(role))));
+    public Mono<String> createUser(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
+        // Create JWT
+        Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        String jws = Jwts.builder().setSubject(username).signWith(key).compact();
+        this.token = jws;
+        // Create User
+        if (controller.createUser(new User(username, password, Role.valueOf(role)))) {
+            return Mono.just(jws);
+        }
+
+        return Mono.just("invalid user");
     }
 
 
@@ -91,10 +105,10 @@ public class ProxyController implements Controller {
      */
     @RequestMapping("/acceptApplication/{userId}/{applicationId}/{token}")
     @Override
-    public Mono<Boolean> acceptApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "applicationId") UUID applicationId, @PathVariable(value = "token") String token) throws Exception {
+    public Mono<Boolean> acceptApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "applicationId") UUID applicationId, @PathVariable(value = "token") String token) {
         validateToken(token);
         controller.validateRole(userId, Role.valueOf("LECTURER"));
-        return Mono.just(controller.acceptApplication(userId, applicationId));
+        return Mono.just(controller.acceptApplication(applicationId));
     }
 
     /**
@@ -168,11 +182,10 @@ public class ProxyController implements Controller {
 
 
     /**
-     * Validate a token.
+     * Validate a JWT token.
      */
     private void validateToken(String token) {
-        //TODO validate JWT token -> change String token to actual token and check
-        if (token.equals("")) {
+        if (!token.equals(this.token)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Incorrect token provided");
         }
     }

@@ -25,9 +25,6 @@ import java.util.UUID;
 @RestController
 public class SecuredUserController {
 
-    /**
-     * The Authentication.
-     */
     @NonNull
     UserAuthenticationService authentication;
 
@@ -82,17 +79,11 @@ public class SecuredUserController {
     /**
      * Accept application.
      *
-     * @param userId        the user id
      * @param applicationId the application id
      * @return true if accepting application was successful
      * @throws Exception if user not found in database
      */
-    public boolean acceptApplication(UUID userId, UUID applicationId) throws Exception {
-//        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
-//        if (user.getRole() != Role.LECTURER) {
-//            throw new Exception("invalid role: only lecturers can accept applications");
-//        }
-
+    public boolean acceptApplication(UUID applicationId) {
         return userService.acceptTaApplication(applicationId);
     }
 
@@ -104,17 +95,12 @@ public class SecuredUserController {
      * @return true if creation was successful
      * @throws Exception if user not found in database
      */
-    public boolean createApplication(UUID userId, UUID courseId) throws Exception {
-//        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
-//        if (user.getRole() != Role.STUDENT) {
-//            throw new Exception("invalid role: only students can create applications");
-//        }
-
+    public boolean createApplication(UUID userId, UUID courseId) {
         return userService.createApplication(userId, courseId);
     }
 
     /**
-     * Gets all applications.
+     * Get all applications.
      *
      * @return all applications
      */
@@ -123,14 +109,22 @@ public class SecuredUserController {
     }
 
     /**
-     * Gets all applications.
+     * Get all applications.
      *
+     * @param studentId the student id
+     * @param courseId  the course id
      * @return all applications
      */
     public ApplicationDTO getApplication(UUID studentId, UUID courseId) {
         return userService.getApplication(studentId, courseId);
     }
 
+    /**
+     * Gets applications overview.
+     *
+     * @param courseId the course id
+     * @return the applications overview
+     */
     public List<ApplyingStudentDTO> getApplicationsOverview(UUID courseId) {
         return userService.getApplicationsOverview(courseId);
     }

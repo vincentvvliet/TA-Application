@@ -1,6 +1,8 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
+import nl.tudelft.sem.User.entities.Role;
+import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ public class PublicUserController {
     UserAuthenticationService authentication;
 
     @Autowired
-    UserRepository users;
+    private UserRepository userRepository;
 
     /**
      * POST endpoint registers user by username and password
@@ -30,16 +32,10 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/register")
-    String register(@RequestParam("username") final String username,
-                    @RequestParam("password") final String password) {
-//        users.save(
-//                User
-//                        .builder()
-//                        .username(username)
-//                        .password(password)
-//                        .build()
-//        );
-
+    String register(@RequestParam("username") String username,
+                    @RequestParam("password") String password,
+                    @RequestParam("role") String role) {
+        userRepository.save(new User(username, password, Role.valueOf(role)));
         return login(username, password);
     }
 
@@ -51,8 +47,8 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/login")
-    String login(@RequestParam("username") final String username,
-                 @RequestParam("password") final String password) {
+    String login(@RequestParam("username") String username,
+                 @RequestParam("password") String password) {
         System.out.println(username);
         System.out.println(password);
         System.out.println(authentication);

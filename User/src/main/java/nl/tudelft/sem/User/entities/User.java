@@ -11,9 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-/**
- * The type User.
- */
 @Entity
 @Data
 @Table(name = "user", schema = "userschema")
