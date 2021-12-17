@@ -5,18 +5,17 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import org.joda.time.*;
+//import org.joda.time.*;
 import java.util.*;
 import java.util.function.Supplier;
 
 import static io.jsonwebtoken.SignatureAlgorithm.HS256;
-import io.jsonwebtoken.CompressionCodec.*;
+import io.jsonwebtoken.*;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @Service
 final class JWTTokenService {//implements Clock, TokenService {
-//    private static final String DOT = ".";
 //    private static final GzipCompressionCodec COMPRESSION_CODEC = new GzipCompressionCodec();
 //
 //    DateService dates;
@@ -88,8 +87,7 @@ final class JWTTokenService {//implements Clock, TokenService {
 //                .setClock(this)
 //                .setAllowedClockSkewSeconds(clockSkewSec);
 //
-//        // See: https://github.com/jwtk/jjwt/issues/135
-//        final String withoutSignature = substringBeforeLast(token, DOT) + DOT;
+//        final String withoutSignature = substringBeforeLast(token, ".") + ".";
 //        return parseClaims(() -> parser.parseClaimsJwt(withoutSignature).getBody());
 //    }
 //
