@@ -4,10 +4,14 @@ import nl.tudelft.sem.Course.entities.Course;
 import nl.tudelft.sem.Course.entities.Grade;
 import nl.tudelft.sem.Course.repositories.CourseRepository;
 import nl.tudelft.sem.Course.repositories.GradeRepository;
+import nl.tudelft.sem.DTO.GradeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +34,30 @@ public class GradeController {
     @GetMapping("/getGrade/{student_id}/{course_id}")
     public Optional<Grade> getGradeByStudentAndCourse(@PathVariable(value = "student_id") UUID studentId, @PathVariable(value = "course_id") UUID courseId) {
         return gradeRepository.findByStudentIdAndCourseId(studentId, courseId);
+    }
+
+    /**
+     * GET endpoint retrieves GradeDTOs for grades tied to course.
+     * @param courseId id of sepecific course.
+     * @return Flux of GradeDTOs that are for specified course.
+     */
+    @GetMapping("/getGrades/{course_id}")
+    public Flux<GradeDTO> getGrades(@PathVariable("course_id") UUID courseId) {
+        Optional<Course> course = courseRepository.findById(courseId);
+        if(course.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested course does not exits!");
+        }
+        List<Grade> grades = gradeRepository.findAllByCourse(course.get());
+        if (grades.isEmpty()) {
+            // throwing is not necessary here I believe.
+        }
+        // Transform into a Flux of gradeDTOs
+        return Flux.fromStream(
+            grades.stream()
+                .map(
+                    (Grade g)-> new GradeDTO(g.getStudentId(), g.getGrade())
+                )
+        );
     }
 
     /**
