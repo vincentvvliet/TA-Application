@@ -64,12 +64,13 @@ public class CourseController {
     }
 
     /**
-     * GET endpoint retrieves all open courses
+     * GET endpoint retrieves all open courses.
+     * The courses are considered open if there are more than 3 weeks left until the start date.
      * @return list of courses
      */
     @GetMapping("/getOpenCourses")
     public Flux<Course> getOpenCourses() {
-        return Flux.fromIterable(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
+        return Flux.fromIterable(courseRepository.findByStartDateIsAfter(LocalDate.now().plusWeeks(selectionPeriod)));
     }
 
     /**
