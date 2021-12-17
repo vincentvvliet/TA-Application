@@ -18,5 +18,5 @@ public interface Controller {
 
     public Mono<Boolean> createApplication(UUID userId, UUID courseId, String token) throws Exception;
 
-    public Mono<Boolean> deleteUser(UUID id, String token);
+    public Mono<Boolean> deleteUser(UUID id, UUID ownId, String token);
 }

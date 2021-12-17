@@ -1,5 +1,6 @@
 package nl.tudelft.sem.User.controllers;
 
+import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +34,7 @@ public class SecuredUserControllerTest {
     @MockBean
     UserRepository userRepository;
 
-    User user = new User();
+    User user = new User("username", "password", null);
     List<User> userList = new ArrayList<>();
     UUID id = UUID.randomUUID();
 

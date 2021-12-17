@@ -57,6 +57,15 @@ class UserTest {
     }
 
     /**
+     * Test set password.
+     */
+    @Test
+    public void testSetPassword() {
+        user.setPassword("newPassword");
+        Assertions.assertEquals(user.getPassword(),"newPassword");
+    }
+
+    /**
      * Test get authorities.
      */
     @Test

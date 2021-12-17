@@ -10,10 +10,13 @@ import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -33,6 +36,9 @@ public class SecuredUserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Gets user by id.
@@ -72,6 +78,7 @@ public class SecuredUserController {
      * @return true if creation was successful
      */
     public boolean createUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         return true;
     }
@@ -130,7 +137,7 @@ public class SecuredUserController {
     }
 
     /**
-     * Delete user boolean.
+     * Delete user.
      *
      * @param id the id
      * @return the boolean
@@ -145,7 +152,7 @@ public class SecuredUserController {
     }
 
     /**
-     * Validate.
+     * Validate role.
      *
      * @param id   the id
      * @param role the role

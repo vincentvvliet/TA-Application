@@ -17,6 +17,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +45,7 @@ public class ProxyController implements Controller {
     @GetMapping("/getUser/{id}/{token}")
     @Override
     public Mono<Optional<User>> getUserById(@PathVariable(value = "id") UUID id, @PathVariable(value = "token") String token) {
-        controller.validateRole(id, null);
+        validateToken(token);
         return controller.getUserById(id);
     }
 
@@ -68,7 +70,6 @@ public class ProxyController implements Controller {
     @GetMapping("/logout")
     @Override
     public boolean logout(@AuthenticationPrincipal User user) {
-        validateToken("token");
         return controller.logout(user);
     }
 
@@ -173,10 +174,10 @@ public class ProxyController implements Controller {
      * @param token JWT token
      * @return boolean representing if the deletion was successful or not
      */
-    @DeleteMapping("deleteUser/{id}/{token}")
-    public Mono<Boolean> deleteUser(@PathVariable(value = "id") UUID id, @PathVariable(value = "token") String token) {
+    @DeleteMapping("deleteUser/{ownId}/{id}/{token}")
+    public Mono<Boolean> deleteUser(@PathVariable(value = "id") UUID id, @PathVariable(value = "ownId") UUID ownId, @PathVariable(value = "token") String token) {
         validateToken(token);
-        controller.validateRole(id, null);
+        controller.validateRole(ownId, Role.valueOf("LECTURER"));
         return Mono.just(controller.deleteUser(id));
     }
 
