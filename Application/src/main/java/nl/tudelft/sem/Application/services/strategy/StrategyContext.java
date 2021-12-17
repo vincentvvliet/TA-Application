@@ -1,5 +1,7 @@
 package nl.tudelft.sem.Application.services.strategy;
 
+import nl.tudelft.sem.DTO.RecommendationDTO;
+
 import java.util.List;
 
 public class StrategyContext {
@@ -9,8 +11,8 @@ public class StrategyContext {
         this.strategy = strategy;
     }
 
-    public List<String> giveRecommendation() {
-        return strategy.recommend();
+    public List<RecommendationDTO> giveRecommendation(List<RecommendationDTO> list) {
+        return strategy.recommend(list);
     }
 
 }

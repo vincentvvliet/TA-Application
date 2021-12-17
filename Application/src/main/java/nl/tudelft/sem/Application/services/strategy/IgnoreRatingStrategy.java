@@ -1,10 +1,15 @@
 package nl.tudelft.sem.Application.services.strategy;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.*;
+import nl.tudelft.sem.DTO.RecommendationDTO;
 
-public class IgnoreRatingStrategy implements Strategy{
+
+public class IgnoreRatingStrategy implements Strategy {
     @Override
-    public List<String> recommend() {
-        return null;
+    public List<RecommendationDTO> recommend(List<RecommendationDTO> list) {
+
+        Stream<RecommendationDTO> recommendationStream = list.stream().sorted(Comparator.comparingDouble(RecommendationDTO::getGrade));
+        return recommendationStream.collect(Collectors.toList());
     }
 }
