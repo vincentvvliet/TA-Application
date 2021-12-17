@@ -67,8 +67,7 @@ public class ApplicationController {
 
     @GetMapping("/getRatings/{student_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id)
-    {
+    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id) {
         try {
             return applicationService.getRatingForTA(student_id);
         } catch (EmptyResourceException e) {
