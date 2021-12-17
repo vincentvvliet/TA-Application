@@ -1,5 +1,14 @@
 package nl.tudelft.sem.User.services;
 
+import java.net.URI;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import nl.tudelft.sem.User.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import nl.tudelft.sem.DTO.ApplicationDTO;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import org.springframework.stereotype.Service;
@@ -9,22 +18,61 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+
+    /**
+     * Accepts the specified TA application.
+     *
+     * @param applicationId of the TA application to be accepted
+     * @return true if application successfully accepted, false otherwise
+     */
+    public boolean acceptTaApplication(UUID applicationId) {
+        WebClient client = WebClient.create();
+        WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = client.method(HttpMethod.POST);
+        WebClient.RequestBodySpec bodySpec =
+                uriSpec.uri(URI.create(
+                        "localhost:47112/application/acceptApplication/" + applicationId));
+        Mono<Boolean> response = bodySpec.retrieve().bodyToMono(Boolean.class);
+        Optional<Boolean> result = response.blockOptional(Duration.of(1000, ChronoUnit.MILLIS));
+        return result.orElse(false);
+    }
+
+
+    /**
+     *  Created an application using a userID and CourseId.
+     *
+     * @param userId of student creating application.
+     * @param courseId of course being applied for.
+     * @return boolean
+     */
+    public boolean createApplication(UUID userId, UUID courseId) {
+        WebClient client = WebClient.create();
+        WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec =
+                client.method(HttpMethod.POST);
+        WebClient.RequestBodySpec bodySpec = uriSpec.uri(URI.create(
+                "localhost:47112/application/createApplication/" + userId + "/" + courseId));
+        Mono<Boolean> response = bodySpec.retrieve().bodyToMono(Boolean.class);
+        Optional<Boolean> result = response.blockOptional(Duration.of(1000, ChronoUnit.MILLIS));
+        return result.orElse(false);
+    }
 
     /**
      * Requests all applications from the Applications microservice.
      *  @return List of all Applications.
      */
 
-    public List<ApplicationDTO> getAllApplications() {
+    public List<ApplicationDTO> getAllApplications(UUID courseId)  {
         WebClient webClient = WebClient.create("http://localhost:47113");
         Flux<ApplicationDTO> applications = webClient.get()
-                .uri("application/retrieveAll")
+                .uri("application/retrieveAll/" + courseId)
                 .retrieve()
                 .bodyToFlux(ApplicationDTO.class);
-        return applications.collectList().block();
+        return applications.toStream().collect(Collectors.toList());
     }
 
     /**
@@ -55,6 +103,6 @@ public class UserService {
                 .uri("application/getApplicationOverview/" + courseId)
                 .retrieve()
                 .bodyToFlux(ApplyingStudentDTO.class);
-        return applications.collectList().block();
+        return applications.toStream().collect(Collectors.toList());
     }
 }
