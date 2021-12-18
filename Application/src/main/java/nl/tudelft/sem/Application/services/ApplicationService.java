@@ -234,11 +234,22 @@ public class ApplicationService {
      * @return the recommended list of applicants.
      */
     public List<RecommendationDTO> getRecommendation(List<RecommendationDTO> list, String strategy) {
-
         StrategyContext context = new StrategyContext();
         if(strategy.equals("IgnoreRating")) context.setRecommendation(new IgnoreRatingStrategy());
         if(strategy.equals("IgnoreGrade")) context.setRecommendation(new IgnoreGradeStrategy());
         if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
         return context.giveRecommendation(list);
     }
+
+    /**
+     * Method for recommending n students.
+     * @param list of applicants to recommend.
+     * @param strategy to use for recommending system.
+     * @param n amount of students.
+     * @return N best students based on criterion strategy.
+     */
+    public List<RecommendationDTO> recommendNStudents(List<RecommendationDTO> list, String strategy, int n) {
+        return getRecommendation(list, strategy).subList(0, n);
+    }
+
 }
