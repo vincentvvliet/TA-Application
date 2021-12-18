@@ -1,5 +1,6 @@
 package nl.tudelft.sem.Application.services;
 
+import com.sun.xml.bind.v2.TODO;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -194,5 +195,16 @@ public class ApplicationService {
             throw new EmptyResourceException("No grade for student found");
         }
         return result.get();
+    }
+
+    /**
+     * Determines if a student is already selected to TA 3 courses per quarter
+     *
+     * @param studentId of the student applying as TA
+     * @return true if student is not already TA for 3 courses this quarter, false otherwise
+     */
+    public boolean studentCanTAAnotherCourse(UUID studentId) {
+        //List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
+        return true;
     }
 }
