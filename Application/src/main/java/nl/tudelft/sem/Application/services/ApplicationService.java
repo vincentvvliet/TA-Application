@@ -137,28 +137,6 @@ public class ApplicationService {
         return applicationRepository.findApplicationsByCourseId(course);
     }
 
-    /** getRatingForTA method.
-     * Makes request to TA service for a average rating.
-     *
-     * @param studentId studentId of TA we want the rating for.
-     *
-     * @return rating of TA for a certain course.
-     * @throws EmptyResourceException if the TA service returns an empty result.
-     */
-    public RatingDTO getRatingForTA(UUID studentId) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47110");
-        Mono<RatingDTO> rating = webClient.get()
-            .uri("/TA/getRating/" + studentId)
-            .retrieve()
-            .bodyToMono(RatingDTO.class);
-        Optional<RatingDTO> result = rating.blockOptional();
-        if (result.isEmpty()) {
-            throw new EmptyResourceException("no TA rating found");
-        }
-
-        return result.get();
-    }
-
     /**
      * Transforms list of applications to list of ApplyingStudentDTO,
      * which contains rating and grade of student applying.
@@ -203,17 +181,42 @@ public class ApplicationService {
         return result.get();
     }
 
-    public List<GradeDTO> getGradesByCourseId(UUID courseId) {
+    public GradeDTO getGradeByCourseIdAndStudentId(UUID courseId, UUID studentId) throws Exception {
         // Request to Grade microservice
         WebClient webClient = WebClient.create("http://localhost:47112");
-        Flux<GradeDTO> response = webClient.get()
-            .uri("/grade/getGrades/" + courseId)
+        Mono<GradeDTO> response = webClient.get()
+            .uri("/grade/getGrades/" + courseId + "/" + studentId)
             .retrieve()
-            .bodyToFlux(GradeDTO.class);
-        return response.toStream().collect(Collectors.toList());
+            .bodyToMono(GradeDTO.class);
+        Optional<GradeDTO> optional = response.blockOptional();
+        if (optional.isEmpty()) {
+            throw new Exception("No grade found!");
+        }
+        return optional.get();
     }
 
-    public RatingDTO getRatingsByStudentId(UUID studentId) throws Exception {
+
+    public RatingDTO getRatingForTA(UUID studentId) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:47110");
+        Mono<RatingDTO> rating = webClient.get()
+            .uri("/TA/getRating/" + studentId)
+            .retrieve()
+            .bodyToMono(RatingDTO.class);
+        Optional<RatingDTO> result = rating.blockOptional();
+        if (result.isEmpty()) {
+            throw new EmptyResourceException("no TA rating found");
+        }
+
+        return result.get();
+    }
+    /** getRatingForTA method.
+     * Makes request to TA service for a average rating.
+     *
+     * @param studentId studentId of TA we want the rating for.
+     *
+     * @return rating of TA for a certain course.
+     */
+    public RatingDTO getTARatingEmptyIfMissing(UUID studentId) {
         // Request to TA microservice
         // RatingOptional might be empty
         WebClient webClient = WebClient.create("http://localhost:47110");
@@ -223,17 +226,51 @@ public class ApplicationService {
             .bodyToMono(RatingDTO.class);
         Optional<RatingDTO> optional = response.blockOptional();
         if (optional.isEmpty()) {
-            throw new Exception("No response!");
+            RatingDTO dto = new RatingDTO();
+            dto.setStudentId(studentId);
+            dto.setRating(Optional.empty());
+            return dto;
         }
         return optional.get();
     }
+
+    public RecommendationDTO collectApplicationDetails(UUID courseId, UUID studentId) throws EmptyResourceException {
+        try {
+            // get rating
+            RatingDTO rating = getTARatingEmptyIfMissing(studentId);
+            // get grade
+            GradeDTO grade = getGradeByCourseIdAndStudentId(courseId, studentId);
+            return new RecommendationDTO(studentId, rating.getRating(), grade.getGrade());
+        } catch (Exception e) {
+            throw new EmptyResourceException("Grade not present for student for this course");
+        }
+    }
+
+
+    public List<RecommendationDTO> prepareComparason(UUID courseId) {
+        List<RecommendationDTO> result = new ArrayList<>();
+        List<Application> applications = applicationRepository.findApplicationsByCourseId(courseId);
+        for (Application a : applications) {
+            RecommendationDTO applicationDetails;
+            try {
+                applicationDetails = collectApplicationDetails(a.getCourseId(), a.getStudentId());
+
+            } catch (Exception e) {
+                // "a" doesn't have a grade for the course.
+                continue;
+            }
+            result.add(applicationDetails);
+        }
+        return result;
+    }
+
 
     /**This method gives recommendation using the Strategy design pattern.
      * @param list of applicants to recommend.
      * @param strategy to use for recommending system.
      * @return the recommended list of applicants.
      */
-    public List<RecommendationDTO> getRecommendation(List<RecommendationDTO> list, String strategy) {
+    public List<RecommendationDTO> doComparason(List<RecommendationDTO> list, String strategy) {
         StrategyContext context = new StrategyContext();
         if(strategy.equals("IgnoreRating")) context.setRecommendation(new IgnoreRatingStrategy());
         if(strategy.equals("IgnoreGrade")) context.setRecommendation(new IgnoreGradeStrategy());
@@ -249,7 +286,7 @@ public class ApplicationService {
      * @return N best students based on criterion strategy.
      */
     public List<RecommendationDTO> recommendNStudents(List<RecommendationDTO> list, String strategy, int n) {
-        return getRecommendation(list, strategy).subList(0, n);
+        return doComparason(list, strategy).subList(0, n);
     }
 
 }
