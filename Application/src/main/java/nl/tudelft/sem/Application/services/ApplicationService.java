@@ -23,6 +23,7 @@ import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -209,6 +210,7 @@ public class ApplicationService {
 
         return result.get();
     }
+
     /** getRatingForTA method.
      * Makes request to TA service for a average rating.
      *

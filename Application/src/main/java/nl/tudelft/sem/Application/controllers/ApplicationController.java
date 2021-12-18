@@ -11,6 +11,7 @@ import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -125,5 +126,17 @@ public class ApplicationController {
         application.setAccepted(true);
         applicationRepository.save(application);
         return Mono.just(true);
+    }
+
+    @GetMapping("/getSortedList/{course_id}/{strategy}")
+    Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId, @PathVariable("strategy") String strategy) {
+        List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
+        return Flux.fromIterable(applicationService.doComparason(list, strategy));
+    }
+
+    @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
+    Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId, @PathVariable("strategy") String strategy, @PathVariable("n") int n) {
+        List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
+        return Flux.fromIterable(applicationService.recommendNStudents(list, strategy, n));
     }
 }
