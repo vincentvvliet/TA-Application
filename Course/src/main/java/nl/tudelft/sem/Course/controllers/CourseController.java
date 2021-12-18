@@ -6,6 +6,7 @@ import nl.tudelft.sem.Course.repositories.GradeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -72,17 +73,18 @@ public class CourseController {
      * @return list of courses
      */
     @GetMapping("/getCourses")
-    public Mono<List<Course>> getCourses() {
-        return Mono.just(courseRepository.findAll());
+    public Flux<Course> getCourses() {
+        return Flux.fromIterable(courseRepository.findAll());
     }
 
     /**
-     * GET endpoint retrieves all open courses
+     * GET endpoint retrieves all open courses.
+     * The courses are considered open if there are more than 3 weeks left until the start date.
      * @return list of courses
      */
     @GetMapping("/getOpenCourses")
-    public Mono<List<Course>> getOpenCourses() {
-        return Mono.just(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
+    public Flux<Course> getOpenCourses() {
+        return Flux.fromIterable(courseRepository.findByStartDateIsAfter(LocalDate.now().plusWeeks(selectionPeriod)));
     }
 
     /**

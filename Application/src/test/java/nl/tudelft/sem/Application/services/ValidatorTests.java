@@ -50,6 +50,7 @@ public class ValidatorTests {
     UUID courseId;
     UUID studentId;
     Application application;
+    LocalDate deadline;
 
     @BeforeEach
     public void init() {
@@ -57,13 +58,13 @@ public class ValidatorTests {
         courseId = UUID.randomUUID();
         studentId = UUID.randomUUID();
         application = new Application(courseId, studentId);
+        deadline = LocalDate.now().plusWeeks(3);
     }
 
     @Test
     public void isCourseOpenSuccessfulTest() throws Exception {
-        LocalDate startDate = LocalDate.now();
-        startDate = startDate.plusWeeks(1);
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+        deadline = deadline.plusWeeks(1);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(deadline);
 
 
         Assertions.assertEquals(isCourseOpen.handle(application) , true);
@@ -71,7 +72,6 @@ public class ValidatorTests {
 
     @Test
     public void isCourseOpenNoCourseTest() throws Exception {
-        LocalDate startDate = LocalDate.now();
         when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(null);
         Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "Could not retrieve startDate that was linked to the given courseId";
@@ -83,7 +83,6 @@ public class ValidatorTests {
 
     @Test
     public void isCourseOpenNullTest() {
-        LocalDate startDate = LocalDate.now();
         application = new Application(null, studentId);
         Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
         String expectedMessage = "The given application does not contain a course ID";
@@ -94,32 +93,8 @@ public class ValidatorTests {
     }
 
     @Test
-    public void isCourseOpenTooEarlyTest() throws Exception {
-        LocalDate startDate = LocalDate.now();
-        startDate = startDate.plusWeeks(4);
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
-        Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
-        String expectedMessage = "The course is not yet open to applications";
-        String actualMessage = exception.getMessage();
-
-        Assertions.assertTrue(actualMessage.contains(expectedMessage));
-
-    }
-
-    @Test
-    public void isCourseOpenOnDeadlineTest1() throws Exception {
-        LocalDate startDate = LocalDate.now();
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
-
-        Assertions.assertEquals(isCourseOpen.handle(application) , true);
-
-    }
-
-    @Test
-    public void isCourseOpenOnDeadlineTest2() throws Exception {
-        LocalDate startDate = LocalDate.now();
-        startDate = startDate.plusWeeks(3);
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+    public void isCourseOpenOnDeadlineTest() throws Exception {
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(deadline);
 
         Assertions.assertEquals(isCourseOpen.handle(application) , true);
 
@@ -127,10 +102,22 @@ public class ValidatorTests {
 
     @Test
     public void isCourseOpenTooLateTest() throws Exception {
-        LocalDate startDate = LocalDate.now();
-        startDate = startDate.minusDays(1);
+        deadline = deadline.minusDays(1);
 
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(deadline);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
+
+        String expectedMessage = "The period for applications has passed";
+        String actualMessage = exception.getMessage();
+
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    public void isCourseOpenTooLateTest2() throws Exception {
+        deadline = deadline.minusWeeks(1);
+
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(deadline);
         Exception exception = Assertions.assertThrows(Exception.class, () -> isCourseOpen.handle(application));
 
         String expectedMessage = "The period for applications has passed";
@@ -194,13 +181,12 @@ public class ValidatorTests {
         Validator validator = isCourseOpen;
         isCourseOpen.setLast(isGradeSufficient);
         isCourseOpen.setLast(isUniqueApplication);
-        LocalDate startDate = LocalDate.now();
-        startDate = startDate.plusWeeks(1);
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+        deadline = deadline.plusWeeks(1);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(deadline);
         when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(9D);
         when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 
-        Assertions.assertEquals(isUniqueApplication.handle(application) , true);
+        Assertions.assertEquals(validator.handle(application) , true);
     }
 
     @Test
@@ -208,9 +194,8 @@ public class ValidatorTests {
         Validator validator = isCourseOpen;
         isCourseOpen.setLast(isGradeSufficient);
         isCourseOpen.setLast(isUniqueApplication);
-        LocalDate startDate = LocalDate.now();
-        startDate = startDate.plusWeeks(1);
-        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(startDate);
+        deadline = deadline.plusWeeks(1);
+        when(applicationService.getCourseStartDate(application.getCourseId(), 47112)).thenReturn(deadline);
         when(applicationService.getGrade(studentId, courseId, 47112)).thenReturn(5.9);
         when(applicationRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.empty());
 

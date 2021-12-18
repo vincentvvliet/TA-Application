@@ -3,13 +3,17 @@ package nl.tudelft.sem.Application.services;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.Application.services.strategy.*;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.DTO.GradeDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -17,9 +21,12 @@ import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
+import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -218,5 +225,44 @@ public class ApplicationService {
             throw new EmptyResourceException("No grade for student found");
         }
         return result.get();
+    }
+
+    public List<GradeDTO> getGradesByCourseId(UUID courseId) {
+        // Request to Grade microservice
+        WebClient webClient = WebClient.create("http://localhost:47112");
+        Flux<GradeDTO> response = webClient.get()
+            .uri("/grade/getGrades/" + courseId)
+            .retrieve()
+            .bodyToFlux(GradeDTO.class);
+        return response.toStream().collect(Collectors.toList());
+    }
+
+    public RatingDTO getRatingsByStudentId(UUID studentId) throws Exception {
+        // Request to TA microservice
+        // RatingOptional might be empty
+        WebClient webClient = WebClient.create("http://localhost:47110");
+        Mono<RatingDTO> response = webClient.get()
+            .uri("/TA/getRating/" + studentId)
+            .retrieve()
+            .bodyToMono(RatingDTO.class);
+        Optional<RatingDTO> optional = response.blockOptional();
+        if (optional.isEmpty()) {
+            throw new Exception("No response!");
+        }
+        return optional.get();
+    }
+
+    /**This method gives recommendation using the Strategy design pattern.
+     * @param list of applicants to recommend.
+     * @param strategy to use for recommending system.
+     * @return the recommended list of applicants.
+     */
+    public List<RecommendationDTO> getRecommendation(List<RecommendationDTO> list, String strategy) {
+
+        StrategyContext context = new StrategyContext();
+        if(strategy.equals("IgnoreRating")) context.setRecommendation(new IgnoreRatingStrategy());
+        if(strategy.equals("IgnoreGrade")) context.setRecommendation(new IgnoreGradeStrategy());
+        if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
+        return context.giveRecommendation(list);
     }
 }

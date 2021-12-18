@@ -33,11 +33,8 @@ public class IsCourseOpen extends BaseValidator {
         if (startCourse == null) {
             throw new Exception("Could not retrieve startDate that was linked to the given courseId");
         }
-        if (startCourse.minusWeeks(openForApplicationPeriod).isAfter(current) // check if applications have opened yet
-                && !startCourse.minusWeeks(openForApplicationPeriod).equals(current)) {
-            throw new Exception("The course is not yet open to applications");
-        }
-        if (current.isAfter(startCourse)) { // check if the period for application has passed
+        LocalDate deadline = startCourse.minusWeeks(openForApplicationPeriod);
+        if (current.isAfter(deadline)) { // check if the period for application has passed
             throw new Exception("The period for applications has passed");
         }
         return super.checkNext(application);
