@@ -95,7 +95,7 @@ public class ApplicationService {
      * @param courseId of the course for which the grade is retrieved
      * @param port of the server on which request is performed (on Course microservice)
      *
-     * @return A Optional double
+     * @return Optional of grade (i.e. double)
      */
     public Double getGrade(UUID studentId, UUID courseId, int port) throws EmptyResourceException {
         WebClient webClient = WebClient.create("http://localhost:" + port);

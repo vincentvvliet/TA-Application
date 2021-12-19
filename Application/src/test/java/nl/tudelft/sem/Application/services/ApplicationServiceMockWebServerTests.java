@@ -2,6 +2,7 @@ package nl.tudelft.sem.Application.services;
 
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,9 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -142,5 +146,33 @@ public class ApplicationServiceMockWebServerTests {
 
         boolean booleanAvailable = applicationService.isTASpotAvailable(courseId, mockBackEnd.getPort());
         Assertions.assertFalse(booleanAvailable);
+    }
+
+    /**
+     * empty response (no grade) -> throw exception
+     */
+    @Test
+    void getGrade_emptyResponse() {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getGrade(studentId, courseId, mockBackEnd.getPort()));
+        String expectedMessage = "no grade found";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getGrade_gradePresent() throws EmptyResourceException {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        Double grade = 9.0;
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
+
+        assertEquals(applicationService.getGrade(studentId, courseId, mockBackEnd.getPort()), grade);
     }
 }
