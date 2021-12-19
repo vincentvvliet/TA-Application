@@ -159,7 +159,7 @@ public class ApplicationService {
     }
 
     /** getRatingForTA method.
-     * Makes request to TA service for a average rating.
+     * Makes request to TA service for an average rating.
      *
      * @param studentId studentId of TA we want the rating for.
      * @param port of the server on which request is performed (on TA microservice)
@@ -237,20 +237,6 @@ public class ApplicationService {
         return response.toStream().collect(Collectors.toList());
     }
 
-    public RatingDTO getRatingsByStudentId(UUID studentId) throws Exception {
-        // Request to TA microservice
-        // RatingOptional might be empty
-        WebClient webClient = WebClient.create("http://localhost:47110");
-        Mono<RatingDTO> response = webClient.get()
-            .uri("/TA/getRating/" + studentId)
-            .retrieve()
-            .bodyToMono(RatingDTO.class);
-        Optional<RatingDTO> optional = response.blockOptional();
-        if (optional.isEmpty()) {
-            throw new Exception("No response!");
-        }
-        return optional.get();
-    }
 
     /**This method gives recommendation using the Strategy design pattern.
      * @param list of applicants to recommend.
