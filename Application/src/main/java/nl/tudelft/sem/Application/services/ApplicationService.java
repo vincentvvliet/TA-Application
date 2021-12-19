@@ -1,19 +1,14 @@
 package nl.tudelft.sem.Application.services;
 
-import com.sun.xml.bind.v2.TODO;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
-import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
@@ -21,6 +16,7 @@ import nl.tudelft.sem.Application.services.validator.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -199,12 +195,35 @@ public class ApplicationService {
 
     /**
      * Determines if a student is already selected to TA 3 courses per quarter
+     * Important: 3 courses are in the same quarter if they overlap (partially or totally)
      *
      * @param studentId of the student applying as TA
+     * @param courseId of the course for which student is applying as TA
+     *
      * @return true if student is not already TA for 3 courses this quarter, false otherwise
      */
-    public boolean studentCanTAAnotherCourse(UUID studentId) {
-        //List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
-        return true;
+    public boolean studentCanTAAnotherCourse(UUID studentId, UUID courseId) {
+        List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
+        List<UUID> overlappingCourses = getOverlappingCourses(courseId, 47112);
+        overlappingCourses.retainAll(coursesAcceptedAsTA);
+        return (overlappingCourses.size() < 3);
     }
+
+    /**
+     * Get list of courses that overlap with a certain course
+     *
+     * @param courseId of course that overlaps
+     * @param port of the server on which request is performed (on Course microservice)
+     *
+     * @return list of courses that overlap with the given course
+     */
+    public List<UUID> getOverlappingCourses(UUID courseId, int port) {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Flux<UUID> overlappingCourses = webClient.get()
+                .uri("/course/getOverlappingCourses/" + courseId)
+                .retrieve()
+                .bodyToFlux(UUID.class);
+        return overlappingCourses.toStream().collect(Collectors.toList());
+    }
+
 }

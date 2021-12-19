@@ -115,7 +115,7 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        if (! applicationService.studentCanTAAnotherCourse(application.getStudentId())) {
+        if (! applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
             throw new Exception("a student can TA a maximum of 3 courses per quarter");
         }
         if (! applicationService.isTASpotAvailable(application.getCourseId())) {
