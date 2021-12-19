@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -175,4 +176,37 @@ public class ApplicationServiceMockWebServerTests {
 
         assertEquals(applicationService.getGrade(studentId, courseId, mockBackEnd.getPort()), grade);
     }
+
+    /**
+     * empty response (no start date) -> throw exception
+     */
+    @Test
+    void getCourseStartDate_emptyResponse() {
+        UUID courseId = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getCourseStartDate(courseId, mockBackEnd.getPort()));
+        String expectedMessage = "no starting date found";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    // test case requires changing LocalDate to String in Mono and endpoint
+    // not sure if this is 100% a good approach, si I left it aside for now
+    /*
+    @Test
+    void getCourseStartDate_datePresent() throws EmptyResourceException {
+        UUID courseId = UUID.randomUUID();
+        LocalDate startDate = LocalDate.parse("2021-12-19");
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody("2021-12-19").addHeader("Content-Type", "application/json"));
+
+        assertEquals(applicationService.getCourseStartDate(courseId, mockBackEnd.getPort()), startDate);
+    }
+    */
+
+
+
 }

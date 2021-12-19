@@ -128,7 +128,7 @@ public class ApplicationService {
 
         Optional<LocalDate> result = startDate.blockOptional();
         if (result.isEmpty()) {
-            throw new EmptyResourceException("no TA rating found");
+            throw new EmptyResourceException("no starting date found");
         }
         return result.get();
     }
