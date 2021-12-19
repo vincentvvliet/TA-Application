@@ -21,7 +21,7 @@ public class IsGradeSufficient extends BaseValidator {
     @Override
     public Boolean handle(Application application) throws Exception {
         Double grade = applicationServices
-                .getGrade(application.getStudentId(), application.getCourseId());
+                .getGrade(application.getStudentId(), application.getCourseId(), 47112);
         if (grade == null) {
             throw new Exception("could not retrieve course grade with the given student and course IDs");
         }

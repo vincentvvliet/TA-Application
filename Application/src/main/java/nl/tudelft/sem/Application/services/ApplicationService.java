@@ -51,22 +51,36 @@ public class ApplicationService {
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
      *
-     * @return true is ratio is already met, false otherwise.
+     * @param courseId of the course for which the check is performed
+     * @param port of the server to which request is sent (on User microservice)
+     *
+     * @return true if ratio is not already met (i.e. TA spot available), false otherwise.
      */
-    public boolean isTASpotAvailable(@SuppressWarnings("unused") UUID courseId) {
-        return true;
+    public boolean isTASpotAvailable(UUID courseId, int port) {
+        int selectedTAs = applicationRepository.numberSelectedTAsForCourse(courseId);
+
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<Integer> enrolledStudents = webClient.get()
+                .uri("/course/getCourseNrParticipants/" + courseId)
+                .retrieve()
+                .bodyToMono(Integer.class);
+
+        int enrolledStudentsForCourse = enrolledStudents.blockOptional().orElse(0);
+        return (selectedTAs < enrolledStudentsForCourse / 20);
     }
+
 
     /**
      * Creates a new TA once an application has been accepted.
      *
      * @param studentId of the student that becomes TA.
      * @param courseId of the course for which student is TA.
+     * @param port of the server to which request is sent (on TA microservice)
      *
      * @return true if the TA was successfully created.
      */
-    public boolean createTA(UUID studentId, UUID courseId) {
-        WebClient webClient = WebClient.create("http://localhost:47110");
+    public boolean createTA(UUID studentId, UUID courseId, int port) {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Boolean> accepted = webClient.get()
                 .uri("/TA/createTA/" + studentId  + "/" + courseId)
                 .retrieve()
@@ -77,10 +91,14 @@ public class ApplicationService {
     /** Ask the Course microservice for the grade corresponding to
      * the student and course ID of the application.
      *
+     * @param studentId of the student whose grade is retrieved
+     * @param courseId of the course for which the grade is retrieved
+     * @param port of the server on which request is performed (on Course microservice)
+     *
      * @return A Optional double
      */
-    public Double getGrade(UUID studentId, UUID courseId) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47112");
+    public Double getGrade(UUID studentId, UUID courseId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Double> grade = webClient.get()
                 .uri("/grade/getGrade/" + studentId + "/" + courseId)
                 .retrieve()
@@ -96,10 +114,13 @@ public class ApplicationService {
     /** Ask the Course microservice for the startDate corresponding to
      * the course ID of the application.
      *
+     * @param courseId for which start date is retrieved
+     * @param port of the server on which request is performed (on Course microservice)
+     *
      * @return An optional LocalDate
      */
-    public LocalDate getCourseStartDate(UUID courseId) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47112");
+    public LocalDate getCourseStartDate(UUID courseId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port); // 47112
         Mono<LocalDate> startDate = webClient.get()
                 .uri("/course/getCourseStartDate/" + courseId)
                 .retrieve()
@@ -141,12 +162,13 @@ public class ApplicationService {
      * Makes request to TA service for a average rating.
      *
      * @param studentId studentId of TA we want the rating for.
+     * @param port of the server on which request is performed (on TA microservice)
      *
      * @return rating of TA for a certain course.
      * @throws EmptyResourceException if the TA service returns an empty result.
      */
-    public RatingDTO getRatingForTA(UUID studentId) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47110");
+    public RatingDTO getRatingForTA(UUID studentId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<RatingDTO> rating = webClient.get()
             .uri("/TA/getRating/" + studentId)
             .retrieve()
@@ -172,8 +194,8 @@ public class ApplicationService {
             try {
                 ret.add(new ApplyingStudentDTO(
                     a.getStudentId(),
-                    getGradeByStudentAndCourse(a.getStudentId(), a.getCourseId()),
-                    getRatingForTA(a.getStudentId()).getRating()
+                    getGradeByStudentAndCourse(a.getStudentId(), a.getCourseId(), 47112),
+                    getRatingForTA(a.getStudentId(), 47110).getRating()
                 ));
             } catch (EmptyResourceException e) {
                 System.out.println("failed to get application details: " + e.getMessage());
@@ -187,11 +209,13 @@ public class ApplicationService {
      *
      * @param studentId id of the student.
      * @param courseId id of the course.
-     * @return Grade of the studet.
+     * @param port of the server on which the request is performed (on the Course microservice)
+     *
+     * @return grade of the student
      */
-    public double getGradeByStudentAndCourse(UUID studentId, UUID courseId)
+    public double getGradeByStudentAndCourse(UUID studentId, UUID courseId, int port)
         throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47112");
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Double> rating = webClient.get()
             .uri("/grade/getGrade/" + studentId + "/" + courseId)
             .retrieve()

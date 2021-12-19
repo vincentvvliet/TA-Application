@@ -70,7 +70,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id) {
         try {
-            return applicationService.getRatingForTA(student_id);
+            return applicationService.getRatingForTA(student_id, 47110);
         } catch (EmptyResourceException e) {
             return null;
         }
@@ -122,11 +122,11 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId())) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId());
+            .createTA(application.getStudentId(), application.getCourseId(), 47110);
         if (! successfullyCreated) {
             return Mono.just(false);
         }
