@@ -1,9 +1,15 @@
 package nl.tudelft.sem.Application.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.DTO.RatingDTO;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -13,10 +19,9 @@ import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -200,6 +205,8 @@ public class ApplicationServiceMockWebServerTests {
     void getCourseStartDate_datePresent() throws EmptyResourceException {
         UUID courseId = UUID.randomUUID();
         LocalDate startDate = LocalDate.parse("2021-12-19");
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(ratingDTO);
         mockBackEnd.enqueue(new MockResponse()
                 .setBody("2021-12-19").addHeader("Content-Type", "application/json"));
 
@@ -207,6 +214,21 @@ public class ApplicationServiceMockWebServerTests {
     }
     */
 
+    /**
+     * empty response (no TA rating) -> throw exception
+     */
+    @Test
+    void getRatingForTA_emptyResponse() {
+        UUID studentId = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getRatingForTA(studentId, mockBackEnd.getPort()));
+        String expectedMessage = "no TA rating found";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
 
 
 }
