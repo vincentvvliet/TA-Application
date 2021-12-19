@@ -91,9 +91,10 @@ public class ApplicationControllerTests {
     public void acceptApplicationSuccessfully() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
         when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
-        when(applicationService.createTA(studentId,courseId)).thenReturn(true);
+        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
+
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
@@ -126,7 +127,8 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
-        when(applicationService.isTASpotAvailable(courseId)).thenReturn(false);
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(false);
+
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "maximum number of TA's was already reached for this course";
         String actualMessage = exception.getMessage();
@@ -152,9 +154,10 @@ public class ApplicationControllerTests {
     public void acceptApplicationCreationFault() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.isTASpotAvailable(courseId)).thenReturn(true);
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
         when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
-        when(applicationService.createTA(studentId,courseId)).thenReturn(false);
+        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(false);
+
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), false);
         verify(applicationRepository, never()).save(any(Application.class));
     }

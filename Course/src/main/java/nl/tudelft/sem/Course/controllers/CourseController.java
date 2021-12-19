@@ -43,7 +43,7 @@ public class CourseController {
     /**
      * GET endpoint retrieves startDate of course by id
      * @param id (UUID) of the course
-     * @return optional of course
+     * @return optional of date
      */
     @GetMapping("/getCourseStartDate/{id}")
     public Mono<LocalDate> getCourseStartDateById(@PathVariable(value = "id") UUID id) {
@@ -54,23 +54,38 @@ public class CourseController {
         return Mono.empty();
     }
 
+    /**
+     * GET endpoint retrieves number of participants to course by id
+     * @param id (UUID) of the course
+     * @return optional of integer (nr participants)
+     */
+    @GetMapping("/getCourseNrParticipants/{id}")
+    public Mono<Integer> getCourseNrParticipantsById(@PathVariable(value = "id") UUID id) {
+        Optional<Course> course = courseRepository.findById(id);
+        if(course.isPresent()){
+            return Mono.just(course.get().getNrParticipants());
+        }
+        return Mono.empty();
+    }
+
 
     /**
      * GET endpoint retrieves all existing courses
      * @return list of courses
      */
     @GetMapping("/getCourses")
-    public Mono<List<Course>> getCourses() {
-        return Mono.just(courseRepository.findAll());
+    public Flux<Course> getCourses() {
+        return Flux.fromIterable(courseRepository.findAll());
     }
 
     /**
-     * GET endpoint retrieves all open courses
+     * GET endpoint retrieves all open courses.
+     * The courses are considered open if there are more than 3 weeks left until the start date.
      * @return list of courses
      */
     @GetMapping("/getOpenCourses")
-    public Mono<List<Course>> getOpenCourses() {
-        return Mono.just(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
+    public Flux<Course> getOpenCourses() {
+        return Flux.fromIterable(courseRepository.findByStartDateIsAfter(LocalDate.now().plusWeeks(selectionPeriod)));
     }
 
     /**

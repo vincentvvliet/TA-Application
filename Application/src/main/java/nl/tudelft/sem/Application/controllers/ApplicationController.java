@@ -59,24 +59,23 @@ public class ApplicationController {
 
     @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
+    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
             @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
-        return  applicationService.getApplicationDetails(applications);
+        return  Flux.fromIterable(applicationService.getApplicationDetails(applications));
     }
 
     @GetMapping("/getRatings/{student_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id)
-    {
+    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id) {
         try {
-            return applicationService.getRatingForTA(student_id);
+            return applicationService.getRatingForTA(student_id, 47110);
         } catch (EmptyResourceException e) {
             return null;
         }
     }
 
-    @GetMapping("/applications/{course_id}")
+    @GetMapping("/retrieveAll/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Flux<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
                                                                  UUID course) {
@@ -118,11 +117,11 @@ public class ApplicationController {
         if (! applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
             throw new Exception("a student can TA a maximum of 3 courses per quarter");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId())) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId());
+            .createTA(application.getStudentId(), application.getCourseId(), 47110);
         if (! successfullyCreated) {
             return Mono.just(false);
         }
