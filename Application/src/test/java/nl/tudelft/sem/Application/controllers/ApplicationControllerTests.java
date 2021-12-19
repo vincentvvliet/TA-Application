@@ -136,6 +136,19 @@ public class ApplicationControllerTests {
     }
 
     @Test
+    public void acceptApplicationAlreadyTAFor3CoursesPerQuarter() {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(false);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "a student can TA a maximum of 3 courses per quarter";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
     public void acceptApplicationCreationFault() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
