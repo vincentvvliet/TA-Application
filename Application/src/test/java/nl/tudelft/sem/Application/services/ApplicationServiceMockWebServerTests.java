@@ -230,5 +230,34 @@ public class ApplicationServiceMockWebServerTests {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    /**
+     * empty response (no grade) -> throw exception
+     */
+    @Test
+    void getGradeByStudentAndCourse_emptyResponse() {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getGradeByStudentAndCourse(studentId, courseId, mockBackEnd.getPort()));
+        String expectedMessage = "No grade for student found";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getGradeByStudentAndCourse_gradePresent() throws EmptyResourceException {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        Double grade = 5.0;
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
+
+        assertEquals(applicationService.getGradeByStudentAndCourse(studentId, courseId, mockBackEnd.getPort()), grade);
+    }
+
 
 }
