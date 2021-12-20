@@ -17,8 +17,8 @@ public class Notification {
     @JsonProperty(value = "id")
     private final UUID id;
 
-    @Column(name = "recipientId")
-    @JsonProperty(value = "id")
+    @Column(name = "recipientid")
+    @JsonProperty(value = "recipientid")
     private UUID recipientId;
 
     @Column(name = "message")
