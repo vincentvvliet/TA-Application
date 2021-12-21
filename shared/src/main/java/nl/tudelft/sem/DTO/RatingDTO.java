@@ -9,6 +9,9 @@ import lombok.Setter;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * DTO to represent average rating of a student.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

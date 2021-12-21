@@ -9,6 +9,9 @@ import lombok.Setter;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * DTO to leave rating for a TA, id represents TA instance, not student ID.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -36,8 +36,7 @@ public class TAService {
         UUID taId = ratingDTO.getId();
         int rating = ratingDTO.getRating().get();
         Optional<TA> rated = taRepository.findById(taId);
-        if (rated.isPresent())
-        {
+        if (rated.isPresent()) {
             TA ta = rated.get();
             ta.setRating(rating);
             taRepository.save(ta);

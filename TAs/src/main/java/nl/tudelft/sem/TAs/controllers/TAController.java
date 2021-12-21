@@ -117,11 +117,25 @@ public class TAController {
      * POST endpoint for adding rating to a certain TA
      * Careful: Overwrites old rating.
      *
-     * @param ratingDTO dto contiaing relevant information
-     * @return boolean indicating succes of operation
+     * @param ratingDTO dto containing relevant information
+     * @return boolean indicating success of operation
      */
     @PostMapping("addRating")
     Mono<Boolean> addRating(@RequestBody LeaveRatingDTO ratingDTO) {
+        if (ratingDTO.getRating().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request is incomplete");
+        }
+        return taService.addRating(ratingDTO);
+    }
+
+    /**
+     * PATCH endpoint for editing rating to a certain TA
+     *
+     * @param ratingDTO dto containing relevant information.
+     * @return boolean indicating success of operation.
+     */
+    @PostMapping("setRating")
+    Mono<Boolean> setRating(@RequestBody LeaveRatingDTO ratingDTO) {
         if (ratingDTO.getRating().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request is incomplete");
         }
