@@ -22,11 +22,8 @@ import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -282,7 +279,7 @@ public class ApplicationService {
      * @param strategy to use for recommending system.
      * @return the recommended list of applicants.
      */
-    public List<RecommendationDTO> doComparason(List<RecommendationDTO> list, String strategy) {
+    public List<RecommendationDTO> sortOnStrategy(List<RecommendationDTO> list, String strategy) {
         StrategyContext context = new StrategyContext();
         if (strategy.equals("IgnoreRating")) {
             context.setRecommendation(new IgnoreRatingStrategy());
@@ -306,7 +303,7 @@ public class ApplicationService {
      */
     public List<RecommendationDTO> recommendNStudents(List<RecommendationDTO> list, String strategy,
                                                       int n) {
-        return doComparason(list, strategy).subList(0, n);
+        return sortOnStrategy(list, strategy).subList(0, n);
     }
 
 }

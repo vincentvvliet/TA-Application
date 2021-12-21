@@ -144,7 +144,7 @@ public class ApplicationController {
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
         List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
-        return Flux.fromIterable(applicationService.doComparason(list, strategy));
+        return Flux.fromIterable(applicationService.sortOnStrategy(list, strategy));
     }
 
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
