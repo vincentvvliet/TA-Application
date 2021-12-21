@@ -188,7 +188,7 @@ public class ApplicationService {
      * @return rating of TA for a certain course.
      * @throws EmptyResourceException iff result is empty.
      */
-    public RatingDTO getRatingForTA(UUID studentId) throws EmptyResourceException {
+    public RatingDTO getRatingForTA(UUID studentId) throws Exception {
         WebClient webClient = WebClient.create("http://localhost:47110");
         Mono<RatingDTO> rating = webClient.get()
             .uri("/TA/getRating/" + studentId)
@@ -196,7 +196,7 @@ public class ApplicationService {
             .bodyToMono(RatingDTO.class);
         Optional<RatingDTO> result = rating.blockOptional();
         if (result.isEmpty()) {
-            throw new EmptyResourceException("no TA rating found");
+            throw new Exception("no TA rating found");
         }
 
         return result.get();
@@ -237,7 +237,7 @@ public class ApplicationService {
      * @throws EmptyResourceException iff no grade returned.
      */
     public RecommendationDTO collectApplicationDetails(UUID courseId, UUID studentId)
-        throws EmptyResourceException {
+        throws Exception {
         try {
             // get rating
             RatingDTO rating = getTARatingEmptyIfMissing(studentId);
@@ -245,7 +245,7 @@ public class ApplicationService {
             GradeDTO grade = getGradeByCourseIdAndStudentId(courseId, studentId);
             return new RecommendationDTO(studentId, rating.getRating(), grade.getGrade());
         } catch (Exception e) {
-            throw new EmptyResourceException("Grade not present for student for this course");
+            throw new Exception("Grade not present for student for this course");
         }
     }
 
