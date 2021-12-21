@@ -143,7 +143,7 @@ public class ApplicationController {
     @GetMapping("/getSortedList/{course_id}/{strategy}")
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
-        List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
+        List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
         return Flux.fromIterable(applicationService.doComparason(list, strategy));
     }
 
@@ -151,7 +151,7 @@ public class ApplicationController {
     Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId,
                                        @PathVariable("strategy") String strategy,
                                        @PathVariable("n") int n) {
-        List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
+        List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
         return Flux.fromIterable(applicationService.recommendNStudents(list, strategy, n));
     }
 
@@ -159,7 +159,7 @@ public class ApplicationController {
     Mono<Boolean> hireN(@PathVariable("course_id") UUID courseId,
                         @PathVariable("strategy") String strategy,
                         @PathVariable("n") int n) {
-        List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
+        List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
         List<RecommendationDTO> recommended =
             applicationService.recommendNStudents(list, strategy, n);
         // Hire all n recommended students

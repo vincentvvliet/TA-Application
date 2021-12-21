@@ -1,26 +1,25 @@
 package nl.tudelft.sem.Application.services;
 
-import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
-import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.strategy.*;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.DTO.RatingDTO;
-import nl.tudelft.sem.DTO.GradeDTO;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.Application.services.strategy.EqualStrategy;
+import nl.tudelft.sem.Application.services.strategy.IgnoreGradeStrategy;
+import nl.tudelft.sem.Application.services.strategy.IgnoreRatingStrategy;
+import nl.tudelft.sem.Application.services.strategy.StrategyContext;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.GradeDTO;
+import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,7 +47,6 @@ public class ApplicationService {
     private Validator validator;
 
 
-
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
      *
@@ -62,20 +60,20 @@ public class ApplicationService {
      * Creates a new TA once an application has been accepted.
      *
      * @param studentId of the student that becomes TA.
-     * @param courseId of the course for which student is TA.
-     *
+     * @param courseId  of the course for which student is TA.
      * @return true if the TA was successfully created.
      */
     public boolean createTA(UUID studentId, UUID courseId) {
         WebClient webClient = WebClient.create("http://localhost:47110");
         Mono<Boolean> accepted = webClient.get()
-                .uri("/TA/createTA/" + studentId  + "/" + courseId)
-                .retrieve()
-                .bodyToMono(Boolean.class);
+            .uri("/TA/createTA/" + studentId + "/" + courseId)
+            .retrieve()
+            .bodyToMono(Boolean.class);
         return accepted.blockOptional().orElse(false);
     }
 
-    /** Ask the Course microservice for the grade corresponding to
+    /**
+     * Ask the Course microservice for the grade corresponding to
      * the student and course ID of the application.
      *
      * @return A Optional double
@@ -83,9 +81,9 @@ public class ApplicationService {
     public Double getGrade(UUID studentId, UUID courseId) throws EmptyResourceException {
         WebClient webClient = WebClient.create("http://localhost:47112");
         Mono<Double> grade = webClient.get()
-                .uri("/grade/getGrade/" + studentId + "/" + courseId)
-                .retrieve()
-                .bodyToMono(Double.class);
+            .uri("/grade/getGrade/" + studentId + "/" + courseId)
+            .retrieve()
+            .bodyToMono(Double.class);
         Optional<Double> result = grade.blockOptional();
         if (result.isEmpty()) {
             throw new EmptyResourceException("no grade found");
@@ -94,7 +92,8 @@ public class ApplicationService {
         return result.get();
     }
 
-    /** Ask the Course microservice for the startDate corresponding to
+    /**
+     * Ask the Course microservice for the startDate corresponding to
      * the course ID of the application.
      *
      * @return An optional LocalDate
@@ -102,9 +101,9 @@ public class ApplicationService {
     public LocalDate getCourseStartDate(UUID courseId) throws EmptyResourceException {
         WebClient webClient = WebClient.create("http://localhost:47112");
         Mono<LocalDate> startDate = webClient.get()
-                .uri("/course/getCourseStartDate/" + courseId)
-                .retrieve()
-                .bodyToMono(LocalDate.class);
+            .uri("/course/getCourseStartDate/" + courseId)
+            .retrieve()
+            .bodyToMono(LocalDate.class);
 
         Optional<LocalDate> result = startDate.blockOptional();
         if (result.isEmpty()) {
@@ -113,7 +112,8 @@ public class ApplicationService {
         return result.get();
     }
 
-    /** Check if the application is valid.
+    /**
+     * Check if the application is valid.
      *
      * @return true if valid, false if not.
      */
@@ -130,7 +130,8 @@ public class ApplicationService {
         return isValid;
     }
 
-    /** Get a list of applications by CourseId.
+    /**
+     * Get a list of applications by CourseId.
      *
      * @return List of Applications
      */
@@ -151,10 +152,10 @@ public class ApplicationService {
             try {
                 ret.add(new ApplyingStudentDTO(
                     a.getStudentId(),
-                    getGradeByStudentAndCourse(a.getStudentId(), a.getCourseId()),
+                    getGradeByCourseIdAndStudentId(a.getStudentId(), a.getCourseId()).getGrade(),
                     getRatingForTA(a.getStudentId()).getRating()
                 ));
-            } catch (EmptyResourceException e) {
+            } catch (Exception e) {
                 System.out.println("failed to get application details: " + e.getMessage());
             }
         }
@@ -162,26 +163,12 @@ public class ApplicationService {
     }
 
     /**
-     * Gets grade for a student for a specific course from course microservice.
+     * Gets gradeDTO for a student for a specific course from course microservice.
      *
+     * @param courseId  id of the course.
      * @param studentId id of the student.
-     * @param courseId id of the course.
-     * @return Grade of the studet.
+     * @return GradeDTO.
      */
-    public double getGradeByStudentAndCourse(UUID studentId, UUID courseId)
-        throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47112");
-        Mono<Double> rating = webClient.get()
-            .uri("/grade/getGrade/" + studentId + "/" + courseId)
-            .retrieve()
-            .bodyToMono(Double.class);
-        Optional<Double> result = rating.blockOptional();
-        if (result.isEmpty()) {
-            throw new EmptyResourceException("No grade for student found");
-        }
-        return result.get();
-    }
-
     public GradeDTO getGradeByCourseIdAndStudentId(UUID courseId, UUID studentId) throws Exception {
         // Request to Grade microservice
         WebClient webClient = WebClient.create("http://localhost:47112");
@@ -196,7 +183,14 @@ public class ApplicationService {
         return optional.get();
     }
 
-
+    /**
+     * getRatingForTA method.
+     * Makes request to TA service for a average rating.
+     *
+     * @param studentId studentId of TA we want the rating for.
+     * @return rating of TA for a certain course.
+     * @throws EmptyResourceException iff result is empty.
+     */
     public RatingDTO getRatingForTA(UUID studentId) throws EmptyResourceException {
         WebClient webClient = WebClient.create("http://localhost:47110");
         Mono<RatingDTO> rating = webClient.get()
@@ -211,12 +205,12 @@ public class ApplicationService {
         return result.get();
     }
 
-    /** getRatingForTA method.
+    /**
+     * getRatingForTA method.
      * Makes request to TA service for a average rating.
      *
      * @param studentId studentId of TA we want the rating for.
-     *
-     * @return rating of TA for a certain course.
+     * @return rating of TA for a certain course. Leaves rating optional.
      */
     public RatingDTO getTARatingEmptyIfMissing(UUID studentId) {
         // Request to TA microservice
@@ -236,7 +230,17 @@ public class ApplicationService {
         return optional.get();
     }
 
-    public RecommendationDTO collectApplicationDetails(UUID courseId, UUID studentId) throws EmptyResourceException {
+    /**
+     * collectApplicationDetials method that collects a students'
+     * rating and grade for a course.
+     *
+     * @param courseId  id of course.
+     * @param studentId if of student.
+     * @return recommendationDTO containing rating(or empty)
+     * @throws EmptyResourceException iff no grade returned.
+     */
+    public RecommendationDTO collectApplicationDetails(UUID courseId, UUID studentId)
+        throws EmptyResourceException {
         try {
             // get rating
             RatingDTO rating = getTARatingEmptyIfMissing(studentId);
@@ -248,8 +252,12 @@ public class ApplicationService {
         }
     }
 
-
-    public List<RecommendationDTO> prepareComparason(UUID courseId) {
+    /** getRecommendationDetailsByCourse.
+     *
+     * @param courseId id of course.
+     * @return list of recommendationDTOs
+     */
+    public List<RecommendationDTO> getRecommendationDetailsByCourse(UUID courseId) {
         List<RecommendationDTO> result = new ArrayList<>();
         List<Application> applications = applicationRepository.findApplicationsByCourseId(courseId);
         for (Application a : applications) {
@@ -267,27 +275,37 @@ public class ApplicationService {
     }
 
 
-    /**This method gives recommendation using the Strategy design pattern.
-     * @param list of applicants to recommend.
+    /**
+     * This method gives recommendation using the Strategy design pattern.
+     *
+     * @param list     of applicants to recommend.
      * @param strategy to use for recommending system.
      * @return the recommended list of applicants.
      */
     public List<RecommendationDTO> doComparason(List<RecommendationDTO> list, String strategy) {
         StrategyContext context = new StrategyContext();
-        if(strategy.equals("IgnoreRating")) context.setRecommendation(new IgnoreRatingStrategy());
-        if(strategy.equals("IgnoreGrade")) context.setRecommendation(new IgnoreGradeStrategy());
-        if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
+        if (strategy.equals("IgnoreRating")) {
+            context.setRecommendation(new IgnoreRatingStrategy());
+        }
+        if (strategy.equals("IgnoreGrade")) {
+            context.setRecommendation(new IgnoreGradeStrategy());
+        }
+        if (strategy.equals("Grade&Rating")) {
+            context.setRecommendation(new EqualStrategy());
+        }
         return context.giveRecommendation(list);
     }
 
     /**
      * Method for recommending n students.
-     * @param list of applicants to recommend.
+     *
+     * @param list     of applicants to recommend.
      * @param strategy to use for recommending system.
-     * @param n amount of students.
+     * @param n        amount of students.
      * @return N best students based on criterion strategy.
      */
-    public List<RecommendationDTO> recommendNStudents(List<RecommendationDTO> list, String strategy, int n) {
+    public List<RecommendationDTO> recommendNStudents(List<RecommendationDTO> list, String strategy,
+                                                      int n) {
         return doComparason(list, strategy).subList(0, n);
     }
 
