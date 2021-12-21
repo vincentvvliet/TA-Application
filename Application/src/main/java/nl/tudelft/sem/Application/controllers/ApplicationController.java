@@ -4,26 +4,25 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 
 
 @RestController
@@ -40,8 +39,7 @@ public class ApplicationController {
      * GET endpoint to retrieve an application based on studentId and courseId.
      *
      * @param studentId of student who applied
-     * @param courseId of course
-     *
+     * @param courseId  of course
      * @return Application
      */
     @GetMapping("/getApplication/{studentId}/{courseId}")
@@ -51,8 +49,9 @@ public class ApplicationController {
         return applicationRepository.findByStudentIdAndCourseId(studentId, courseId);
     }
 
-    /** GET all applications for specific course,
-     *  together with the applying student's names, grades, and possible past TA experience.
+    /**
+     * GET all applications for specific course,
+     * together with the applying student's names, grades, and possible past TA experience.
      *
      * @param course UUID for course.
      * @return list of applications for specific course.
@@ -61,29 +60,41 @@ public class ApplicationController {
     @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public List<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
-            @PathVariable(value = "course_id") UUID course) {
+        @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
-        return  applicationService.getApplicationDetails(applications);
+        return applicationService.getApplicationDetails(applications);
     }
 
+
+    /** GET rating based on student Id.
+     *
+     * @param studentId studentId.
+     * @return average rating for students' previous TAing experience.
+     */
     @GetMapping("/getRatings/{student_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id) {
+    public RatingDTO getRating(@PathVariable(value = "student_id") UUID studentId) {
         try {
-            return applicationService.getRatingForTA(student_id);
+            return applicationService.getRatingForTA(studentId);
         } catch (EmptyResourceException e) {
             return null;
         }
     }
 
+    /** GET Applications by course.
+     *
+     * @param courseId courseId.
+     * @return flux of Applications.
+     */
     @GetMapping("/applications/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Flux<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
-                                                                 UUID course) {
-        return Flux.fromIterable(applicationService.getApplicationsByCourse(course));
+                                                         UUID courseId) {
+        return Flux.fromIterable(applicationService.getApplicationsByCourse(courseId));
     }
 
-    /** Post endpoint creates new application using studentId and courseId
+    /**
+     * Post endpoint creates new application using studentId and courseId
      * and return boolean of result.
      *
      * @param studentId (UUID) of the student
@@ -102,7 +113,8 @@ public class ApplicationController {
         return Mono.just(false);
     }
 
-    /**PATCH Endpoint to accept a TA application.
+    /**
+     * PATCH Endpoint to accept a TA application.
      *
      * @param id of the application to be accepted
      * @return true if the application was successfully accepted, false otherwise
@@ -115,12 +127,12 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId())) {
+        if (!applicationService.isTASpotAvailable(application.getCourseId())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
             .createTA(application.getStudentId(), application.getCourseId());
-        if (! successfullyCreated) {
+        if (!successfullyCreated) {
             return Mono.just(false);
         }
         application.setAccepted(true);
@@ -129,14 +141,50 @@ public class ApplicationController {
     }
 
     @GetMapping("/getSortedList/{course_id}/{strategy}")
-    Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId, @PathVariable("strategy") String strategy) {
+    Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
+                                          @PathVariable("strategy") String strategy) {
         List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
         return Flux.fromIterable(applicationService.doComparason(list, strategy));
     }
 
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
-    Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId, @PathVariable("strategy") String strategy, @PathVariable("n") int n) {
+    Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId,
+                                       @PathVariable("strategy") String strategy,
+                                       @PathVariable("n") int n) {
         List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
         return Flux.fromIterable(applicationService.recommendNStudents(list, strategy, n));
+    }
+
+    @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
+    Mono<Boolean> hireN(@PathVariable("course_id") UUID courseId,
+                        @PathVariable("strategy") String strategy,
+                        @PathVariable("n") int n) {
+        List<RecommendationDTO> list = applicationService.prepareComparason(courseId);
+        List<RecommendationDTO> recommended =
+            applicationService.recommendNStudents(list, strategy, n);
+        // Hire all n recommended students
+        for (RecommendationDTO rec : recommended) {
+            Application application =
+                applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
+                    .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+            if (application.isAccepted()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "application is already accepted");
+            }
+            if (!applicationService.isTASpotAvailable(application.getCourseId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "maximum number of TA's was already reached for this course");
+            }
+            boolean successfullyCreated = applicationService
+                .createTA(application.getStudentId(), application.getCourseId());
+            if (!successfullyCreated) {
+                return Mono.just(false);
+            }
+            // Save accepted application to database.
+            application.setAccepted(true);
+            applicationRepository.save(application);
+            return Mono.just(true);
+        }
+        return Mono.just(true);
     }
 }
