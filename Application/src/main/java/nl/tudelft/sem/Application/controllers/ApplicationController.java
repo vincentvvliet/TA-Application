@@ -1,5 +1,11 @@
 package nl.tudelft.sem.Application.controllers;
 
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -11,14 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
-
-
 
 @RestController
 @RequestMapping("/application/")
@@ -62,8 +60,7 @@ public class ApplicationController {
 
     @GetMapping("/getRatings/{student_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id)
-    {
+    public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id) {
         try {
             return applicationService.getRatingForTA(student_id);
         } catch (EmptyResourceException e) {
@@ -109,7 +106,6 @@ public class ApplicationController {
      * @param id of the application to be accepted
      * @return true if the application was successfully accepted, false otherwise
      */
-    //TODO : implement isTaSpotAvailable
 
     @PatchMapping("/acceptApplication/{id}")
     @ResponseStatus(value = HttpStatus.OK)
@@ -120,22 +116,28 @@ public class ApplicationController {
             throw new Exception("application is already accepted");
         }
         LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId());
-       if( LocalDate.now().isBefore(startDate.minusWeeks(3)) ){
-           throw new Exception("application is still open for application");
+        if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
+            throw new Exception("application is still open for application");
         }
-       if(LocalDate.now().isAfter(startDate)){
-           throw new Exception("course has already started");
-       }
+        if (LocalDate.now().isAfter(startDate)) {
+            throw new Exception("course has already started");
+        }
         if (! applicationService.isTASpotAvailable(application.getCourseId())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
-        boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId());
-        if (! successfullyCreated) {
-            return Mono.just(false);
+
+        try {
+            applicationService.createTA(application.getStudentId(), application.getCourseId(), 47110);
+            applicationService.createContract(application.getStudentId(), application.getCourseId(),47110);
+            applicationService.sendContract(application.getStudentId(), application.getCourseId(), 47110);
+        } catch (Exception e) {
+            throw new Exception("TA or contract creation failed: " + e.getMessage());
         }
+
+        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", 47111 );
         application.setAccepted(true);
         applicationRepository.save(application);
+
         return Mono.just(true);
     }
 }

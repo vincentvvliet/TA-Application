@@ -1,5 +1,10 @@
 package nl.tudelft.sem.Application.services;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -13,12 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -56,13 +55,16 @@ public class ApplicationService {
      *
      * @return true if the TA was successfully created.
      */
-    public boolean createTA(UUID studentId, UUID courseId) {
-        WebClient webClient = WebClient.create("http://localhost:47110");
+    public boolean createTA(UUID studentId, UUID courseId, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Boolean> accepted = webClient.get()
                 .uri("/TA/createTA/" + studentId  + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return accepted.blockOptional().orElse(false);
+        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+            throw new Exception("Could not create TA.");
+        }
+        return  true;
     }
 
     /** Ask the Course microservice for the grade corresponding to
@@ -71,7 +73,7 @@ public class ApplicationService {
      * @return A Optional double
      */
     public Double getGrade(UUID studentId, UUID courseId) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:47112");
+        WebClient webClient = WebClient.create("http://locportalhost:47112");
         Mono<Double> grade = webClient.get()
                 .uri("/grade/getGrade/" + studentId + "/" + courseId)
                 .retrieve()
@@ -192,5 +194,60 @@ public class ApplicationService {
             throw new EmptyResourceException("No grade for student found");
         }
         return result.get();
+    }
+
+    /** Requests notification for a user.
+     *
+     * @param reciepientId user to recieve notification.
+     * @param message of notification.
+     * @param port of MS to send request to.
+     */
+    public boolean sendNotification(UUID reciepientId, String message, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<Boolean> accepted = webClient.get()
+                .uri("/notification/createNotification" + reciepientId  + "/" + message)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+            throw new Exception("Could not create notification for user.");
+        }
+        return  true;
+    }
+
+    /** Requests for contract to be sent to TA.
+     *
+     * @param studentId of TA.
+     * @param courseId of course student is TAing.
+     * @param port of MS to send request to.
+     */
+    public boolean sendContract(UUID studentId, UUID courseId, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<Boolean> accepted = webClient.get()
+                .uri("/contract/sendContract/" + studentId  + "/" + courseId)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+            throw new EmptyResourceException("Could not send contract to User");
+        }
+        return  true;
+    }
+
+    /**Request for a TA's contract to be sent to a TA.
+     *
+     * @param studentId of TA.
+     * @param courseId of course student is TAing.
+     * @param port of MS to send request to.
+     */
+    public boolean createContract(UUID studentId, UUID courseId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Optional<Boolean> accepted = webClient.get()
+                .uri("/contract/createContract/" + studentId  + "/" + courseId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .blockOptional();
+        if (accepted.isEmpty() || !accepted.get()) {
+            throw new EmptyResourceException("Contract creation failed");
+        }
+        return  true;
     }
 }
