@@ -121,7 +121,7 @@ public class UserService {
                 .bodyToMono(Boolean.class);
         Optional<Boolean> result = success.blockOptional();
         if (result.isEmpty()) {
-            throw new Exception("No boolean received");
+            throw new Exception("No response received");
         }
         return result.get();
     }
