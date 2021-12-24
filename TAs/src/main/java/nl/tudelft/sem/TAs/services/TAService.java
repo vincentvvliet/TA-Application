@@ -24,7 +24,7 @@ public class TAService {
                 sum += ta.getRating();
             }
             RatingDTO dto = new RatingDTO();
-            dto.setRating(Optional.of(sum / TAs.size()));
+            dto.setRating(sum / TAs.size());
             dto.setStudentId(studentId);
             return Mono.just(dto);
         }

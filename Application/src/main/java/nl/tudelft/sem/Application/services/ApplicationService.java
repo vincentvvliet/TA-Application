@@ -44,6 +44,8 @@ public class ApplicationService {
     private Validator validator;
 
 
+
+
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
      *
@@ -149,8 +151,8 @@ public class ApplicationService {
             try {
                 ret.add(new ApplyingStudentDTO(
                     a.getStudentId(),
-                    getGradeByCourseIdAndStudentId(a.getStudentId(), a.getCourseId()).getGrade(),
-                    getRatingForTA(a.getStudentId()).getRating()
+                    getGradeByCourseIdAndStudentId(a.getStudentId(), a.getCourseId(), 47112).getGrade(),
+                    Optional.of(getRatingForTA(a.getStudentId(), 47110).getRating())
                 ));
             } catch (Exception e) {
                 System.out.println("failed to get application details: " + e.getMessage());
@@ -164,11 +166,13 @@ public class ApplicationService {
      *
      * @param courseId  id of the course.
      * @param studentId id of the student.
+     * @param port port on which Course ms is hosted. (default 47112)
      * @return GradeDTO.
+     * @throws Exception when no grade is found.
      */
-    public GradeDTO getGradeByCourseIdAndStudentId(UUID courseId, UUID studentId) throws Exception {
-        // Request to Grade microservice
-        WebClient webClient = WebClient.create("http://localhost:47112");
+    public GradeDTO getGradeByCourseIdAndStudentId(UUID courseId, UUID studentId, int port) throws Exception {
+        // Request to Course microservice
+        WebClient webClient = WebClient.create("http://localhost:"+ port);
         Mono<GradeDTO> response = webClient.get()
             .uri("/grade/getGrades/" + courseId + "/" + studentId)
             .retrieve()
@@ -185,18 +189,19 @@ public class ApplicationService {
      * Makes request to TA service for a average rating.
      *
      * @param studentId studentId of TA we want the rating for.
+     * @param port port on which TA ms is hosted. (default 47110)
      * @return rating of TA for a certain course.
      * @throws EmptyResourceException iff result is empty.
      */
-    public RatingDTO getRatingForTA(UUID studentId) throws Exception {
-        WebClient webClient = WebClient.create("http://localhost:47110");
+    public RatingDTO getRatingForTA(UUID studentId, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<RatingDTO> rating = webClient.get()
             .uri("/TA/getRating/" + studentId)
             .retrieve()
             .bodyToMono(RatingDTO.class);
         Optional<RatingDTO> result = rating.blockOptional();
         if (result.isEmpty()) {
-            throw new Exception("no TA rating found");
+            throw new Exception("No TA rating found!");
         }
 
         return result.get();
@@ -207,12 +212,13 @@ public class ApplicationService {
      * Makes request to TA service for a average rating.
      *
      * @param studentId studentId of TA we want the rating for.
+     * @param port port on which TA ms is hosted. (default 47110)
      * @return rating of TA for a certain course. Leaves rating optional.
      */
-    public RatingDTO getTARatingEmptyIfMissing(UUID studentId) {
+    public RatingDTO getTARatingEmptyIfMissing(UUID studentId, int port) {
         // Request to TA microservice
         // RatingOptional might be empty
-        WebClient webClient = WebClient.create("http://localhost:47110");
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<RatingDTO> response = webClient.get()
             .uri("/TA/getRating/" + studentId)
             .retrieve()
@@ -221,7 +227,7 @@ public class ApplicationService {
         if (optional.isEmpty()) {
             RatingDTO dto = new RatingDTO();
             dto.setStudentId(studentId);
-            dto.setRating(Optional.empty());
+            dto.setRating(null);
             return dto;
         }
         return optional.get();
@@ -240,10 +246,10 @@ public class ApplicationService {
         throws Exception {
         try {
             // get rating
-            RatingDTO rating = getTARatingEmptyIfMissing(studentId);
+            RatingDTO rating = getTARatingEmptyIfMissing(studentId, 47110);
             // get grade
-            GradeDTO grade = getGradeByCourseIdAndStudentId(courseId, studentId);
-            return new RecommendationDTO(studentId, rating.getRating(), grade.getGrade());
+            GradeDTO grade = getGradeByCourseIdAndStudentId(courseId, studentId, 47112);
+            return new RecommendationDTO(studentId, Optional.of(rating.getRating()), grade.getGrade());
         } catch (Exception e) {
             throw new Exception("Grade not present for student for this course");
         }
@@ -261,7 +267,6 @@ public class ApplicationService {
             RecommendationDTO applicationDetails;
             try {
                 applicationDetails = collectApplicationDetails(a.getCourseId(), a.getStudentId());
-
             } catch (Exception e) {
                 // "a" doesn't have a grade for the course.
                 continue;

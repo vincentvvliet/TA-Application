@@ -75,7 +75,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID studentId) {
         try {
-            return applicationService.getRatingForTA(studentId);
+            return applicationService.getRatingForTA(studentId, 47110);
         } catch (Exception e) {
             return null;
         }

@@ -55,8 +55,7 @@ public class TAServiceTests {
         // Assert
         RatingDTO result = Objects.requireNonNull(mono.block());
         assertEquals(result.getStudentId(), student);
-        assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), 4);
+        assertEquals(result.getRating(), 4);
     }
 
     @Test
@@ -76,7 +75,6 @@ public class TAServiceTests {
         // Assert
         RatingDTO result = Objects.requireNonNull(mono.block());
         assertEquals(result.getStudentId(), student);
-        assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), (5+5+4)/3);
+        assertEquals(result.getRating(), (5+5+4)/3);
     }
 }
