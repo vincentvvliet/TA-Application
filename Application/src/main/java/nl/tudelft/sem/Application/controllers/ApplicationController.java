@@ -128,8 +128,8 @@ public class ApplicationController {
 
         try {
             applicationService.createTA(application.getStudentId(), application.getCourseId(), 47110);
-            applicationService.createContract(application.getStudentId(), application.getCourseId(),47110);
-            applicationService.sendContract(application.getStudentId(), application.getCourseId(), 47110);
+            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(),47110);
+            applicationService.addContract(application.getStudentId(),contractId,47110);
         } catch (Exception e) {
             throw new Exception("TA or contract creation failed: " + e.getMessage());
         }
