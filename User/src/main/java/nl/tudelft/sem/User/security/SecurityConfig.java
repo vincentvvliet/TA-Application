@@ -25,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     TokenAuthenticationProvider provider;
 
     SecurityConfig(final TokenAuthenticationProvider provider) {
-//        super();
+        super();
         this.provider = requireNonNull(provider);
     }
 
@@ -38,18 +38,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-//                .anyRequest().authenticated()
                 .antMatchers("/user/login", "/user/register")
                 .permitAll()
-//                .antMatchers("/user/register")
-//                .permitAll()
-//                .hasRole("ADMIN")
-//                .antMatchers("/protected/**")
-//                .hasRole("USER");
-//                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .permitAll()
+                .antMatchers("/user/getUsers")
+                .hasRole("ADMIN")
                 .and()
                 .csrf().disable()
                 .formLogin().disable()

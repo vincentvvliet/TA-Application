@@ -3,7 +3,7 @@ package nl.tudelft.sem.User.controllers;
 import lombok.NonNull;
 import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
-import nl.tudelft.sem.User.security.UserAuthenticationService;
+import nl.tudelft.sem.User.security.TokenAuthenticationService;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +20,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/user/")
 public class PublicUserController {
+    @Autowired
     @NonNull
-    UserAuthenticationService authentication;
+    TokenAuthenticationService authentication;
 
     @Autowired
     UserRepository userRepository;
@@ -34,9 +35,9 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/register")
-    UUID register(@RequestParam("username") String username,
+    String register(@RequestParam("username") String username,
                     @RequestParam("password") String password,
-                    @RequestParam("password") String role) {
+                    @RequestParam("role") String role) {
         userRepository.save(new User(username, password, Role.valueOf(role)));
 
         return login(username, password, role);
@@ -50,12 +51,9 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/login")
-    UUID login(@RequestParam("username") String username,
+    String login(@RequestParam("username") String username,
                  @RequestParam("password") String password,
-                 @RequestParam("password") String role) {
-        System.out.println(username);
-        System.out.println(password);
-        System.out.println(authentication);
+                 @RequestParam(value = "role", required = false) String role) {
         return authentication
                 .login(username, password, role)
                 .orElseThrow(() -> new RuntimeException("invalid login and/or password"));

@@ -14,18 +14,19 @@ import java.util.UUID;
 @Service
 public class TokenAuthenticationService implements UserAuthenticationService {
     @NonNull
-    TokenService tokens;
+    @Autowired
+    JWTTokenService tokens;
     @Autowired
     UserRepository userRepository;
 
     @Override
-    public Optional<UUID> login(String username, String password, String role) {
-        return Optional.of(UUID.fromString(userRepository.findAll()
+    public Optional<String> login(String username, String password, String role) {
+        return userRepository.findAll()
                 .stream()
                 .filter(u -> Objects.equals(username, u.getUsername()))
                 .findFirst()
-                .filter(user -> Objects.equals(password, user.getPassword()))
-                .map(user -> tokens.expiring(Map.of("username", username))).get()));
+                .filter(u -> Objects.equals(password, u.getPassword()))
+                .map(user -> tokens.expiring(Map.of("username", username)));
     }
 
     @Override

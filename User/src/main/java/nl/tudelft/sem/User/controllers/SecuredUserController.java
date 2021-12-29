@@ -59,6 +59,7 @@ public class SecuredUserController {
      */
     @GetMapping("/logout")
     boolean logout(@AuthenticationPrincipal final User user) {
+        System.out.println(user);
         authentication.logout(user);
         return true;
     }
@@ -94,5 +95,4 @@ public class SecuredUserController {
         }
         return userService.createApplication(userId, courseId);
     }
-
 }
