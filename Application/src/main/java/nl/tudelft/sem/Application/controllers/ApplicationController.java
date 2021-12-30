@@ -52,29 +52,29 @@ public class ApplicationController {
 
     @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
+    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
             @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
-        return  applicationService.getApplicationDetails(applications);
+        return  Flux.fromIterable(applicationService.getApplicationDetails(applications));
     }
 
     @GetMapping("/getRatings/{student_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID student_id) {
         try {
-            return applicationService.getRatingForTA(student_id);
+            return applicationService.getRatingForTA(student_id, 47110);
         } catch (EmptyResourceException e) {
             return null;
         }
     }
 
     /**
-     * get all applications for a course
+     * get all applications for a course.
      *
      * @param course id of course
      * @return list of applications for course.
      */
-    @GetMapping("/getApplications/{course_id}")
+    @GetMapping("/retrieveAll/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Flux<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
                                                                  UUID course) {
@@ -122,7 +122,7 @@ public class ApplicationController {
         if (LocalDate.now().isAfter(startDate)) {
             throw new Exception("course has already started");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId())) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
 
@@ -133,11 +133,9 @@ public class ApplicationController {
         } catch (Exception e) {
             throw new Exception("TA or contract creation failed: " + e.getMessage());
         }
-
         applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", 47111 );
         application.setAccepted(true);
         applicationRepository.save(application);
-
         return Mono.just(true);
     }
 }

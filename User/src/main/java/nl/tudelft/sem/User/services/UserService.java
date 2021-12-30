@@ -1,5 +1,14 @@
 package nl.tudelft.sem.User.services;
 
+
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.net.URI;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import nl.tudelft.sem.DTO.ApplicationDTO;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.User.repositories.UserRepository;
@@ -10,12 +19,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
+
 
 @Service
 public class UserService {
@@ -63,13 +68,13 @@ public class UserService {
      *  @return List of all Applications.
      */
 
-    public List<ApplicationDTO> getAllApplications() {
+    public List<ApplicationDTO> getAllApplications(UUID courseId)  {
         WebClient webClient = WebClient.create("http://localhost:47113");
         Flux<ApplicationDTO> applications = webClient.get()
-                .uri("application/retrieveAll")
+                .uri("application/retrieveAll/" + courseId)
                 .retrieve()
                 .bodyToFlux(ApplicationDTO.class);
-        return applications.collectList().block();
+        return applications.toStream().collect(Collectors.toList());
     }
 
     /**
@@ -100,7 +105,7 @@ public class UserService {
                 .uri("application/getApplicationOverview/" + courseId)
                 .retrieve()
                 .bodyToFlux(ApplyingStudentDTO.class);
-        return applications.collectList().block();
+        return applications.toStream().collect(Collectors.toList());
     }
 
     /**
