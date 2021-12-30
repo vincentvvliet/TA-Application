@@ -100,6 +100,16 @@ public class TAControllerTests {
     }
 
     @Test
+    public void setRatingBadRequest() {
+        ResponseStatusException thrown =
+                Assertions.assertThrows(ResponseStatusException.class, () -> {
+                    leaveRatingDTO.setRating(Optional.empty());
+                    taController.setRating(leaveRatingDTO);
+                });
+        Assertions.assertEquals("400 BAD_REQUEST \"Request is incomplete\"", thrown.getMessage());
+    }
+
+    @Test
     public void setRatingSuccessful() {
         taController.createTA(ta.getStudentId(), ta.getCourseId());
         taController.setRating(leaveRatingDTO);
@@ -111,5 +121,12 @@ public class TAControllerTests {
     public void deleteTest() {
         taController.deleteTA(ta.getId());
         verify(taRepository).deleteById(ta.getId());
+    }
+
+    @Test
+    public void deleteFailed() {
+        doThrow(IllegalArgumentException.class).when(taRepository).deleteById(null);
+        Assertions.assertEquals(false, taController.deleteTA(null).block());
+        verify(taRepository).deleteById(null);
     }
 }

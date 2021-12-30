@@ -1,7 +1,8 @@
 package nl.tudelft.sem.TAs.serviceTests;
 
+import java.util.*;
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
-import nl.tudelft.sem.TAs.controllers.TAController;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.TARepository;
 import nl.tudelft.sem.TAs.services.TAService;
@@ -13,13 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class TAServiceTests {
@@ -77,6 +76,24 @@ public class TAServiceTests {
         RatingDTO result = Objects.requireNonNull(mono.block());
         assertEquals(result.getStudentId(), student);
         assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), (5+5+4)/3);
+        assertEquals(result.getRating().get(), (5 + 5 + 4) / 3);
+    }
+
+    @Test
+    public void addRatingSuccessful() {
+        TA ta = new TA(UUID.randomUUID(), UUID.randomUUID());
+        LeaveRatingDTO dto = new LeaveRatingDTO(ta.getId(), Optional.of(5));
+        when(taRepository.findById(ta.getId())).thenReturn(Optional.of(ta));
+        taService.addRating(dto);
+        verify(taRepository).save(any(ta.getClass()));
+    }
+
+    @Test
+    public void addRatingNotSuccessful() {
+        TA ta = new TA(UUID.randomUUID(), UUID.randomUUID());
+        LeaveRatingDTO dto = new LeaveRatingDTO(ta.getId(), Optional.of(5));
+        when(taRepository.findById(ta.getId())).thenReturn(Optional.empty());
+        taService.addRating(dto);
+        verify(taRepository, Mockito.never()).save(any(ta.getClass()));
     }
 }
