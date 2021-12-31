@@ -44,8 +44,10 @@ public class RecommendationService {
             // get rating
             RatingDTO rating = applicationService.getTARatingEmptyIfMissing(studentId, 47110);
             // get grade
-            GradeDTO grade = applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, 47112);
-            return new RecommendationDTO(studentId, Optional.of(rating.getRating()), grade.getGrade());
+            GradeDTO grade = applicationService.getGradeByCourseIdAndStudentId(
+                courseId, studentId, 47112);
+            return new RecommendationDTO(
+                studentId, Optional.of(rating.getRating()), grade.getGrade());
         } catch (Exception e) {
             throw new Exception("Grade not present for student for this course");
         }
