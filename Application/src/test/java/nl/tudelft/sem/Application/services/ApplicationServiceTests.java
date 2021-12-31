@@ -216,38 +216,4 @@ public class ApplicationServiceTests {
         assertEquals(studentId, result.getStudentId());
         assertNull(result.getRating());
     }
-
-    /**
-     * collectApplicationDetails tests
-     */
-    // Succes_return_recommendationDTO
-//    @Test
-//    void collectApplicationDetails_succes_returnRecommendationDTO () {
-//        UUID studentId = UUID.randomUUID();
-//        UUID courseId = UUID.randomUUID();
-//        mockBackEnd.enqueue(new MockResponse()
-//            .setBody(gson.toJson(null)).addHeader("Content-Type", "application/json"));
-//
-//    }
-    // Succes_emptyRating
-    // FailureNoGrade_throwsException
-
-    /**
-     * getRecommendationDetailsByCourse tests
-     */
-    // Succes_noApplicaitons
-    // Succes_multipleApplications
-    // Succes_skips_gradeless_stuffs
-
-    /**
-     * sortOnStrategy tests
-     */
-    // succes_IgnoreRating_sorted
-    // succes_IgnoreRating_sorted
-    // succes_IgnoreRating_sorted
-
-    /**
-     * recommendNStudents tests
-     */
-    // Succes_n_sorted_items
 }

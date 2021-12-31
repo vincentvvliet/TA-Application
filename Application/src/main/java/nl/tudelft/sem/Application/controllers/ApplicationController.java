@@ -5,9 +5,9 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.Application.services.CollectionService;
 import nl.tudelft.sem.Application.services.RecommendationService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
@@ -38,6 +38,9 @@ public class ApplicationController {
 
     @Autowired
     RecommendationService recommendationService;
+
+    @Autowired
+    CollectionService collectionService;
 
     /**
      * GET endpoint to retrieve an application based on studentId and courseId.

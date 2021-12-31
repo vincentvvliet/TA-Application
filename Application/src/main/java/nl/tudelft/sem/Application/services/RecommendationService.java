@@ -27,32 +27,7 @@ public class RecommendationService {
     private ApplicationRepository applicationRepository;
 
     @Autowired
-    private ApplicationService applicationService;
-
-    /**
-     * collectApplicationDetials method that collects a students'
-     * rating and grade for a course.
-     *
-     * @param courseId  id of course.
-     * @param studentId if of student.
-     * @return recommendationDTO containing rating(or empty)
-     * @throws EmptyResourceException iff no grade returned.
-     */
-    public RecommendationDTO collectApplicationDetails(UUID courseId, UUID studentId)
-        throws Exception {
-        try {
-            // get rating
-            RatingDTO rating = applicationService.getTARatingEmptyIfMissing(studentId, 47110);
-            // get grade
-            GradeDTO grade = applicationService.getGradeByCourseIdAndStudentId(
-                courseId, studentId, 47112);
-            return new RecommendationDTO(
-                studentId, Optional.of(rating.getRating()), grade.getGrade());
-        } catch (Exception e) {
-            throw new Exception("Grade not present for student for this course");
-        }
-    }
-
+    private CollectionService collectionService;
     /** getRecommendationDetailsByCourse.
      *
      * @param courseId id of course.
@@ -64,7 +39,7 @@ public class RecommendationService {
         for (Application a : applications) {
             RecommendationDTO applicationDetails;
             try {
-                applicationDetails = collectApplicationDetails(a.getCourseId(), a.getStudentId());
+                applicationDetails = collectionService.collectApplicationDetails(a.getCourseId(), a.getStudentId());
             } catch (Exception e) {
                 // "a" doesn't have a grade for the course.
                 continue;
