@@ -8,6 +8,7 @@ import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.Application.services.RecommendationService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
@@ -35,6 +36,8 @@ public class ApplicationController {
     @Autowired
     ApplicationService applicationService;
 
+    @Autowired
+    RecommendationService recommendationService;
     /**
      * GET endpoint to retrieve an application based on studentId and courseId.
      *
@@ -143,25 +146,25 @@ public class ApplicationController {
     @GetMapping("/getSortedList/{course_id}/{strategy}")
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
-        List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
-        return Flux.fromIterable(applicationService.sortOnStrategy(list, strategy));
+        List<RecommendationDTO> list = recommendationService.getRecommendationDetailsByCourse(courseId);
+        return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
     }
 
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
     Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId,
                                        @PathVariable("strategy") String strategy,
                                        @PathVariable("n") int n) {
-        List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
-        return Flux.fromIterable(applicationService.recommendNStudents(list, strategy, n));
+        List<RecommendationDTO> list = recommendationService.getRecommendationDetailsByCourse(courseId);
+        return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
     }
 
     @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
     Mono<Boolean> hireN(@PathVariable("course_id") UUID courseId,
                         @PathVariable("strategy") String strategy,
                         @PathVariable("n") int n) {
-        List<RecommendationDTO> list = applicationService.getRecommendationDetailsByCourse(courseId);
+        List<RecommendationDTO> list = recommendationService.getRecommendationDetailsByCourse(courseId);
         List<RecommendationDTO> recommended =
-            applicationService.recommendNStudents(list, strategy, n);
+            recommendationService.recommendNStudents(list, strategy, n);
         // Hire all n recommended students
         for (RecommendationDTO rec : recommended) {
             Application application =
