@@ -38,6 +38,7 @@ public class ApplicationController {
 
     @Autowired
     RecommendationService recommendationService;
+
     /**
      * GET endpoint to retrieve an application based on studentId and courseId.
      *
@@ -146,7 +147,8 @@ public class ApplicationController {
     @GetMapping("/getSortedList/{course_id}/{strategy}")
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
-        List<RecommendationDTO> list = recommendationService.getRecommendationDetailsByCourse(courseId);
+        List<RecommendationDTO> list = recommendationService
+            .getRecommendationDetailsByCourse(courseId);
         return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
     }
 
@@ -154,7 +156,8 @@ public class ApplicationController {
     Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId,
                                        @PathVariable("strategy") String strategy,
                                        @PathVariable("n") int n) {
-        List<RecommendationDTO> list = recommendationService.getRecommendationDetailsByCourse(courseId);
+        List<RecommendationDTO> list = recommendationService
+            .getRecommendationDetailsByCourse(courseId);
         return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
     }
 
@@ -162,7 +165,8 @@ public class ApplicationController {
     Mono<Boolean> hireN(@PathVariable("course_id") UUID courseId,
                         @PathVariable("strategy") String strategy,
                         @PathVariable("n") int n) {
-        List<RecommendationDTO> list = recommendationService.getRecommendationDetailsByCourse(courseId);
+        List<RecommendationDTO> list = recommendationService
+            .getRecommendationDetailsByCourse(courseId);
         List<RecommendationDTO> recommended =
             recommendationService.recommendNStudents(list, strategy, n);
         // Hire all n recommended students

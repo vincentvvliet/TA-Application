@@ -151,7 +151,8 @@ public class ApplicationService {
             try {
                 ret.add(new ApplyingStudentDTO(
                     a.getStudentId(),
-                    getGradeByCourseIdAndStudentId(a.getStudentId(), a.getCourseId(), 47112).getGrade(),
+                    getGradeByCourseIdAndStudentId(
+                        a.getStudentId(), a.getCourseId(), 47112).getGrade(),
                     Optional.of(getRatingForTA(a.getStudentId(), 47110).getRating())
                 ));
             } catch (Exception e) {
@@ -170,9 +171,10 @@ public class ApplicationService {
      * @return GradeDTO.
      * @throws Exception when no grade is found.
      */
-    public GradeDTO getGradeByCourseIdAndStudentId(UUID courseId, UUID studentId, int port) throws Exception {
+    public GradeDTO getGradeByCourseIdAndStudentId(UUID courseId, UUID studentId, int port)
+        throws Exception {
         // Request to Course microservice
-        WebClient webClient = WebClient.create("http://localhost:"+ port);
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<GradeDTO> response = webClient.get()
             .uri("/grade/getGrades/" + courseId + "/" + studentId)
             .retrieve()
