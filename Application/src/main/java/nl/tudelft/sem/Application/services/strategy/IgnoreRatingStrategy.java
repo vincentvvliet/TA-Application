@@ -14,7 +14,10 @@ public class IgnoreRatingStrategy implements Strategy {
     @Override
     public List<RecommendationDTO> recommend(List<RecommendationDTO> list) {
 
-        Stream<RecommendationDTO> recommendationStream = list.stream().sorted(Comparator.comparingDouble(RecommendationDTO::getGrade));
-        return recommendationStream.collect(Collectors.toList());
+        Stream<RecommendationDTO> recommendationStream = list.stream()
+            .sorted(Comparator.comparingDouble(RecommendationDTO::getGrade));
+        List<RecommendationDTO> l = recommendationStream.collect(Collectors.toList());
+        Collections.reverse(l);
+        return l;
     }
 }
