@@ -8,12 +8,8 @@ import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.GradeDTO;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
@@ -251,4 +247,38 @@ public class ApplicationService {
         if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
         return context.giveRecommendation(list);
     }
+
+    /**
+     * Determines if a student is already selected to TA 3 courses per quarter
+     * Important: 3 courses are in the same quarter if they overlap (partially or totally)
+     *
+     * @param studentId of the student applying as TA
+     * @param courseId of the course for which student is applying as TA
+     *
+     * @return true if student is not already TA for 3 courses this quarter, false otherwise
+     */
+    public boolean studentCanTAAnotherCourse(UUID studentId, UUID courseId) {
+        List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
+        List<UUID> overlappingCourses = getOverlappingCourses(courseId, 47112);
+        overlappingCourses.retainAll(coursesAcceptedAsTA);
+        return (overlappingCourses.size() < 3);
+    }
+
+    /**
+     * Get list of courses that overlap with a certain course
+     *
+     * @param courseId of course that overlaps
+     * @param port of the server on which request is performed (on Course microservice)
+     *
+     * @return list of courses that overlap with the given course
+     */
+    public List<UUID> getOverlappingCourses(UUID courseId, int port) {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Flux<UUID> overlappingCourses = webClient.get()
+                .uri("/course/getOverlappingCourses/" + courseId)
+                .retrieve()
+                .bodyToFlux(UUID.class);
+        return overlappingCourses.toStream().collect(Collectors.toList());
+    }
+
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -113,6 +114,9 @@ public class ApplicationController {
             .orElseThrow(() -> new NoSuchElementException("application does not exist"));
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
+        }
+        if (! applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
         if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
             throw new Exception("maximum number of TA's was already reached for this course");
