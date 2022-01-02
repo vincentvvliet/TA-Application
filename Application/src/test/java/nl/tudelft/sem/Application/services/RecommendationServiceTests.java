@@ -119,7 +119,7 @@ public class RecommendationServiceTests {
         // Act
         List<RecommendationDTO> result = recommendationService.sortOnStrategy(List.of(recommendation1, recommendation2, recommendation3), "Grade&Rating");
         // Assert
-        assertEquals(List.of(recommendation1, recommendation2, recommendation3), result);
+        assertEquals(List.of(recommendation1, recommendation3, recommendation2), result);
     }
 
     @Test
