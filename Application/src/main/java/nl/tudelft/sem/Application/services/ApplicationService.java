@@ -90,7 +90,7 @@ public class ApplicationService {
         if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
             throw new Exception("Could not create TA.");
         }
-        return  true;
+        return true;
     }
 
     /** Ask the Course microservice for the grade corresponding to
@@ -256,7 +256,6 @@ public class ApplicationService {
         if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
         return context.giveRecommendation(list);
     }
-}
 
     /** Requests notification for a user.
      *

@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
@@ -115,25 +117,25 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId());
+        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), 47112);
         if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
             throw new Exception("application is still open for application");
         }
         if (LocalDate.now().isAfter(startDate)) {
             throw new Exception("course has already started");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47112)) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
 
         try {
             applicationService.createTA(application.getStudentId(), application.getCourseId(), 47110);
-            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(),47110);
-            applicationService.addContract(application.getStudentId(),contractId,47110);
+            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), 47110);
+            applicationService.addContract(application.getStudentId(), contractId, 47110);
         } catch (Exception e) {
             throw new Exception("TA or contract creation failed: " + e.getMessage());
         }
-        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", 47111 );
+        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", 47111);
         application.setAccepted(true);
         applicationRepository.save(application);
         return Mono.just(true);

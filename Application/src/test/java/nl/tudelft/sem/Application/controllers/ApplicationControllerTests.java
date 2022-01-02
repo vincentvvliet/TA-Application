@@ -93,8 +93,9 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        //when(applicationService.createTA(studentId,courseId,47110)).thenReturn(true);
-        when(applicationService.getCourseStartDate(courseId,47110)).thenReturn(startDateClosed);
+        when(applicationService.createTA(studentId,courseId,47110)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId,47112)).thenReturn(startDateClosed);
+        when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
@@ -127,7 +128,7 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(false);
-        when(applicationService.getCourseStartDate(courseId, 47110)).thenReturn(startDateClosed);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "maximum number of TA's was already reached for this course";
         String actualMessage = exception.getMessage();
@@ -141,8 +142,9 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        when(applicationService.getCourseStartDate(courseId, 47110)).thenReturn(startDateClosed);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
         when(applicationService.createTA(studentId, courseId, 47110)).thenThrow(new Exception("Could not create TA."));
+        when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
         Exception thrown =
                 Assertions.assertThrows(Exception.class, () -> {
                     applicationController.acceptApplication(id);
@@ -202,8 +204,8 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        //when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
-        when(applicationService.getCourseStartDate(courseId, 47110)).thenReturn(startDateOpen);
+        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateOpen);
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "application is still open for application";
         String actualMessage = exception.getMessage();
@@ -217,8 +219,8 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        //when(applicationService.createTA(studentId,courseId, 47110).thenReturn(true);
-        when(applicationService.getCourseStartDate(courseId, 47110)).thenReturn(LocalDate.now().minusWeeks(1));
+        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(LocalDate.now().minusWeeks(1));
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "course has already started";
         String actualMessage = exception.getMessage();
