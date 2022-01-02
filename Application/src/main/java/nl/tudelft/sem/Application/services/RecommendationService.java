@@ -28,6 +28,7 @@ public class RecommendationService {
 
     @Autowired
     private CollectionService collectionService;
+
     /** getRecommendationDetailsByCourse.
      *
      * @param courseId id of course.
@@ -57,16 +58,21 @@ public class RecommendationService {
      * @param strategy to use for recommending system.
      * @return the recommended list of applicants.
      */
-    public List<RecommendationDTO> sortOnStrategy(List<RecommendationDTO> list, String strategy) {
+    public List<RecommendationDTO> sortOnStrategy(List<RecommendationDTO> list, String strategy)
+        throws Exception {
         StrategyContext context = new StrategyContext();
-        if (strategy.equals("IgnoreRating")) {
-            context.setRecommendation(new IgnoreRatingStrategy());
-        }
-        if (strategy.equals("IgnoreGrade")) {
-            context.setRecommendation(new IgnoreGradeStrategy());
-        }
-        if (strategy.equals("Grade&Rating")) {
-            context.setRecommendation(new EqualStrategy());
+        switch (strategy) {
+            case "IgnoreRating":
+                context.setRecommendation(new IgnoreRatingStrategy());
+                break;
+            case "IgnoreGrade":
+                context.setRecommendation(new IgnoreGradeStrategy());
+                break;
+            case "Grade&Rating":
+                context.setRecommendation(new EqualStrategy());
+                break;
+            default:
+                throw new Exception("strategy doesn't exist!");
         }
         return context.giveRecommendation(list);
     }
@@ -80,7 +86,7 @@ public class RecommendationService {
      * @return N best students based on criterion strategy.
      */
     public List<RecommendationDTO> recommendNStudents(List<RecommendationDTO> list, String strategy,
-                                                      int n) {
+                                                      int n) throws Exception{
         return sortOnStrategy(list, strategy).subList(0, n);
     }
 }

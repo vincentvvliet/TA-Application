@@ -152,7 +152,11 @@ public class ApplicationController {
                                           @PathVariable("strategy") String strategy) {
         List<RecommendationDTO> list = recommendationService
             .getRecommendationDetailsByCourse(courseId);
-        return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
+        try {
+            return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested Strategy not found!");
+        }
     }
 
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
@@ -161,7 +165,11 @@ public class ApplicationController {
                                        @PathVariable("n") int n) {
         List<RecommendationDTO> list = recommendationService
             .getRecommendationDetailsByCourse(courseId);
-        return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
+        try {
+            return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested Strategy not found!");
+        }
     }
 
     @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
@@ -170,31 +178,35 @@ public class ApplicationController {
                         @PathVariable("n") int n) {
         List<RecommendationDTO> list = recommendationService
             .getRecommendationDetailsByCourse(courseId);
-        List<RecommendationDTO> recommended =
-            recommendationService.recommendNStudents(list, strategy, n);
-        // Hire all n recommended students
-        for (RecommendationDTO rec : recommended) {
-            Application application =
-                applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
-                    .orElseThrow(() -> new NoSuchElementException("application does not exist"));
-            if (application.isAccepted()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "application is already accepted");
+        try {
+            List<RecommendationDTO> recommended =
+                recommendationService.recommendNStudents(list, strategy, n);
+            // Hire all n recommended students
+            for (RecommendationDTO rec : recommended) {
+                Application application =
+                    applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
+                        .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+                if (application.isAccepted()) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "application is already accepted");
+                }
+                if (!applicationService.isTASpotAvailable(application.getCourseId())) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "maximum number of TA's was already reached for this course");
+                }
+                boolean successfullyCreated = applicationService
+                    .createTA(application.getStudentId(), application.getCourseId());
+                if (!successfullyCreated) {
+                    return Mono.just(false);
+                }
+                // Save accepted application to database.
+                application.setAccepted(true);
+                applicationRepository.save(application);
+                return Mono.just(true);
             }
-            if (!applicationService.isTASpotAvailable(application.getCourseId())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "maximum number of TA's was already reached for this course");
-            }
-            boolean successfullyCreated = applicationService
-                .createTA(application.getStudentId(), application.getCourseId());
-            if (!successfullyCreated) {
-                return Mono.just(false);
-            }
-            // Save accepted application to database.
-            application.setAccepted(true);
-            applicationRepository.save(application);
             return Mono.just(true);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested Strategy not found!");
         }
-        return Mono.just(true);
     }
 }
