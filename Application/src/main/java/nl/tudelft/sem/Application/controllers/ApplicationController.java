@@ -155,7 +155,7 @@ public class ApplicationController {
         try {
             return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested Strategy not found!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }
     }
 
@@ -168,7 +168,7 @@ public class ApplicationController {
         try {
             return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested Strategy not found!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }
     }
 
@@ -184,29 +184,29 @@ public class ApplicationController {
             // Hire all n recommended students
             for (RecommendationDTO rec : recommended) {
                 Application application =
-                    applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
-                        .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+                applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
+                    .orElseThrow(() -> new NoSuchElementException("application does not exist"));
                 if (application.isAccepted()) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "application is already accepted");
+                   continue;
                 }
                 if (!applicationService.isTASpotAvailable(application.getCourseId())) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "maximum number of TA's was already reached for this course");
+                  continue;
                 }
                 boolean successfullyCreated = applicationService
                     .createTA(application.getStudentId(), application.getCourseId());
                 if (!successfullyCreated) {
-                    return Mono.just(false);
+                    continue;
                 }
                 // Save accepted application to database.
                 application.setAccepted(true);
                 applicationRepository.save(application);
-                return Mono.just(true);
             }
             return Mono.just(true);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Requested Strategy not found!");
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentId in recommendationDTO not found!");
+        }
+        catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }
     }
 }
