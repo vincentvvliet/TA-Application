@@ -4,6 +4,7 @@ import lombok.NonNull;
 import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
+import nl.tudelft.sem.User.security.TokenAuthenticationService;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.util.List;
 public class SecuredUserController {
 
     @NonNull
-    UserAuthenticationService authentication;
+    TokenAuthenticationService authentication;
 
     @Autowired
     private UserRepository userRepository;
@@ -48,7 +49,7 @@ public class SecuredUserController {
      * @return list of courses
      */
     @GetMapping("/getUsers")
-    public List<User> getCourses() {
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
@@ -59,7 +60,7 @@ public class SecuredUserController {
      */
     @GetMapping("/logout")
     boolean logout(@AuthenticationPrincipal final User user) {
-        System.out.println(user);
+        System.out.println(user); //TODO user null
         authentication.logout(user);
         return true;
     }

@@ -8,18 +8,18 @@ import java.util.Optional;
 public interface UserAuthenticationService {
 
     /**
-     * Logs in with the given {@code username} and {@code password}.
+     * Logs in with the given {@code username} and {@code password} and {@code role}.
      *
      * @param username
      * @param password
-     * @return an {@link Optional} of a user when login succeeds
+     * @return an {@link Optional} of a JWT token when login succeeds
      */
     Optional<String> login(String username, String password, String role);
 
     /**
-     * Finds a user by its dao-key.
+     * Finds a user by its token.
      *
-     * @param token user dao key
+     * @param token user token
      * @return
      */
     Optional<User> findByToken(String token);
