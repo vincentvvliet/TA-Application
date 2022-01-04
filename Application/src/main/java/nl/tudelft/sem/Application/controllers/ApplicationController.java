@@ -192,11 +192,11 @@ public class ApplicationController {
                 if (application.isAccepted()) {
                    continue;
                 }
-                if (!applicationService.isTASpotAvailable(application.getCourseId())) {
+                if (!applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
                   continue;
                 }
                 boolean successfullyCreated = applicationService
-                    .createTA(application.getStudentId(), application.getCourseId());
+                    .createTA(application.getStudentId(), application.getCourseId(), 47110);
                 if (!successfullyCreated) {
                     continue;
                 }

@@ -26,6 +26,7 @@ import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -161,28 +162,7 @@ public class ApplicationService {
         return applicationRepository.findApplicationsByCourseId(course);
     }
 
-    /** getRatingForTA method.
-     * Makes request to TA service for an average rating.
-     *
-     * @param studentId studentId of TA we want the rating for.
-     * @param port of the server on which request is performed (on TA microservice)
-     *
-     * @return rating of TA for a certain course.
-     * @throws EmptyResourceException if the TA service returns an empty result.
-     */
-    public RatingDTO getRatingForTA(UUID studentId, int port) throws EmptyResourceException {
-        WebClient webClient = WebClient.create("http://localhost:" + port);
-        Mono<RatingDTO> rating = webClient.get()
-            .uri("/TA/getRating/" + studentId)
-            .retrieve()
-            .bodyToMono(RatingDTO.class);
-        Optional<RatingDTO> result = rating.blockOptional();
-        if (result.isEmpty()) {
-            throw new EmptyResourceException("no TA rating found");
-        }
 
-        return result.get();
-    }
 
     /**
      * Transforms list of applications to list of ApplyingStudentDTO,
@@ -254,14 +234,6 @@ public class ApplicationService {
         return result.get();
     }
 
-    /**
-     * getRatingForTA method.
-     * Makes request to TA service for a average rating.
-     *
-     * @param studentId studentId of TA we want the rating for.
-     * @param port port on which TA ms is hosted. (default 47110)
-     * @return rating of TA for a certain course. Leaves rating optional.
-     */
     public RatingDTO getTARatingEmptyIfMissing(UUID studentId, int port) {
         // Request to TA microservice
         // RatingOptional might be empty

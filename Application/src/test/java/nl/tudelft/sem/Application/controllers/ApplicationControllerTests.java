@@ -313,9 +313,9 @@ public class ApplicationControllerTests {
             .thenReturn(List.of(recommendation1, recommendation2, recommendation3));
         when(recommendationService.recommendNStudents(any(), any(), anyInt()))
             .thenReturn(List.of(recommendation3, recommendation1));
-        when(applicationService.isTASpotAvailable(any()))
+        when(applicationService.isTASpotAvailable(any(), eq(47110)))
             .thenReturn(true);
-        when(applicationService.createTA(any(), any()))
+        when(applicationService.createTA(any(), any(), eq(47110)))
             .thenReturn(true);
         //      Set Database behaviour
         when(applicationRepository.findByStudentIdAndCourseId(eq(recommendation1.getStudentId()), any()))
@@ -330,9 +330,9 @@ public class ApplicationControllerTests {
         assertEquals(true, result.block());
         verify(applicationRepository).findByStudentIdAndCourseId(eq(recommendation1.getStudentId()), any());
         verify(applicationRepository).findByStudentIdAndCourseId(eq(recommendation3.getStudentId()), any());
-        verify(applicationService, atMostOnce()).createTA(eq(recommendation1.getStudentId()), any());
-        verify(applicationService, never()).createTA(eq(recommendation2.getStudentId()), any());
-        verify(applicationService, atMostOnce()).createTA(eq(recommendation3.getStudentId()), any());
+        verify(applicationService, atMostOnce()).createTA(eq(recommendation1.getStudentId()), any(), eq(47110));
+        verify(applicationService, never()).createTA(eq(recommendation2.getStudentId()), any(), eq(47110));
+        verify(applicationService, atMostOnce()).createTA(eq(recommendation3.getStudentId()), any(), eq(47110));
 
     }
 
@@ -362,9 +362,9 @@ public class ApplicationControllerTests {
             .thenReturn(List.of(recommendation1, recommendation2, recommendation3));
         when(recommendationService.recommendNStudents(any(), any(), anyInt()))
             .thenReturn(List.of(recommendation3, recommendation1));
-        when(applicationService.isTASpotAvailable(any()))
+        when(applicationService.isTASpotAvailable(any(), eq(47110)))
             .thenReturn(true);
-        when(applicationService.createTA(any(), any()))
+        when(applicationService.createTA(any(), any(), eq(47110)))
             .thenReturn(true);
         //      Set Database behaviour
         when(applicationRepository.findByStudentIdAndCourseId(any(), any())).thenReturn(Optional.empty());
