@@ -6,6 +6,8 @@ import nl.tudelft.sem.Course.repositories.GradeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -41,7 +43,7 @@ public class CourseController {
     /**
      * GET endpoint retrieves startDate of course by id
      * @param id (UUID) of the course
-     * @return optional of course
+     * @return optional of date
      */
     @GetMapping("/getCourseStartDate/{id}")
     public Mono<LocalDate> getCourseStartDateById(@PathVariable(value = "id") UUID id) {
@@ -52,23 +54,50 @@ public class CourseController {
         return Mono.empty();
     }
 
+    /**
+     * GET endpoint retrieves number of participants to course by id
+     * @param id (UUID) of the course
+     * @return optional of integer (nr participants)
+     */
+    @GetMapping("/getCourseNrParticipants/{id}")
+    public Mono<Integer> getCourseNrParticipantsById(@PathVariable(value = "id") UUID id) {
+        Optional<Course> course = courseRepository.findById(id);
+        if(course.isPresent()){
+            return Mono.just(course.get().getNrParticipants());
+        }
+        return Mono.empty();
+    }
+
 
     /**
      * GET endpoint retrieves all existing courses
      * @return list of courses
      */
     @GetMapping("/getCourses")
-    public Mono<List<Course>> getCourses() {
-        return Mono.just(courseRepository.findAll());
+    public Flux<Course> getCourses() {
+        return Flux.fromIterable(courseRepository.findAll());
     }
 
     /**
-     * GET endpoint retrieves all open courses
+     * GET endpoint retrieves all open courses.
+     * The courses are considered open if there are more than 3 weeks left until the start date.
      * @return list of courses
      */
     @GetMapping("/getOpenCourses")
-    public Mono<List<Course>> getOpenCourses() {
-        return Mono.just(courseRepository.findByStartDateBetween(LocalDate.now(), LocalDate.now().plusWeeks(selectionPeriod)));
+    public Flux<Course> getOpenCourses() {
+        return Flux.fromIterable(courseRepository.findByStartDateIsAfter(LocalDate.now().plusWeeks(selectionPeriod)));
+    }
+
+    /**
+     * GET endpoint retrieves all overlapping courses with a given course
+     * @param courseId of the course for which other overlapping courses are searched
+     * @return list of overlapping courses (id's) - including the specified course itself
+     */
+    @GetMapping("/getOverlappingCourses/{course_id}")
+    public Flux<UUID> getOverlappingCourses(@PathVariable(value = "course_id") UUID courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Specified course does not exit!"));
+        List<UUID> overlappingCourses = courseRepository.findOverlappingCourses(course.getStartDate(), course.getEndDate());
+        return Flux.fromStream(overlappingCourses.stream());
     }
 
     /**

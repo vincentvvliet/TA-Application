@@ -16,15 +16,16 @@ public class TAService {
     @Autowired
     TARepository taRepository;
 
+    /**
+     * Gets the average TA rating for a given student
+     * @param studentId of the student whose average TA rating is returned
+     * @return mono of RatingDTO (containing studentId and rating)
+     */
     public Mono<RatingDTO> getAverageRating(UUID studentId) {
-        List<TA> TAs = taRepository.findAllByStudentId(studentId);
-        if(!TAs.isEmpty()) {
-            int sum = 0;
-            for(TA ta:TAs) {
-                sum += ta.getRating();
-            }
+        Optional<Integer> averageRating = taRepository.getAverageRating(studentId);
+        if(averageRating.isPresent()) {
             RatingDTO dto = new RatingDTO();
-            dto.setRating(sum / TAs.size());
+            dto.setRating(averageRating);
             dto.setStudentId(studentId);
             return Mono.just(dto);
         }

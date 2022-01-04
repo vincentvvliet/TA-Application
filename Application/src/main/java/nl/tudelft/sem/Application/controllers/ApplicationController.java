@@ -66,10 +66,10 @@ public class ApplicationController {
 
     @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public List<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
-        @PathVariable(value = "course_id") UUID course) {
+    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
+            @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
-        return applicationService.getApplicationDetails(applications);
+        return  Flux.fromIterable(applicationService.getApplicationDetails(applications));
     }
 
 
@@ -134,11 +134,14 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        if (!applicationService.isTASpotAvailable(application.getCourseId())) {
+        if (! applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
+        }
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId());
+            .createTA(application.getStudentId(), application.getCourseId(), 47110);
         if (!successfullyCreated) {
             return Mono.just(false);
         }
