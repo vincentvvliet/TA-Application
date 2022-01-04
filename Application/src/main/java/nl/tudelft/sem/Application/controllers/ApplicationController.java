@@ -163,9 +163,9 @@ public class ApplicationController {
     }
 
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
-    Flux<RecommendationDTO> recommendN(@PathVariable("course_id") UUID courseId,
-                                       @PathVariable("strategy") String strategy,
-                                       @PathVariable("n") int n) {
+    Flux<RecommendationDTO> recommendNStudents(@PathVariable("course_id") UUID courseId,
+                                               @PathVariable("strategy") String strategy,
+                                               @PathVariable("n") int n) {
         List<RecommendationDTO> list = recommendationService
             .getRecommendationDetailsByCourse(courseId);
         try {
@@ -176,9 +176,9 @@ public class ApplicationController {
     }
 
     @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
-    Mono<Boolean> hireN(@PathVariable("course_id") UUID courseId,
-                        @PathVariable("strategy") String strategy,
-                        @PathVariable("n") int n) {
+    Mono<Boolean> hireNStudents(@PathVariable("course_id") UUID courseId,
+                                @PathVariable("strategy") String strategy,
+                                @PathVariable("n") int n) {
         List<RecommendationDTO> list = recommendationService
             .getRecommendationDetailsByCourse(courseId);
         try {

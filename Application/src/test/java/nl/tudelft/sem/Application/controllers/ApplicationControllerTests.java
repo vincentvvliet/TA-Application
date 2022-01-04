@@ -1,6 +1,5 @@
 package nl.tudelft.sem.Application.controllers;
 
-import nl.tudelft.sem.Application.controllers.ApplicationController;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
@@ -10,8 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -260,7 +257,7 @@ public class ApplicationControllerTests {
             .thenThrow(new Exception());
         // Act
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            ()-> applicationController.hireN(courseId, "Gibberish", 2));
+            ()-> applicationController.hireNStudents(courseId, "Gibberish", 2));
         // Assert
         assertEquals("Requested Strategy not found!", e.getReason());
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -279,7 +276,7 @@ public class ApplicationControllerTests {
         when(recommendationService.recommendNStudents(any(), any(), anyInt()))
             .thenReturn(List.of(recommendation3, recommendation1));
         // Act
-        Flux<RecommendationDTO> result = applicationController.recommendN(courseId, "IgnoreGrade", 2);
+        Flux<RecommendationDTO> result = applicationController.recommendNStudents(courseId, "IgnoreGrade", 2);
         // Assert
         assertEquals(List.of(recommendation3, recommendation1), result.collectList().block());
     }
@@ -295,7 +292,7 @@ public class ApplicationControllerTests {
             .thenThrow(new Exception());
         // Act
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            ()-> applicationController.recommendN(courseId, "Gibberish", 2));
+            ()-> applicationController.recommendNStudents(courseId, "Gibberish", 2));
         // Assert
         assertEquals("Requested Strategy not found!", e.getReason());
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -325,7 +322,7 @@ public class ApplicationControllerTests {
         when(applicationRepository.findByStudentIdAndCourseId(eq(recommendation3.getStudentId()), any()))
             .thenReturn(Optional.of(rec_app3));
         // Act
-        Mono<Boolean> result = applicationController.hireN(courseId, "IgnoreGrade", 2);
+        Mono<Boolean> result = applicationController.hireNStudents(courseId, "IgnoreGrade", 2);
         // Assert
         assertEquals(true, result.block());
         verify(applicationRepository).findByStudentIdAndCourseId(eq(recommendation1.getStudentId()), any());
@@ -347,7 +344,7 @@ public class ApplicationControllerTests {
             .thenThrow(new Exception());
         // Act
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            ()-> applicationController.hireN(courseId, "Gibberish", 2));
+            ()-> applicationController.hireNStudents(courseId, "Gibberish", 2));
         // Assert
         assertEquals("Requested Strategy not found!", e.getReason());
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -370,7 +367,7 @@ public class ApplicationControllerTests {
         when(applicationRepository.findByStudentIdAndCourseId(any(), any())).thenReturn(Optional.empty());
         // Act
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            ()-> applicationController.hireN(courseId, "IgnoreGrade", 2));
+            ()-> applicationController.hireNStudents(courseId, "IgnoreGrade", 2));
         // Assert
         assertEquals("StudentId in recommendationDTO not found!", e.getReason());
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
