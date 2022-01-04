@@ -18,10 +18,11 @@ public class EqualStrategy implements Strategy {
      */
     @Override
     public List<RecommendationDTO> recommend(List<RecommendationDTO> list) {
-        Stream<RecommendationDTO> recommendationStream = list.stream().filter(x -> x.getRating().isPresent())
-            .sorted(Comparator.comparingDouble(x -> x.getRating().orElse(0) + x.getGrade()));
-        List<RecommendationDTO> l = recommendationStream.collect(Collectors.toList());
-        Collections.reverse(l);
-        return l;
+        List<RecommendationDTO> recommendationList = list.stream()
+            .filter(x -> x.getRating().isPresent())
+            .sorted(Comparator.comparingDouble(x -> x.getRating().orElse(0) + x.getGrade()))
+            .collect(Collectors.toList());
+        Collections.reverse(recommendationList);
+        return recommendationList;
     }
 }
