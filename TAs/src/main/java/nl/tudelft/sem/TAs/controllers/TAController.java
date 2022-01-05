@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -108,6 +109,27 @@ public class TAController {
         } catch (Exception e) {
             return Mono.just(false);
         }
+    }
+
+    /**
+     * PATCH endpoint sets actual time spent by a TA preparing for a course
+     * @param id of the TA
+     * @param timeSpent estimated average number of weekly hours spent by the TA working on the course
+     * @return true if time was added successfully, false otherwise
+     */
+    @PatchMapping("addTimeSpent/{id}/{timeSpent}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Mono<Boolean> addTimeSpent(@PathVariable (value = "id")  UUID id , @PathVariable(value = "timeSpent") Integer timeSpent) {
+        TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException("no TA was found with the given id"));
+        if (timeSpent <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "number of hours spent must be positive");
+        }
+        if (! taService.isCourseFinished(ta.getCourseId(), 47112)) {
+            return Mono.just(false);
+        }
+        ta.setTimeSpent(timeSpent);
+        taRepository.save(ta);
+        return Mono.just(true);
     }
 
 
