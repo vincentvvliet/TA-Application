@@ -38,7 +38,7 @@ public class CollectionServiceTests {
         // Arrange
         RecommendationDTO expected = new RecommendationDTO(studentId, Optional.of(4), 8.2d);
         //      Mock behaviour for retrieving RatingDTO
-        Mockito.when(applicationService.getTARatingEmptyIfMissing(studentId, 47110)).thenReturn(new RatingDTO(studentId, expected.getRating().get()));
+        Mockito.when(applicationService.getRatingForTA(studentId, 47110)).thenReturn(new RatingDTO(studentId, expected.getRating().get()));
         //      Mock behaviour for retrieving GradeDTO
         Mockito.when(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, 47112)).thenReturn(new GradeDTO(studentId, expected.getGrade()));
         // Act
@@ -53,7 +53,7 @@ public class CollectionServiceTests {
         // Arrange
         RecommendationDTO expected = new RecommendationDTO(studentId, Optional.empty(), 8.2d);
         //      Mock behaviour for retrieving RatingDTO
-        Mockito.when(applicationService.getTARatingEmptyIfMissing(studentId, 47110)).thenReturn(new RatingDTO(studentId, null));
+        Mockito.when(applicationService.getRatingForTA(studentId, 47110)).thenReturn(new RatingDTO(studentId, null));
         //      Mock behaviour for retrieving GradeDTO
         Mockito.when(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, 47112)).thenReturn(new GradeDTO(studentId, expected.getGrade()));
         // Act
@@ -67,7 +67,7 @@ public class CollectionServiceTests {
         // Arrange
         RecommendationDTO expected = new RecommendationDTO(studentId, Optional.empty(), 8.2d);
         //      Mock behaviour for retrieving RatingDTO
-        Mockito.when(applicationService.getTARatingEmptyIfMissing(studentId, 47110)).thenReturn(new RatingDTO(studentId, null));
+        Mockito.when(applicationService.getRatingForTA(studentId, 47110)).thenThrow(new Exception("No TA rating found!"));
         //      Mock behaviour for retrieving GradeDTO
         Mockito.when(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, 47112)).thenThrow(new Exception("missing"));
         // Act && Assert

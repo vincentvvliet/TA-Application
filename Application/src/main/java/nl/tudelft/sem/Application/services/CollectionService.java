@@ -28,13 +28,20 @@ public class CollectionService {
         throws Exception {
         try {
             // get rating
-            RatingDTO rating = applicationService.getTARatingEmptyIfMissing(studentId, 47110);
+            RatingDTO ratingDTO = null;
+            try {
+                ratingDTO = applicationService.getRatingForTA(studentId, 47110);
+            } catch (Exception e) {
+                ratingDTO = new RatingDTO();
+                ratingDTO.setStudentId(studentId);
+                ratingDTO.setRating(null);
+            }
             // get grade
             GradeDTO grade = applicationService.getGradeByCourseIdAndStudentId(
                 courseId, studentId, 47112);
             // If there is no rating, have Optional.empty() as value
-            Optional<Integer> ratingOpt = (rating.getRating() == null) ?
-                (Optional.empty()) : (Optional.of(rating.getRating()));
+            Optional<Integer> ratingOpt = (ratingDTO.getRating() == null) ?
+                (Optional.empty()) : (Optional.of(ratingDTO.getRating()));
             return new RecommendationDTO(
                 studentId, ratingOpt, grade.getGrade());
 

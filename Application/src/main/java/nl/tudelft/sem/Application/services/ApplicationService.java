@@ -74,7 +74,6 @@ public class ApplicationService {
      *
      * @param studentId of the student that becomes TA.
      * @param courseId  of the course for which student is TA.
-     * @param courseId of the course for which student is TA.
      * @param port of the server to which request is sent (on TA microservice)
      *
      * @return true if the TA was successfully created.
@@ -171,19 +170,15 @@ public class ApplicationService {
      * @param applications List of bare applications.
      * @return List of detailed applications.
      */
-    public List<ApplyingStudentDTO> getApplicationDetails(List<Application> applications) {
+    public List<ApplyingStudentDTO> getApplicationDetails(List<Application> applications, int gradePort, int taPort) throws Exception{
         List<ApplyingStudentDTO> ret = new ArrayList<>();
         for (Application a : applications) {
-            try {
-                ret.add(new ApplyingStudentDTO(
-                    a.getStudentId(),
-                    getGradeByCourseIdAndStudentId(
-                        a.getStudentId(), a.getCourseId(), 47112).getGrade(),
-                    Optional.of(getRatingForTA(a.getStudentId(), 47110).getRating())
-                ));
-            } catch (Exception e) {
-                System.out.println("failed to get application details: " + e.getMessage());
-            }
+            ret.add(new ApplyingStudentDTO(
+                a.getStudentId(),
+                getGradeByCourseIdAndStudentId(
+                    a.getStudentId(), a.getCourseId(), gradePort).getGrade(),
+                Optional.of(getRatingForTA(a.getStudentId(), taPort).getRating())
+            ));
         }
         return ret;
     }
@@ -234,24 +229,11 @@ public class ApplicationService {
         return result.get();
     }
 
-    public RatingDTO getTARatingEmptyIfMissing(UUID studentId, int port) {
-        // Request to TA microservice
-        // RatingOptional might be empty
-        WebClient webClient = WebClient.create("http://localhost:" + port);
-        Mono<RatingDTO> response = webClient.get()
-            .uri("/TA/getRating/" + studentId)
-            .retrieve()
-            .bodyToMono(RatingDTO.class);
-        Optional<RatingDTO> optional = response.blockOptional();
-        if (optional.isEmpty()) {
-            RatingDTO dto = new RatingDTO();
-            dto.setStudentId(studentId);
-            dto.setRating(null);
-            return dto;
-        }
-        return optional.get();
-    }
-
+    /**
+     * getGradesByCourseId
+     * @param courseId the id of the course
+     * @return a list of all the grades students received for this course
+     */
     public List<GradeDTO> getGradesByCourseId(UUID courseId) {
         // Request to Grade microservice
         WebClient webClient = WebClient.create("http://localhost:47112");

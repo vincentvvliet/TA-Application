@@ -69,7 +69,12 @@ public class ApplicationController {
     public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
             @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
-        return  Flux.fromIterable(applicationService.getApplicationDetails(applications));
+        try {
+            return Flux
+                .fromIterable(applicationService.getApplicationDetails(applications, 47112, 47110));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No applications found!");
+        }
     }
 
 
