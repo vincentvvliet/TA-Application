@@ -9,6 +9,7 @@ import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.Validator;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import org.junit.jupiter.api.AfterAll;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -112,7 +114,44 @@ public class ApplicationServiceTests {
     /**
      * getApplicationDetails tests
      */
-    // Succes_return_list_of_applyingStudentDTOs
+    @Test
+    void getApplicationDetails_validList_returnsListOfApplyingStudentDTOs() throws Exception{
+        // Arrange
+        UUID courseId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        Application app1 = new Application(courseId, studentId);
+        List<Application> list = List.of(app1);
+        // Mock request to Grade MS
+        mockBackEnd.enqueue(new MockResponse()
+            .setBody(gson.toJson(new GradeDTO(studentId, 8.0d)))
+            .addHeader("Content-Type", "application/json"));
+        // Mock request to TA MS
+        mockBackEnd.enqueue(new MockResponse()
+            .setBody(gson.toJson(new RatingDTO(studentId, 4)))
+            .addHeader("Content-Type", "application/json"));
+        // Act
+        List<ApplyingStudentDTO> result = applicationService.getApplicationDetails(list, mockBackEnd.getPort(), mockBackEnd.getPort());
+        // Assert
+        List<ApplyingStudentDTO> expected = List.of(new ApplyingStudentDTO(studentId, 8.0d, Optional.of(4)));
+        assertEquals(expected, result);
+
+    }
+    @Test
+    void getApplicationDetails_notAvailable_throwsException() {
+        // Arrange
+        UUID courseId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        Application app1 = new Application(courseId, studentId);
+        List<Application> list = List.of(app1);
+        // Mock request to Grade MS
+        mockBackEnd.enqueue(new MockResponse()
+            .setResponseCode(404));
+        // Act & Assert
+        Exception e = assertThrows(Exception.class,
+            () -> applicationService.getApplicationDetails(
+                list, mockBackEnd.getPort(), mockBackEnd.getPort()
+            ));
+    }
 
     /**
      * getGradeByCourseIdAndStudentId tests
@@ -181,39 +220,5 @@ public class ApplicationServiceTests {
         );
         // Assert
         assertEquals("No TA rating found!", e.getMessage());
-    }
-
-    /**
-     * getTARatingEmptyIfMissing tests
-     */
-    @Test
-    void getTARatingEmptyIfMissing_ratingFound_returnsGradeDTO() {
-        // Arrange
-        UUID studentId = UUID.randomUUID();
-        RatingDTO rating = new RatingDTO(studentId, 5);
-        mockBackEnd.enqueue(new MockResponse()
-            .setBody(gson.toJson(rating)).addHeader("Content-Type", "application/json"));
-        // Act
-        RatingDTO result = null;
-        try {
-            result = applicationService.getTARatingEmptyIfMissing(studentId, mockBackEnd.getPort());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-        // Assert
-        assertEquals(rating, result);
-    }
-
-    @Test
-    void getTARatingEmptyIfMissing_emptyResult_returnsDTOEmptyOptional() {
-        // Arrange
-        UUID studentId = UUID.randomUUID();
-        mockBackEnd.enqueue(new MockResponse()
-            .setBody(gson.toJson(null)).addHeader("Content-Type", "application/json"));
-        // Act
-        RatingDTO result = applicationService.getTARatingEmptyIfMissing(studentId, mockBackEnd.getPort());
-        // Assert
-        assertEquals(studentId, result.getStudentId());
-        assertNull(result.getRating());
     }
 }
