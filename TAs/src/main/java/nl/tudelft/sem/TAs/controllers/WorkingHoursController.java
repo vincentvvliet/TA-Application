@@ -59,7 +59,7 @@ public class WorkingHoursController {
      * @param id (UUID) of the working hours
      * @return true if successfully deleted, false otherwise
      */
-    @GetMapping("/deleteHours/{id}")
+    @DeleteMapping("/deleteHours/{id}")
     public Mono<Boolean> deleteHours(@PathVariable(value = "id") UUID id) {
         try {
             workingHoursRepository.deleteById(id);
