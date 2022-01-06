@@ -97,5 +97,20 @@ public class TAControllerTests {
         verify(taRepository, never()).save(any(TA.class));
     }
 
+    @Test
+    public void getAverageTimeSpent_successful() {
+        double averageTime = 5.5;
+        Mockito.when(taRepository.getAverageTimeSpentAsTA(courseId)).thenReturn(Optional.of(averageTime));
+
+        Assertions.assertEquals(averageTime, taController.getAverageTimeSpentAsTA(courseId).block());
+    }
+
+    @Test
+    public void getAverageTimeSpent_emptyResponse() {
+        Mockito.when(taRepository.getAverageTimeSpentAsTA(courseId)).thenReturn(Optional.empty());
+
+        Assertions.assertNull(taController.getAverageTimeSpentAsTA(courseId).block());
+    }
+
 
 }
