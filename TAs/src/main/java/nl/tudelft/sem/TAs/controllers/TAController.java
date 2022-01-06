@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -130,6 +131,21 @@ public class TAController {
         ta.setTimeSpent(timeSpent);
         taRepository.save(ta);
         return Mono.just(true);
+    }
+
+    /**
+     * GET endpoint retrieves average time spent from past TAs for a course
+     * @param courseId (UUID) of the course
+     * @return optional of double (average time spent)
+     */
+    @GetMapping("/getAverageTimeSpent/{id}")
+    public Mono<Double> getAverageTimeSpentAsTA(@PathVariable(value = "id") UUID courseId) {
+        Optional<Double> averageTime = taRepository.getAverageTimeSpentAsTA(courseId);
+        if(averageTime.isPresent()){
+            return Mono.just(averageTime.get());
+        } else {
+            return Mono.empty();
+        }
     }
 
 
