@@ -26,7 +26,7 @@ public class TAService {
         Optional<Integer> averageRating = taRepository.getAverageRating(studentId);
         if(averageRating.isPresent()) {
             RatingDTO dto = new RatingDTO();
-            dto.setRating(averageRating);
+            dto.setRating(averageRating.get());
             dto.setStudentId(studentId);
             return Mono.just(dto);
         }

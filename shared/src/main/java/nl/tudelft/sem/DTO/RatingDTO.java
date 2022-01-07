@@ -17,5 +17,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RatingDTO {
     private UUID studentId;
-    private Optional<Integer> rating;
+    private Integer rating;
 }
