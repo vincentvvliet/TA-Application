@@ -239,6 +239,169 @@ public class ApplicationControllerTests {
         assertEquals(List.of(), result);
     }
 
+    /** Tests for getSortedListWithMinimumGrade
+     *
+     */
+
+    @Test
+    void getSortedListWithMinimumGradeSuccessful() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.sortOnStrategy(List.of(recommendation1,recommendation2),"Strategy" ))
+                .thenReturn(List.of(recommendation2,recommendation1));
+
+        Flux<RecommendationDTO> result = applicationController
+                .getSortedListWithMinimumGrade(courseId, "Strategy", 7.0);
+        // Assert
+        assertEquals(List.of(recommendation2, recommendation1), result.collectList().block());
+
+    }
+
+    @Test
+    void getSortedListWithMinimumGradeNoGradesPass() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.sortOnStrategy(List.of(),"Strategy" ))
+                .thenReturn(List.of());
+
+        Flux<RecommendationDTO> result = applicationController
+                .getSortedListWithMinimumGrade(courseId, "Strategy", 9.0);
+        // Assert
+        assertEquals(List.of(), result.collectList().block());
+
+        verify(recommendationService).sortOnStrategy(List.of(),"Strategy");
+
+    }
+
+    @Test
+    void getSortedListWithMinimumGradeAllGradesPass() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.sortOnStrategy(List.of(recommendation1,recommendation2,recommendation3),"Strategy" ))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+
+        Flux<RecommendationDTO> result = applicationController
+                .getSortedListWithMinimumGrade(courseId, "Strategy", 6.0);
+        // Assert
+        assertEquals(List.of(recommendation1,recommendation2,recommendation3), result.collectList().block());
+
+        verify(recommendationService).sortOnStrategy(List.of(recommendation1,recommendation2,recommendation3),"Strategy");
+
+    }
+
+    @Test
+    void getSortedListWithMinimumGradeMinimumEqualsGrade() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.sortOnStrategy(List.of(recommendation1),"Strategy" ))
+                .thenReturn(List.of(recommendation1));
+
+        Flux<RecommendationDTO> result = applicationController
+                .getSortedListWithMinimumGrade(courseId, "Strategy", 8.8);
+        // Assert
+        assertEquals(List.of(recommendation1), result.collectList().block());
+
+        verify(recommendationService).sortOnStrategy(List.of(recommendation1),"Strategy");
+
+    }
+
+    @Test
+    void getSortedListWithMinimumGradeExceptionThrown() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.sortOnStrategy(List.of(recommendation1,recommendation2),"Strategy" ))
+                .thenThrow(new Exception());
+
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()-> applicationController.getSortedListWithMinimumGrade(courseId, "Strategy", 7.0));
+
+        assertEquals("Requested Strategy not found!", e.getReason());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+
+    }
+
+    /**
+     * Tests for recommendNStudentsWithMinimumGrade.
+     */
+
+    @Test
+    void recommendNStudentsWithMinimumGradeSuccessful() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.recommendNStudents(List.of(recommendation1,recommendation2),"Strategy" , 3))
+                .thenReturn(List.of(recommendation2,recommendation1));
+
+        Flux<RecommendationDTO> result = applicationController
+                .recommendNStudentsWithMinimumGrade(courseId, "Strategy", 3,7.0);
+        // Assert
+        assertEquals(List.of(recommendation2, recommendation1), result.collectList().block());
+
+    }
+
+    @Test
+    void recommendNStudentsWithMinimumGradeNoGradesPass() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.recommendNStudents(List.of(),"Strategy", 3 ))
+                .thenReturn(List.of());
+
+        Flux<RecommendationDTO> result = applicationController
+                .recommendNStudentsWithMinimumGrade(courseId, "Strategy", 3, 9.0);
+        // Assert
+        assertEquals(List.of(), result.collectList().block());
+
+        verify(recommendationService).recommendNStudents(List.of(),"Strategy", 3);
+
+    }
+
+    @Test
+    void recommendNStudentsWithMinimumGradeAllGradesPass() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.recommendNStudents(List.of(recommendation1,recommendation2,recommendation3),"Strategy", 3 ))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+
+        Flux<RecommendationDTO> result = applicationController
+                .recommendNStudentsWithMinimumGrade(courseId, "Strategy", 3, 6.0);
+        // Assert
+        assertEquals(List.of(recommendation1,recommendation2,recommendation3), result.collectList().block());
+
+        verify(recommendationService).recommendNStudents(List.of(recommendation1,recommendation2,recommendation3),"Strategy", 3);
+
+    }
+
+    @Test
+    void recommendNStudentsWithMinimumGradeMinimumEqualsGrade() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.recommendNStudents(List.of(recommendation1),"Strategy", 3 ))
+                .thenReturn(List.of(recommendation1));
+
+        Flux<RecommendationDTO> result = applicationController
+                .recommendNStudentsWithMinimumGrade(courseId, "Strategy", 3, 8.8);
+        // Assert
+        assertEquals(List.of(recommendation1), result.collectList().block());
+
+        verify(recommendationService).recommendNStudents(List.of(recommendation1),"Strategy", 3);
+
+    }
+
+    @Test
+    void recommendNStudentsWithMinimumGradeExceptionThrown() throws Exception {
+        when(recommendationService.getRecommendationDetailsByCourse(courseId))
+                .thenReturn(List.of(recommendation1,recommendation2,recommendation3));
+        when(recommendationService.recommendNStudents(List.of(recommendation1,recommendation2),"Strategy", 3 ))
+                .thenThrow(new Exception());
+
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()-> applicationController.recommendNStudentsWithMinimumGrade(courseId, "Strategy", 3, 7.0));
+
+        assertEquals("Requested Strategy not found!", e.getReason());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+
+    }
+
+
     /**
      * getSortedList tests
      */
@@ -265,11 +428,11 @@ public class ApplicationControllerTests {
         //      Set Service behaviour
         when(recommendationService.getRecommendationDetailsByCourse(any()))
             .thenReturn(List.of(recommendation1, recommendation2, recommendation3));
-        when(recommendationService.recommendNStudents(any(), any(), anyInt()))
+        when(recommendationService.sortOnStrategy(any(), any()))
             .thenThrow(new Exception());
         // Act
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            ()-> applicationController.hireNStudents(courseId, "Gibberish", 2));
+            ()-> applicationController.getSortedList(courseId, "IgnoreGrade"));
         // Assert
         assertEquals("Requested Strategy not found!", e.getReason());
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
