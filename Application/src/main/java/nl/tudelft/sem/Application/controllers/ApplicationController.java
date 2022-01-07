@@ -12,6 +12,7 @@ import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.Application.services.CollectionService;
 import nl.tudelft.sem.Application.services.RecommendationService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,8 @@ public class ApplicationController {
     @Autowired
     CollectionService collectionService;
 
+    private PortData portData = new PortData();
+
     /**
      * GET endpoint to retrieve an application based on studentId and courseId.
      *
@@ -74,7 +77,7 @@ public class ApplicationController {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         try {
             return Flux
-                .fromIterable(applicationService.getApplicationDetails(applications, 47112, 47110));
+                .fromIterable(applicationService.getApplicationDetails(applications, portData.getCoursePort(), portData.getTAPort()));
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No applications found!");
         }
@@ -90,7 +93,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID studentId) {
         try {
-            return applicationService.getRatingForTA(studentId, 47110);
+            return applicationService.getRatingForTA(studentId, portData.getTAPort());
         } catch (Exception e) {
             return null;
         }
@@ -153,11 +156,11 @@ public class ApplicationController {
         if (! applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), portData.getTAPort())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId(), 47110);
+            .createTA(application.getStudentId(), application.getCourseId(), portData.getTAPort());
         if (!successfullyCreated) {
             return Mono.just(false);
         }
