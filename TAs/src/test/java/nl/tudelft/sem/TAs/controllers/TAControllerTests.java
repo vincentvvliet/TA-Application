@@ -28,24 +28,17 @@ public class TAControllerTests {
     @MockBean
     TARepository taRepository;
 
-    UUID studentId;
-    UUID courseId;
+    UUID studentId = UUID.randomUUID();
+    UUID courseId = UUID.randomUUID();
     LeaveRatingDTO leaveRatingDTO;
-    RatingDTO ratingDTO;
-    int rating;
-    TA ta = new TA();
-    List<TA> taList = new ArrayList<TA>();
+    TA ta = new TA(courseId, studentId);
+    List<TA> taList = new ArrayList<>();
 
     @BeforeEach
     void setup() {
-        studentId = UUID.randomUUID();
-        courseId = UUID.randomUUID();
-        ta.setStudentId(studentId);
-        ta.setCourseId(courseId);
-        ta.setRating(rating);
+        ta.setRating(3);
         taList.add(ta);
-        rating = 3;
-        leaveRatingDTO = new LeaveRatingDTO(ta.getId(), Optional.of(rating));
+        leaveRatingDTO = new LeaveRatingDTO(ta.getId(), Optional.of(3));
         when(taRepository.findById(ta.getId())).thenReturn(Optional.ofNullable(ta));
     }
 
@@ -66,7 +59,7 @@ public class TAControllerTests {
     @Test
     public void getTAbyIdNotSuccessful() {
         when(taRepository.findById(ta.getId())).thenReturn(Optional.empty());
-        Assertions.assertEquals(taController.getTAById(ta.getId()).block(), null);
+        Assertions.assertNull(taController.getTAById(ta.getId()).block());
     }
 
     @Test
