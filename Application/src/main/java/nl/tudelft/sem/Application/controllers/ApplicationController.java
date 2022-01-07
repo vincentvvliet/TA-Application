@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
@@ -44,6 +45,9 @@ public class ApplicationController {
     @Autowired
     ApplicationService applicationService;
 
+    @Autowired
+    RecommendationService recommendationService;
+
     /**
      * GET endpoint to retrieve an application based on studentId and courseId.
      *
@@ -53,13 +57,13 @@ public class ApplicationController {
      */
     @GetMapping("/getApplication/{studentId}/{courseId}")
     public Optional<Application> getApplication(
-        @PathVariable(value = "studentId") UUID studentId,
-        @PathVariable(value = "courseId") UUID courseId) {
+            @PathVariable(value = "studentId") UUID studentId,
+            @PathVariable(value = "courseId") UUID courseId) {
         return applicationRepository.findByStudentIdAndCourseId(studentId, courseId);
     }
 
     /**
-     * GET all applications for specific course,
+     * GET endpoint for all applications for specific course,
      * together with the applying student's names, grades, and possible past TA experience.
      *
      * @param course UUID for course.
@@ -73,14 +77,15 @@ public class ApplicationController {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         try {
             return Flux
-                .fromIterable(applicationService.getApplicationDetails(applications, 47112, 47110));
+                    .fromIterable(applicationService.getApplicationDetails(applications, 47112, 47110));
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No applications found!");
         }
     }
 
 
-    /** GET rating based on student Id.
+    /**
+     * GET endpoint for rating based on student Id.
      *
      * @param studentId studentId.
      * @return average rating for students' previous TAing experience.
@@ -96,7 +101,7 @@ public class ApplicationController {
     }
 
     /**
-     * GET Applications by course.
+     * GET endpoint for Applications by course.
      *
      * @param courseId courseId.
      * @return flux of Applications.
@@ -104,7 +109,7 @@ public class ApplicationController {
     @GetMapping("/applications/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Flux<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
-                                                         UUID courseId) {
+                                                             UUID courseId) {
         return Flux.fromIterable(applicationService.getApplicationsByCourse(courseId));
     }
 
@@ -125,8 +130,8 @@ public class ApplicationController {
      */
     @PostMapping("/createApplication/{student_id}/{course_id}")
     public Mono<Boolean> createApplicationByStudentAndCourse(
-        @PathVariable(value = "student_id") UUID studentId,
-        @PathVariable(value = "course_id") UUID courseId) {
+            @PathVariable(value = "student_id") UUID studentId,
+            @PathVariable(value = "course_id") UUID courseId) {
         Application application = new Application(courseId, studentId);
         if (applicationService.validate(application)) {
             applicationRepository.save(application);
@@ -135,7 +140,8 @@ public class ApplicationController {
         return Mono.just(false);
     }
 
-    /**PATCH Endpoint to accept a TA application, if the application is not yet accepted,
+    /**
+     * PATCH Endpoint to accept a TA application, if the application is not yet accepted,
      * the application is closed for application and there is a TA spot available.
      *
      * @param id of the application to be accepted
@@ -182,65 +188,65 @@ public class ApplicationController {
     }
 
 
-        @GetMapping("/getSortedList/{course_id}/{strategy}")
-        Flux<RecommendationDTO> getSortedList (@PathVariable("course_id") UUID courseId,
-                @PathVariable("strategy") String strategy){
-            List<RecommendationDTO> list = recommendationService
-                    .getRecommendationDetailsByCourse(courseId);
-            try {
-                return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
-            }
-        }
-
-        @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
-        Flux<RecommendationDTO> recommendNStudents (@PathVariable("course_id") UUID courseId,
-                @PathVariable("strategy") String strategy,
-        @PathVariable("n") int n){
-            List<RecommendationDTO> list = recommendationService
-                    .getRecommendationDetailsByCourse(courseId);
-            try {
-                return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
-            }
-        }
-
-        @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
-        Mono<Boolean> hireNStudents (@PathVariable("course_id") UUID courseId,
-                @PathVariable("strategy") String strategy,
-        @PathVariable("n") int n){
-            List<RecommendationDTO> list = recommendationService
-                    .getRecommendationDetailsByCourse(courseId);
-            try {
-                List<RecommendationDTO> recommended =
-                        recommendationService.recommendNStudents(list, strategy, n);
-                // Hire all n recommended students
-                for (RecommendationDTO rec : recommended) {
-                    Application application =
-                            applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
-                                    .orElseThrow(() -> new NoSuchElementException("application does not exist"));
-                    if (application.isAccepted()) {
-                        continue;
-                    }
-                    if (!applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
-                        continue;
-                    }
-                    boolean successfullyCreated = applicationService
-                            .createTA(application.getStudentId(), application.getCourseId(), 47110);
-                    if (!successfullyCreated) {
-                        continue;
-                    }
-                    // Save accepted application to database.
-                    application.setAccepted(true);
-                    applicationRepository.save(application);
-                }
-                return Mono.just(true);
-            } catch (NoSuchElementException e) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentId in recommendationDTO not found!");
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
-            }
+    @GetMapping("/getSortedList/{course_id}/{strategy}")
+    Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
+                                          @PathVariable("strategy") String strategy) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId);
+        try {
+            return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }
     }
+
+    @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
+    Flux<RecommendationDTO> recommendNStudents(@PathVariable("course_id") UUID courseId,
+                                               @PathVariable("strategy") String strategy,
+                                               @PathVariable("n") int n) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId);
+        try {
+            return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
+        }
+    }
+
+    @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
+    Mono<Boolean> hireNStudents(@PathVariable("course_id") UUID courseId,
+                                @PathVariable("strategy") String strategy,
+                                @PathVariable("n") int n) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId);
+        try {
+            List<RecommendationDTO> recommended =
+                    recommendationService.recommendNStudents(list, strategy, n);
+            // Hire all n recommended students
+            for (RecommendationDTO rec : recommended) {
+                Application application =
+                        applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
+                                .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+                if (application.isAccepted()) {
+                    continue;
+                }
+                if (!applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
+                    continue;
+                }
+                boolean successfullyCreated = applicationService
+                        .createTA(application.getStudentId(), application.getCourseId(), 47110);
+                if (!successfullyCreated) {
+                    continue;
+                }
+                // Save accepted application to database.
+                application.setAccepted(true);
+                applicationRepository.save(application);
+            }
+            return Mono.just(true);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentId in recommendationDTO not found!");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
+        }
+    }
+}

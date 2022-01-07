@@ -316,7 +316,7 @@ public class ApplicationService {
         return overlappingCourses.toStream().collect(Collectors.toList());
     }
 
-    /** Requests notification for a user.
+    /** Sends notification to User microservice for a specified user.
      *
      * @param recipientId user to recieve notification.
      * @param message of notification.
