@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
@@ -164,6 +166,20 @@ public class ApplicationController {
         return Mono.just(true);
     }
 
+    @GetMapping("/getSortedListWithMinimumGrade/{course_id}/{strategy}/{minimum}")
+    Flux<RecommendationDTO> getSortedListWithMinimumGrade(@PathVariable("course_id") UUID courseId,
+                                                     @PathVariable("strategy") String strategy,
+                                                     @PathVariable("minimum") double minimumGrade) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId);
+        list = list.stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
+        try {
+            return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
+        }
+    }
+
     @GetMapping("/getSortedList/{course_id}/{strategy}")
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
@@ -171,6 +187,21 @@ public class ApplicationController {
             .getRecommendationDetailsByCourse(courseId);
         try {
             return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
+        }
+    }
+
+    @GetMapping("/recommendNStudentsWithMinimumGrade/{course_id}/{n}/{strategy}/{minimum}")
+    Flux<RecommendationDTO> recommendNStudentsWithMinimumGrade(@PathVariable("course_id") UUID courseId,
+                                                          @PathVariable("strategy") String strategy,
+                                                          @PathVariable("n") int n,
+                                                          @PathVariable("minimum") double minimumGrade) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId);
+        list = list.stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
+        try {
+            return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }

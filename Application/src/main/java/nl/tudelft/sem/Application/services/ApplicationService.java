@@ -266,20 +266,6 @@ public class ApplicationService {
     }
 
 
-    /**This method gives recommendation using the Strategy design pattern.
-     * @param list of applicants to recommend.
-     * @param strategy to use for recommending system.
-     * @return the recommended list of applicants.
-     */
-    public List<RecommendationDTO> getRecommendation(List<RecommendationDTO> list, String strategy) {
-
-        StrategyContext context = new StrategyContext();
-        if(strategy.equals("IgnoreRating")) context.setRecommendation(new IgnoreRatingStrategy());
-        if(strategy.equals("IgnoreGrade")) context.setRecommendation(new IgnoreGradeStrategy());
-        if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
-        return context.giveRecommendation(list);
-    }
-
     /**
      * Determines if a student is already selected to TA 3 courses per quarter
      * Important: 3 courses are in the same quarter if they overlap (partially or totally)
