@@ -51,7 +51,7 @@ public class ApplicationServiceTests {
     ApplicationRepository applicationRepository;
 
     @MockBean
-    IsCourseOpen validator;
+    IsCourseOpen isCourseOpen;
 
     private static final Gson gson = new GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
@@ -86,12 +86,12 @@ public class ApplicationServiceTests {
         studentId = UUID.randomUUID();
         application = new Application(courseId, studentId);
         applicationList.add(application);
-        doNothing().when(validator).setLast(any(Validator.class));
+        doNothing().when(isCourseOpen).setLast(any(Validator.class));
     }
 
     @Test
     public void validateSuccessfulTest() throws Exception {
-        when(validator.handle(application)).thenReturn(true);
+        when(isCourseOpen.handle(application)).thenReturn(true);
 
         assertTrue(applicationService.validate(application));
     }
@@ -99,7 +99,7 @@ public class ApplicationServiceTests {
     @Test
     public void validateNotValidTest() throws Exception {
         Exception e = mock(Exception.class);
-        when(validator.handle(application)).thenThrow(e);
+        when(isCourseOpen.handle(application)).thenThrow(e);
 
         assertFalse(applicationService.validate(application));
         verify(e).printStackTrace();
@@ -109,6 +109,35 @@ public class ApplicationServiceTests {
     public void getApplicationsByCourseTest() {
         when(applicationRepository.findApplicationsByCourseId(courseId)).thenReturn(applicationList);
         assertEquals(applicationService.getApplicationsByCourse(courseId), applicationList);
+    }
+
+    @Test
+    public void removeApplicationSuccessfulTest() throws Exception {
+        when(applicationRepository.findByStudentIdAndCourseId(studentId,courseId)).thenReturn(Optional.ofNullable(application));
+        when(isCourseOpen.handle(application)).thenReturn(true);
+
+        Assertions.assertTrue(applicationService.removeApplication(studentId,courseId));
+
+        verify(applicationRepository).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
+
+    }
+
+    @Test
+    public void removeApplicationNoApplicationInRepositoryTest() throws Exception {
+        when(applicationRepository.findByStudentIdAndCourseId(studentId,courseId)).thenReturn(Optional.ofNullable(null));
+
+        Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
+        verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
+
+    }
+
+    @Test
+    public void removeApplicationCourseNotOpenTest() throws Exception {
+        when(applicationRepository.findByStudentIdAndCourseId(studentId,courseId)).thenReturn(Optional.of(application));
+        when(isCourseOpen.handle(application)).thenThrow(new Exception());
+
+        Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
+        verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
 
     /**
@@ -152,6 +181,7 @@ public class ApplicationServiceTests {
                 list, mockBackEnd.getPort(), mockBackEnd.getPort()
             ));
     }
+
 
     /**
      * getGradeByCourseIdAndStudentId tests

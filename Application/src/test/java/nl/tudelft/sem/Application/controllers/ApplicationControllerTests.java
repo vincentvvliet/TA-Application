@@ -107,6 +107,18 @@ public class ApplicationControllerTests {
     }
 
     @Test
+    public void removeApplicationSuccessfullyTest() {
+        when(applicationService.removeApplication(studentId,courseId)).thenReturn(true);
+        Assertions.assertTrue(applicationController.removeApplication(studentId,courseId).block());
+    }
+
+    @Test
+    public void removeApplicationErrorTest() {
+        when(applicationService.removeApplication(studentId,courseId)).thenReturn(false);
+        Assertions.assertFalse(applicationController.removeApplication(studentId,courseId).block());
+    }
+
+    @Test
     public void acceptApplicationSuccessfully() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));

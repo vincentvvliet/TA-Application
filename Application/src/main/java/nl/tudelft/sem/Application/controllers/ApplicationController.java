@@ -14,6 +14,7 @@ import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -93,7 +94,8 @@ public class ApplicationController {
         }
     }
 
-    /** GET Applications by course.
+    /**
+     * GET Applications by course.
      *
      * @param courseId courseId.
      * @return flux of Applications.
@@ -103,6 +105,13 @@ public class ApplicationController {
     public Flux<Application> getApplicationsByCourse(@PathVariable(value = "course_id")
                                                          UUID courseId) {
         return Flux.fromIterable(applicationService.getApplicationsByCourse(courseId));
+    }
+
+    @DeleteMapping("/removeApplication/{student_id}/{course_id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Mono<Boolean> removeApplication(@PathVariable(value = "student_id") UUID studentId,
+                                           @PathVariable(value = "course_id") UUID courseId) {
+        return Mono.just(applicationService.removeApplication(studentId, courseId));
     }
 
     /**
