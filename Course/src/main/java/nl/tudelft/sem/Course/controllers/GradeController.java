@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -58,6 +59,22 @@ public class GradeController {
                     (Grade g)-> new GradeDTO(g.getStudentId(), g.getGrade())
                 )
         );
+    }
+
+    /**
+     * GET endpoint retrieves GradeDTOs for grades tied to course.
+     * @param courseId id of sepecific course.
+     * @return Flux of GradeDTOs that are for specified course.
+     */
+    @GetMapping("/getGrades/{course_id}/{student_id}")
+    public Mono<GradeDTO> getGrades(@PathVariable("course_id") UUID courseId, @PathVariable("student_id") UUID studentId) {
+        Optional<Grade> grade = gradeRepository.findByStudentIdAndCourseId(studentId, courseId);
+        if (grade.isEmpty()) {
+            // throwing is not necessary here I believe.
+            return Mono.empty();
+        }
+        GradeDTO dto = new GradeDTO(studentId, grade.get().getGrade());
+        return Mono.just(dto);
     }
 
     /**
