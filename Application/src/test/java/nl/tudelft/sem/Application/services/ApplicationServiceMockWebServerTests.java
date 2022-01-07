@@ -1,8 +1,15 @@
 package nl.tudelft.sem.Application.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.DTO.RatingDTO;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -12,10 +19,13 @@ import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -143,4 +153,110 @@ public class ApplicationServiceMockWebServerTests {
         boolean booleanAvailable = applicationService.isTASpotAvailable(courseId, mockBackEnd.getPort());
         Assertions.assertFalse(booleanAvailable);
     }
+
+    /**
+     * empty response (no grade) -> throw exception
+     */
+    @Test
+    void getGrade_emptyResponse() {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getGrade(studentId, courseId, mockBackEnd.getPort()));
+        String expectedMessage = "no grade found";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getGrade_gradePresent() throws EmptyResourceException {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        Double grade = 9.0;
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
+
+        assertEquals(applicationService.getGrade(studentId, courseId, mockBackEnd.getPort()), grade);
+    }
+
+    /**
+     * empty response (no start date) -> throw exception
+     */
+    @Test
+    void getCourseStartDate_emptyResponse() {
+        UUID courseId = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getCourseStartDate(courseId, mockBackEnd.getPort()));
+        String expectedMessage = "no starting date found";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    // test case requires changing LocalDate to String in Mono and endpoint
+    // not sure if this is 100% a good approach, si I left it aside for now
+    /*
+    @Test
+    void getCourseStartDate_datePresent() throws EmptyResourceException {
+        UUID courseId = UUID.randomUUID();
+        LocalDate startDate = LocalDate.parse("2021-12-19");
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String json = ow.writeValueAsString(ratingDTO);
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody("2021-12-19").addHeader("Content-Type", "application/json"));
+
+        assertEquals(applicationService.getCourseStartDate(courseId, mockBackEnd.getPort()), startDate);
+    }
+    */
+
+    /**
+     * empty response (no TA rating) -> throw exception
+     */
+    @Test
+    void getRatingForTA_emptyResponse() {
+        UUID studentId = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getRatingForTA(studentId, mockBackEnd.getPort()));
+        String expectedMessage = "No TA rating found!";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    /**
+     * empty response (no grade) -> throw exception
+     */
+    @Test
+    void getGradeByStudentAndCourse_emptyResponse() {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(null + "").addHeader("Content-Type", "application/json"));
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, mockBackEnd.getPort()));
+        String expectedMessage = "No grade found!";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getGradeByStudentAndCourse_gradePresent() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        Double grade = 5.0;
+//        mockBackEnd.enqueue(new MockResponse()
+//                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
+
+        //assertEquals(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, mockBackEnd.getPort()).getGrade(), grade);
+    }
+
+
 }
