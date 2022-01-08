@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -64,8 +65,8 @@ public class TAController {
      * @return list of TAs
      */
     @GetMapping("/getTAs")
-    public Mono<List<TA>> getTAs() {
-        return Mono.just(taRepository.findAll());
+    public Flux<TA> getTAs() {
+        return Flux.fromStream(taRepository.findAll().stream());
     }
 
     /**
