@@ -1,6 +1,7 @@
 package nl.tudelft.sem.TAs.controllers;
 
 import nl.tudelft.sem.TAs.entities.Contract;
+import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,18 @@ public class ContractController {
     }
 
     /**
+     * Send contract gets the contract by using the combination of studentId and courseId.
+     * @param studentId of the student hired
+     * @param courseId of the course the student is hired for
+     * @return the contract.
+     */
+    @GetMapping("/sendContract/{studentId}/{courseId}")
+    public Mono<String> sendContract(@PathVariable (value = "studentId") UUID studentId, @PathVariable (value = "courseId") UUID courseId) {
+        Contract contract = contractRepository.findByStudentIdAndCourseId(studentId, courseId).orElseThrow(NoSuchElementException::new);
+        return Mono.just(contract.toString());
+    }
+
+    /**
      * GET endpoint retrieves all existing contracts
      * @return list of contracts
      */
@@ -43,13 +56,13 @@ public class ContractController {
      * POST endpoint creating a contract for a TA (identified by studentId and courseId)
      * @param studentId of the TA
      * @param courseId of the course the TA is hired for
-     * @return true after the contract is created and saved in the database
+     * @return the id of the contract saved in the database
      */
     @PostMapping("/createContract/{studentid}/{courseid}")
-    public Mono<Boolean> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
+    public Mono<UUID> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
         Contract c = new Contract(studentId,courseId);
         contractRepository.save(c);
-        return Mono.just(true);
+        return Mono.just(c.getId());
     }
 
     /**

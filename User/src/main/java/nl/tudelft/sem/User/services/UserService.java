@@ -1,24 +1,26 @@
 package nl.tudelft.sem.User.services;
 
-import java.net.URI;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.net.URI;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import nl.tudelft.sem.DTO.ApplicationDTO;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import nl.tudelft.sem.DTO.ApplicationDTO;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+
+
 
 @Service
 public class UserService {
@@ -124,5 +126,21 @@ public class UserService {
             throw new Exception("No response received");
         }
         return result.get();
+    }
+
+    /**
+     * Accepts an application for a given student and course, making them a TA.
+     * @param applicationId of application to accept
+     * @param port of application microservice.
+     * @return if accept was successful.
+     */
+
+    public boolean acceptApplication(UUID applicationId, int port){
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<Boolean> application = webClient.get()
+                .uri("application/acceptApplication/"+ applicationId)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        return application.block();
     }
 }
