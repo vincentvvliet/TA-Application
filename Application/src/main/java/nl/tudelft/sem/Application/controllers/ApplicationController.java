@@ -169,6 +169,14 @@ public class ApplicationController {
         return Mono.just(true);
     }
 
+    /**
+     * GET endpoint to get all the applications of a course and return them ordered using the specified strategy.
+     * It also filters out all the grades that are below the given minimum.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @param minimumGrade The minimum all grades need to be above
+     * @return A sorted and filtered list of applications.
+     */
     @GetMapping("/getSortedListWithMinimumGrade/{course_id}/{strategy}/{minimum}")
     Flux<RecommendationDTO> getSortedListWithMinimumGrade(@PathVariable("course_id") UUID courseId,
                                                      @PathVariable("strategy") String strategy,
@@ -183,6 +191,12 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * GET endpoint to get all the applications of a course and return them ordered using the specified strategy.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @return A sorted list of applications.
+     */
     @GetMapping("/getSortedList/{course_id}/{strategy}")
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
@@ -195,6 +209,15 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * GET endpoint to get n applications of a course and return them ordered using the specified strategy.
+     * It also filters out all the grades that are below the given minimum.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @param n The number of applications that need to be returned.
+     * @param minimumGrade The minimum all grades need to be above
+     * @return A sorted and filtered list of n applications.
+     */
     @GetMapping("/recommendNStudentsWithMinimumGrade/{course_id}/{n}/{strategy}/{minimum}")
     Flux<RecommendationDTO> recommendNStudentsWithMinimumGrade(@PathVariable("course_id") UUID courseId,
                                                           @PathVariable("strategy") String strategy,
@@ -210,6 +233,13 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * GET endpoint to get n applications of a course and return them ordered using the specified strategy.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @param n The number of applications that need to be returned.
+     * @return A sorted and filtered list of n applications.
+     */
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
     Flux<RecommendationDTO> recommendNStudents(@PathVariable("course_id") UUID courseId,
                                                @PathVariable("strategy") String strategy,
@@ -223,6 +253,13 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * PATCH endpoint to accept the top n applications of a given course using the specified strategy.
+     * @param courseId The id of the course that the applications are to.
+     * @param strategy The strategy used to get the top n aplications. (check the Strategy class for more information)
+     * @param n The amount of applications that need to be accepted
+     * @return a true in case everything works or a bad response status in case it doesn't.
+     */
     @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
     Mono<Boolean> hireNStudents(@PathVariable("course_id") UUID courseId,
                                 @PathVariable("strategy") String strategy,
