@@ -39,12 +39,16 @@ public class TAServiceTests {
     TARepository taRepository;
 
     public static MockWebServer mockBackEnd;
+    public static ObjectMapper mapper;
 
     // start up the Mock Web Server
     @BeforeAll
     static void setUp() throws IOException {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     // shut down the Mock Web Server
@@ -97,10 +101,6 @@ public class TAServiceTests {
 
     @Test
     public void isCourseFinished_yes() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
         LocalDate endDate = LocalDate.of(2021, 2, 1);
         mockBackEnd.enqueue(new MockResponse()
                 .setBody(mapper.writeValueAsString(endDate)).addHeader("Content-Type", "application/json"));
@@ -110,10 +110,6 @@ public class TAServiceTests {
 
     @Test
     public void isCourseFinished_no() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
         LocalDate endDate = LocalDate.of(2022, 5, 1);
         mockBackEnd.enqueue(new MockResponse()
                 .setBody(mapper.writeValueAsString(endDate)).addHeader("Content-Type", "application/json"));
