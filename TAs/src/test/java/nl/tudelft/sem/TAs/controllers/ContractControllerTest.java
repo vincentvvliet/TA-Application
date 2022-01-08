@@ -2,6 +2,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
+import nl.tudelft.sem.TAs.services.ContractService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ public class ContractControllerTest {
     @MockBean
     ContractRepository contractRepository;
 
+    @MockBean
+    ContractService contractService;
+
     Contract contract = new Contract();
     List<Contract> contractList = new ArrayList<>();
     UUID id = UUID.randomUUID();
@@ -58,8 +62,11 @@ public class ContractControllerTest {
     }
 
     @Test
-    public void createTest() {
-        contractController.createContract(UUID.randomUUID(),UUID.randomUUID());
+    public void createTest() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        when(contractService.sendContractNotification(studentId, courseId, 47111)).thenReturn(true);
+        contractController.createContract(UUID.randomUUID(), UUID.randomUUID());
         verify(contractRepository).save(any(Contract.class));
     }
 

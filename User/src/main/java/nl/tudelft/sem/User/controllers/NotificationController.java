@@ -22,7 +22,7 @@ public class NotificationController {
      * @param message message for recipient.
      */
 
-    @PostMapping("/createNotification/{message}")
+    @PostMapping("/createNotification/{recipientId}/{message}")
     public void createNotification(
             @PathVariable(value = "recipientId") UUID recipientId,
             @PathVariable(value = "message") String message) {

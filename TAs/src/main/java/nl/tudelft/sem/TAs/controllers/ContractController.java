@@ -2,6 +2,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
+import nl.tudelft.sem.TAs.services.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,9 @@ import java.util.*;
 public class ContractController {
     @Autowired
     private ContractRepository contractRepository;
+
+    @Autowired
+    private ContractService contractService;
 
     /**
      * GET endpoint retrieves contract by id
@@ -46,9 +50,11 @@ public class ContractController {
      * @return true after the contract is created and saved in the database
      */
     @PostMapping("/createContract/{studentid}/{courseid}")
-    public Mono<Boolean> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
+    public Mono<Boolean> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) throws Exception {
         Contract c = new Contract(studentId,courseId);
         contractRepository.save(c);
+        //TODO; merge dev into this branch, dont hardcode port
+        contractService.sendContractNotification(studentId, courseId, 47111);
         return Mono.just(true);
     }
 
