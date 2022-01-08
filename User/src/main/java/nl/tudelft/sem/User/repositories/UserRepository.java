@@ -18,7 +18,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @return Optional of User if found in database
      */
     default Optional<User> findByUsername(String username) {
-        System.out.println("hi");
         return this.findAll()
                 .stream()
                 .filter(u -> Objects.equals(username, u.getUsername()))

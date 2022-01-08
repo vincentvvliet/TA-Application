@@ -15,6 +15,7 @@ public class UserDetailsServiceImplementation implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+//    private UserDetailsMapper
 
     /**
      * Loads a user by given username.
@@ -25,21 +26,13 @@ public class UserDetailsServiceImplementation implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails result;
-        System.out.println("test2");
-        if (username == null || username.isEmpty()) {
-            throw new UsernameNotFoundException("username is empty");
-        }
-
-        Optional<User> foundUser = userRepository.findByUsername(username);
-        System.out.println(foundUser); //TODO does not print
-        if (foundUser.isPresent()) {
-            System.out.println(foundUser.get().getAuthorities());
-            result = foundUser.get();
-        } else {
+        Optional<User> user = userRepository.findByUsername(username);
+        System.out.println(user); //TODO does not print
+        if (user.isEmpty()) {
             throw new UsernameNotFoundException(username + " is not found");
         }
-        return result;
+        User foundUser = user.get();
+        return new org.springframework.security.core.userdetails.User(foundUser.getUsername(), foundUser.getPassword(), foundUser.getAuthorities());
     }
 }
 
