@@ -41,7 +41,7 @@ public class PublicUserController {
     String register(@RequestParam("username") String username,
                     @RequestParam("password") String password,
                     @RequestParam("role") String role) {
-        password = passwordEncoder.encode(password);
+//        password = passwordEncoder.encode(password);
         userRepository.save(new User(username, password, Role.valueOf(role)));
 
         return login(username, password, role);
