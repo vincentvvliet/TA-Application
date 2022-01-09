@@ -61,6 +61,8 @@ dependencies {
             'io.jsonwebtoken:jjwt-jackson:0.11.2'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'com.squareup.okhttp3:okhttp:4.9.1'
+    implementation project(':shared')
+    testImplementation project(':shared')
 }
 
 test {

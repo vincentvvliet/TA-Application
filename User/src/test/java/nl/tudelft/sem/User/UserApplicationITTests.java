@@ -3,7 +3,7 @@ package nl.tudelft.sem.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nl.tudelft.sem.User.entities.User;
-import nl.tudelft.sem.User.repositories.UserRepository;
+import nl.tudelft.sem.portConfiguration.PortData;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,9 +31,6 @@ class UserApplicationITTests {
 
     @Autowired
     private MockMvc mockMvc;
-
-//    @Autowired
-//    private UserRepository userRepository;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
