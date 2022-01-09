@@ -157,7 +157,7 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), 47112);
+        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), portData.getCoursePort());
         if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
             throw new Exception("application is still open for application");
         }
@@ -177,13 +177,13 @@ public class ApplicationController {
         }
 
         try {
-            applicationService.createTA(application.getStudentId(), application.getCourseId(), 47110);
-            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), 47110);
-            applicationService.addContract(application.getStudentId(), contractId, 47110);
+            applicationService.createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            applicationService.addContract(application.getStudentId(), contractId, portData.getTaPort());
         } catch (Exception e) {
             throw new Exception("TA or contract creation failed: " + e.getMessage());
         }
-        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", 47111);
+        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", portData.getUserPort());
         application.setAccepted(true);
         applicationRepository.save(application);
         return Mono.just(true);
