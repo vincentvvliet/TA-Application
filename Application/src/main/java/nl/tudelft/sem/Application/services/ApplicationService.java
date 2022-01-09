@@ -21,6 +21,7 @@ import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.GradeDTO;
+import nl.tudelft.sem.DTO.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ public class ApplicationService {
 
     @Autowired
     private IsGradeSufficient isGradeSufficient;
+
+    private PortData portData = new PortData();
 
     private Validator validator;
 
@@ -258,9 +261,9 @@ public class ApplicationService {
         return true;
     }
 
-    public List<GradeDTO> getGradesByCourseId(UUID courseId) {
+    public List<GradeDTO> getGradesByCourseId(UUID courseId, int port) {
         // Request to Grade microservice
-        WebClient webClient = WebClient.create("http://localhost:47112");
+        WebClient webClient = WebClient.create("http://localhost:" + port);
         Flux<GradeDTO> response = webClient.get()
             .uri("/grade/getGrades/" + courseId)
             .retrieve()
@@ -268,20 +271,6 @@ public class ApplicationService {
         return response.toStream().collect(Collectors.toList());
     }
 
-
-    /**This method gives recommendation using the Strategy design pattern.
-     * @param list of applicants to recommend.
-     * @param strategy to use for recommending system.
-     * @return the recommended list of applicants.
-     */
-    public List<RecommendationDTO> getRecommendation(List<RecommendationDTO> list, String strategy) {
-
-        StrategyContext context = new StrategyContext();
-        if(strategy.equals("IgnoreRating")) context.setRecommendation(new IgnoreRatingStrategy());
-        if(strategy.equals("IgnoreGrade")) context.setRecommendation(new IgnoreGradeStrategy());
-        if(strategy.equals("Grade&Rating")) context.setRecommendation(new EqualStrategy());
-        return context.giveRecommendation(list);
-    }
 
     /**
      * Determines if a student is already selected to TA 3 courses per quarter
@@ -294,7 +283,7 @@ public class ApplicationService {
      */
     public boolean studentCanTAAnotherCourse(UUID studentId, UUID courseId) {
         List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
-        List<UUID> overlappingCourses = getOverlappingCourses(courseId, 47112);
+        List<UUID> overlappingCourses = getOverlappingCourses(courseId, portData.getCoursePort());
         overlappingCourses.retainAll(coursesAcceptedAsTA);
         return (overlappingCourses.size() < 3);
     }
