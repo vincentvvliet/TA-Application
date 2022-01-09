@@ -5,6 +5,7 @@ import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import nl.tudelft.sem.User.security.TokenAuthenticationService;
+import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,8 @@ public class PublicUserController {
     @Autowired
     UserRepository userRepository;
 
+    UserService userService;
+
     /**
      * POST endpoint registers user by username and password
      *
@@ -42,11 +45,11 @@ public class PublicUserController {
     }
 
     /**
-     * POST endpoint registers user by username and password
+     * POST endpoint for a user to log in. Returns notifications for user o succesful login.
      *
      * @param username of the user
      * @param password of the user
-     * @return optional of user
+     * @return Notifications for user.
      */
     @PostMapping("/login")
     String login(@RequestParam("username") String username,
@@ -59,8 +62,9 @@ public class PublicUserController {
         }
         System.out.println(role);
 
-        return authentication
+        authentication
                 .login(username, password, role)
                 .orElseThrow(() -> new RuntimeException("invalid login and/or password"));
+        return userService.getAndRemoveNotificationsByUserName(username);
     }
 }

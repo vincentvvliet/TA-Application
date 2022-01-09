@@ -29,7 +29,7 @@ public class IsCourseOpen extends BaseValidator {
         }
         LocalDate current = LocalDate.now(); // get current date
         LocalDate startCourse = applicationServices
-                .getCourseStartDate(application.getCourseId()); // get startDate course from the course microservice
+                .getCourseStartDate(application.getCourseId(), 47112); // get startDate course from the course microservice
         if (startCourse == null) {
             throw new Exception("Could not retrieve startDate that was linked to the given courseId");
         }

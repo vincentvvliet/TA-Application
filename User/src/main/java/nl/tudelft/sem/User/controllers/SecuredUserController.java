@@ -62,3 +62,4 @@ public class SecuredUserController {
         return true;
     }
 }
+

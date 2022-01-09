@@ -10,12 +10,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * DTO to represent average rating of a student.
+ * DTO to leave rating for a TA, id represents TA instance, not student ID.
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RatingDTO {
-    private UUID studentId;
-    private Integer rating;
+public class LeaveRatingDTO {
+    private UUID id;
+    private Optional<Integer> rating;
 }
