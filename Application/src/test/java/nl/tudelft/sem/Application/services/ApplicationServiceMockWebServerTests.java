@@ -1,8 +1,5 @@
 package nl.tudelft.sem.Application.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
@@ -50,55 +47,6 @@ public class ApplicationServiceMockWebServerTests {
     @AfterAll
     static void tearDown() throws IOException {
         mockBackEnd.shutdown();
-    }
-
-    // following two tests dont terminate, dont know why
-
-//    @Test
-//    void createTA_successfulCreation() throws Exception {
-//        Boolean expected  = true;
-//        UUID studentId = UUID.randomUUID();
-//        UUID courseId = UUID.randomUUID();
-//
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(expected.toString()).addHeader("Content-Type", "application/json"));
-//
-//        boolean booleanAccepted = applicationService.createTA(studentId, courseId, mockBackEnd.getPort());
-//        Assertions.assertTrue(booleanAccepted);
-//    }
-
-
-//    @Test
-//    void createTA_failedCreation() throws Exception {
-//        Boolean expected  = false;
-//        UUID studentId = UUID.randomUUID();
-//        UUID courseId = UUID.randomUUID();
-//
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(expected.toString()).addHeader("Content-Type", "application/json"));
-//
-//        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.createTA(studentId, courseId, mockBackEnd.getPort()));
-//        String expectedMessage = "Could not create TA.";
-//        String actualMessage = exception.getMessage();
-//        assertTrue(actualMessage.contains(expectedMessage));
-//
-//        //boolean booleanAccepted = applicationService.createTA(studentId, courseId, mockBackEnd.getPort());
-//        //Assertions.assertFalse(booleanAccepted);
-//    }
-
-    @Test
-    void createTA_emptyResponse() throws Exception {
-        Boolean expected = null;
-        UUID studentId = UUID.randomUUID();
-        UUID courseId = UUID.randomUUID();
-
-        mockBackEnd.enqueue(new MockResponse()
-                .setBody(expected + "").addHeader("Content-Type", "application/json"));
-
-        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationService.createTA(studentId, courseId, mockBackEnd.getPort()));
-        String expectedMessage = "Could not create TA.";
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
     }
 
     /**
@@ -256,17 +204,4 @@ public class ApplicationServiceMockWebServerTests {
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
-
-    @Test
-    void getGradeByStudentAndCourse_gradePresent() throws Exception {
-        UUID studentId = UUID.randomUUID();
-        UUID courseId = UUID.randomUUID();
-        Double grade = 5.0;
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
-
-        //assertEquals(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, mockBackEnd.getPort()).getGrade(), grade);
-    }
-
-
 }

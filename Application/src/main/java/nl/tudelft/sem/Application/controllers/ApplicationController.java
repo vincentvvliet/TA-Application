@@ -9,21 +9,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.services.CollectionService;
 import nl.tudelft.sem.Application.services.RecommendationService;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.DTO.PortData;
+import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -166,7 +161,7 @@ public class ApplicationController {
         if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
             throw new Exception("application is still open for application");
         }
-        if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
+        if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId(), portData.getCoursePort())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
         if (LocalDate.now().isAfter(startDate)) {

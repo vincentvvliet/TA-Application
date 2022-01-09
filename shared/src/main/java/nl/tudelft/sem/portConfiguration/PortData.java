@@ -1,4 +1,4 @@
-package nl.tudelft.sem.DTO;
+package nl.tudelft.sem.portConfiguration;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

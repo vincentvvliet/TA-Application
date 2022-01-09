@@ -6,24 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.*;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
-import nl.tudelft.sem.Application.services.strategy.EqualStrategy;
-import nl.tudelft.sem.Application.services.strategy.IgnoreGradeStrategy;
-import nl.tudelft.sem.Application.services.strategy.IgnoreRatingStrategy;
-import nl.tudelft.sem.Application.services.strategy.StrategyContext;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.IsGradeSufficient;
 import nl.tudelft.sem.Application.services.validator.IsUniqueApplication;
 import nl.tudelft.sem.Application.services.validator.Validator;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.GradeDTO;
-import nl.tudelft.sem.DTO.PortData;
+import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
-import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -87,7 +81,7 @@ public class ApplicationService {
                 .uri("/TA/createTA/" + studentId  + "/" + courseId)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+        if (!accepted.block()) {
             throw new Exception("Could not create TA.");
         }
         return true;
@@ -132,7 +126,6 @@ public class ApplicationService {
             .uri("/course/getCourseStartDate/" + courseId)
             .retrieve()
             .bodyToMono(LocalDate.class);
-
         Optional<LocalDate> result = startDate.blockOptional();
         if (result.isEmpty()) {
             throw new EmptyResourceException("no starting date found");
@@ -261,33 +254,6 @@ public class ApplicationService {
         return true;
     }
 
-    public List<GradeDTO> getGradesByCourseId(UUID courseId, int port) {
-        // Request to Grade microservice
-        WebClient webClient = WebClient.create("http://localhost:" + port);
-        Flux<GradeDTO> response = webClient.get()
-            .uri("/grade/getGrades/" + courseId)
-            .retrieve()
-            .bodyToFlux(GradeDTO.class);
-        return response.toStream().collect(Collectors.toList());
-    }
-
-
-    /**
-     * Determines if a student is already selected to TA 3 courses per quarter
-     * Important: 3 courses are in the same quarter if they overlap (partially or totally)
-     *
-     * @param studentId of the student applying as TA
-     * @param courseId of the course for which student is applying as TA
-     *
-     * @return true if student is not already TA for 3 courses this quarter, false otherwise
-     */
-    public boolean studentCanTAAnotherCourse(UUID studentId, UUID courseId) {
-        List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
-        List<UUID> overlappingCourses = getOverlappingCourses(courseId, portData.getCoursePort());
-        overlappingCourses.retainAll(coursesAcceptedAsTA);
-        return (overlappingCourses.size() < 3);
-    }
-
     /**
      * Get list of courses that overlap with a certain course
      *
@@ -299,10 +265,26 @@ public class ApplicationService {
     public List<UUID> getOverlappingCourses(UUID courseId, int port) {
         WebClient webClient = WebClient.create("http://localhost:" + port);
         Flux<UUID> overlappingCourses = webClient.get()
-                .uri("/course/getOverlappingCourses/" + courseId)
-                .retrieve()
-                .bodyToFlux(UUID.class);
+            .uri("/course/getOverlappingCourses/" + courseId)
+            .retrieve()
+            .bodyToFlux(UUID.class);
         return overlappingCourses.toStream().collect(Collectors.toList());
+    }
+
+    /**
+     * Determines if a student is already selected to TA 3 courses per quarter
+     * Important: 3 courses are in the same quarter if they overlap (partially or totally)
+     *
+     * @param studentId of the student applying as TA
+     * @param courseId of the course for which student is applying as TA
+     *
+     * @return true if student is not already TA for 3 courses this quarter, false otherwise
+     */
+    public boolean studentCanTAAnotherCourse(UUID studentId, UUID courseId, int coursePort) {
+        List<UUID> coursesAcceptedAsTA = applicationRepository.coursesAcceptedAsTA(studentId);
+        List<UUID> overlappingCourses = getOverlappingCourses(courseId, coursePort);
+        overlappingCourses.retainAll(coursesAcceptedAsTA);
+        return (overlappingCourses.size() < 3);
     }
 
     /** Sends notification to User microservice for a specified user.
@@ -317,10 +299,10 @@ public class ApplicationService {
                 .uri("/notification/createNotification" + recipientId  + "/" + message)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+        if (!accepted.block()) {
             throw new Exception("Could not create notification for user.");
         }
-        return  true;
+        return true;
     }
 
     /** Requests for contract to be sent to TA.
