@@ -1,21 +1,16 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
-import nl.tudelft.sem.User.entities.Notification;
+import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
-import nl.tudelft.sem.User.repositories.NotificationRepository;
-import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.repositories.UserRepository;
+import nl.tudelft.sem.User.security.TokenAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 
 /**
@@ -24,10 +19,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/user/")
 public class PublicUserController {
+    @Autowired
     @NonNull
-    UserAuthenticationService authentication;
+    TokenAuthenticationService authentication;
 
     @Autowired
+    UserRepository userRepository;
+
     UserService userService;
 
     /**
@@ -38,17 +36,12 @@ public class PublicUserController {
      * @return optional of user
      */
     @PostMapping("/register")
-    String register(@RequestParam("username") final String username,
-                    @RequestParam("password") final String password) {
-//        users.save(
-//                User
-//                        .builder()
-//                        .username(username)
-//                        .password(password)
-//                        .build()
-//        );
+    String register(@RequestParam("username") String username,
+                    @RequestParam("password") String password,
+                    @RequestParam("role") String role) {
+        userRepository.save(new User(username, password, Role.valueOf(role)));
 
-        return login(username, password);
+        return login(username, password, role);
     }
 
     /**
@@ -59,15 +52,19 @@ public class PublicUserController {
      * @return Notifications for user.
      */
     @PostMapping("/login")
-    String login(@RequestParam("username") final String username,
-                 @RequestParam("password") final String password) {
-        System.out.println(username);
-        System.out.println(password);
-        System.out.println(authentication);
+    String login(@RequestParam("username") String username,
+                 @RequestParam("password") String password,
+                 @RequestParam(value = "role", required = false) String role) {
+        // Logging in without specifying role
+        if (role == null) {
+            // Get role from database
+            role = String.valueOf(userRepository.findByUsername(username).get().getRole());
+        }
+        System.out.println(role);
+
         authentication
-                .login(username, password)
+                .login(username, password, role)
                 .orElseThrow(() -> new RuntimeException("invalid login and/or password"));
         return userService.getAndRemoveNotificationsByUserName(username);
     }
-
 }
