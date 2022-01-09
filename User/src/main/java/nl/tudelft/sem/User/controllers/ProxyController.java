@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/user/")
 public class ProxyController implements Controller {
-
     @Autowired
     private SecuredUserController controller;
 
@@ -74,35 +73,6 @@ public class ProxyController implements Controller {
     public Mono<Boolean> createUser(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
         check();
         return Mono.just(controller.createUser(new User(username, password, Role.valueOf(role))));
-    }
-
-
-    /**
-     * PATCH endpoint to accept a TA application.
-     *
-     * @param userId        of the lecturer who accepts the application
-     * @param applicationId of the application to be accepted
-     * @return true if the application was successfully accepted, false otherwise
-     */
-    @RequestMapping("/acceptApplication/{userId}/{applicationId}")
-    @Override
-    public Mono<Boolean> acceptApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "applicationId") UUID applicationId) throws Exception {
-        check();
-        return Mono.just(controller.acceptApplication(userId, applicationId));
-    }
-
-    /**
-     * PATCH endpoint to accept a TA application.
-     *
-     * @param userId   of the user the application is of
-     * @param courseId the course the application is for
-     * @return true if the application was successfully created, false otherwise
-     */
-    @PostMapping("/createApplication/{userId}/{courseId}")
-    @Override
-    public Mono<Boolean> createApplication(@PathVariable(value = "userId") UUID userId, @PathVariable(value = "courseId") UUID courseId) throws Exception {
-        check();
-        return Mono.just(controller.createApplication(userId, courseId));
     }
 
     /**

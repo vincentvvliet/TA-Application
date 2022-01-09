@@ -22,7 +22,7 @@ public class ContractService {
      * @param port of user microservice.
      */
     public boolean sendContractNotification(UUID studentId, UUID courseId, int port) throws Exception {
-        Optional<Contract> c = contractRepository.getContractByStudentIdAndCourseId(studentId, courseId);
+        Optional<Contract> c = contractRepository.findByStudentIdAndCourseId(studentId, courseId);
         if (c.isEmpty()) {
             return false;
         }

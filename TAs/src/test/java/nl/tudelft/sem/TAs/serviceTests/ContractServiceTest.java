@@ -55,7 +55,7 @@ public class ContractServiceTest {
         UUID studentId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         Contract contract = new Contract(studentId, courseId);
-        when(contractRepository.getContractByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.of(contract));
+        when(contractRepository.findByStudentIdAndCourseId(studentId, courseId)).thenReturn(Optional.of(contract));
         mockBackEnd.enqueue(new MockResponse()
                 .setBody(expected.toString()).addHeader("Content-Type", "application/json"));
         boolean booleanAccepted = contractService.sendContractNotification(studentId, courseId, mockBackEnd.getPort());
