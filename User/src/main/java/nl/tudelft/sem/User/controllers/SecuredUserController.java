@@ -4,7 +4,6 @@ import lombok.NonNull;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import nl.tudelft.sem.User.security.TokenAuthenticationService;
-import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +28,7 @@ public class SecuredUserController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
-
+    
     /**
      * GET endpoint retrieves user by id.
      *
