@@ -3,10 +3,13 @@ package nl.tudelft.sem.Application.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -208,21 +212,19 @@ public class ApplicationServiceMockWebServerTests {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
-    // test case requires changing LocalDate to String in Mono and endpoint
-    // not sure if this is 100% a good approach, si I left it aside for now
-    /*
     @Test
-    void getCourseStartDate_datePresent() throws EmptyResourceException {
+    void getCourseStartDate_datePresent() throws EmptyResourceException, JsonProcessingException {
         UUID courseId = UUID.randomUUID();
         LocalDate startDate = LocalDate.parse("2021-12-19");
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(ratingDTO);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mockBackEnd.enqueue(new MockResponse()
-                .setBody("2021-12-19").addHeader("Content-Type", "application/json"));
+                .setBody(mapper.writeValueAsString(startDate)).addHeader("Content-Type", "application/json"));
 
         assertEquals(applicationService.getCourseStartDate(courseId, mockBackEnd.getPort()), startDate);
     }
-    */
+
 
     /**
      * empty response (no TA rating) -> throw exception
@@ -237,6 +239,18 @@ public class ApplicationServiceMockWebServerTests {
         String expectedMessage = "No TA rating found!";
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getRatingForTA_successful() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        RatingDTO rating = new RatingDTO(studentId, 8);
+        ObjectMapper mapper = new ObjectMapper();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(mapper.writeValueAsString(rating)).addHeader("Content-Type", "application/json"));
+
+        RatingDTO result = applicationService.getRatingForTA(studentId, mockBackEnd.getPort());
+        assertEquals(rating, result);
     }
 
     /**
@@ -258,15 +272,16 @@ public class ApplicationServiceMockWebServerTests {
     }
 
     @Test
-    void getGradeByStudentAndCourse_gradePresent() throws Exception {
+    void getGradeByStudentAndCourse_successful() throws Exception {
         UUID studentId = UUID.randomUUID();
-        UUID courseId = UUID.randomUUID();
-        Double grade = 5.0;
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
+        GradeDTO grade = new GradeDTO(studentId, 8);
+        ObjectMapper mapper = new ObjectMapper();
 
-        //assertEquals(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, mockBackEnd.getPort()).getGrade(), grade);
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(mapper.writeValueAsString(grade)).addHeader("Content-Type", "application/json"));
+
+        GradeDTO result = applicationService.getGradeByCourseIdAndStudentId(UUID.randomUUID(), studentId, mockBackEnd.getPort());
+        assertEquals(grade, result);
     }
-
 
 }

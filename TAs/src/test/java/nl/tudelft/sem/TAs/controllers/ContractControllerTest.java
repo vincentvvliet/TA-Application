@@ -100,5 +100,10 @@ public class ContractControllerTest {
         Assertions.assertEquals(salary , contract.getSalaryPerHour());
 
     }
+    @Test
+    public void sendContract() {
+        when(contractRepository.findByStudentIdAndCourseId(id,id)).thenReturn(Optional.ofNullable(contract));
+        Assertions.assertEquals(contract.toString(),contractController.sendContract(id,id).block());
+    }
 
 }
