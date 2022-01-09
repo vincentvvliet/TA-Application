@@ -7,8 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import java.util.*;
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
-import nl.tudelft.sem.TAs.controllers.TAController;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.TARepository;
 import nl.tudelft.sem.TAs.services.TAService;
@@ -28,6 +29,9 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class TAServiceTests {
@@ -80,8 +84,7 @@ public class TAServiceTests {
         // Assert
         RatingDTO result = Objects.requireNonNull(mono.block());
         assertEquals(result.getStudentId(), student);
-        assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), ratingTA);
+        assertEquals(result.getRating(), ratingTA);
     }
 
     @Test
@@ -95,34 +98,6 @@ public class TAServiceTests {
         // Assert
         RatingDTO result = Objects.requireNonNull(mono.block());
         assertEquals(result.getStudentId(), student);
-        assertTrue(result.getRating().isPresent());
-        assertEquals(result.getRating().get(), averageRatingTA);
+        assertEquals(result.getRating(), averageRatingTA);
     }
-
-    @Test
-    public void isCourseFinished_yes() throws JsonProcessingException {
-        LocalDate endDate = LocalDate.of(2021, 2, 1);
-        mockBackEnd.enqueue(new MockResponse()
-                .setBody(mapper.writeValueAsString(endDate)).addHeader("Content-Type", "application/json"));
-        boolean result = taService.isCourseFinished(UUID.randomUUID(), mockBackEnd.getPort());
-        Assertions.assertTrue(result);
-    }
-
-    @Test
-    public void isCourseFinished_no() throws JsonProcessingException {
-        LocalDate endDate = LocalDate.of(2022, 5, 1);
-        mockBackEnd.enqueue(new MockResponse()
-                .setBody(mapper.writeValueAsString(endDate)).addHeader("Content-Type", "application/json"));
-        boolean result = taService.isCourseFinished(UUID.randomUUID(), mockBackEnd.getPort());
-        Assertions.assertFalse(result);
-    }
-
-    @Test
-    public void isCourseFinished_emptyResponse() {
-        mockBackEnd.enqueue(new MockResponse()
-                .setBody(null + "").addHeader("Content-Type", "application/json"));
-        boolean result = taService.isCourseFinished(UUID.randomUUID(), mockBackEnd.getPort());
-        Assertions.assertFalse(result);
-    }
-
 }

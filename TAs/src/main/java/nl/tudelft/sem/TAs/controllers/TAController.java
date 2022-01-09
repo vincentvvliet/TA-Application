@@ -2,6 +2,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
@@ -40,6 +41,7 @@ public class TAController {
 
     /**
      * GET endpoint retrieves TAs average rating by studentId.
+     *
      * @param studentId (UUID) of the student
      * @return rating
      */
@@ -49,20 +51,22 @@ public class TAController {
     }
 
     /**
-     * GET endpoint retrieves TA by id
+     * GET endpoint retrieves TA by id.
+     *
      * @param id (UUID) of the TA
      * @return mono optional of TA
      */
     @GetMapping("/getTA/{id}")
     public Mono<TA> getTAById(@PathVariable(value = "id") UUID id) {
         Optional<TA> ta = taRepository.findById(id);
-        if(ta.isEmpty()){
+        if (ta.isEmpty()) {
             return Mono.empty();
         }
         return Mono.just(ta.get());
     }
     /**
-     * GET endpoint retrieves all existing TA
+     * GET endpoint retrieves all existing TA.
+     *
      * @return list of TAs
      */
     @GetMapping("/getTAs")
@@ -71,34 +75,39 @@ public class TAController {
     }
 
     /**
-     * POST endpoint creating a TA (identified by studentId and courseId)
+     * POST endpoint creating a TA (identified by studentId and courseId).
+     *
      * @param studentId of the student to be a TA
      * @param courseId of the course the TA is hired for
      * @return true after the TA is created and saved in the database
      */
     @PostMapping("/createTA/{studentid}/{courseid}")
-    public Mono<Boolean> createTA(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
-        TA ta = new TA(studentId,courseId);
+    public Mono<Boolean> createTA(@PathVariable(value = "studentid") UUID studentId, @PathVariable(value = "courseid") UUID courseId) {
+        TA ta = new TA(studentId, courseId);
         taRepository.save(ta);
         return Mono.just(true);
     }
 
-    /**PATCH Endpoint to add contract to TA
+    /**
+     * POST Endpoint to add contract to TA.
+     *
      * @param id of the TA
      * @param contractId of the contract attached to TA
      * @return true if the object was modified
      */
-    @RequestMapping("/addContract/{id}/{contractId}")
+    @PostMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public  Mono<Boolean> addContract(@PathVariable(value = "id") UUID id,@PathVariable(value = "contractId") UUID contractId) {
+    public Mono<Boolean> addContract(@PathVariable(value = "id") UUID id, @PathVariable(value = "contractId") UUID contractId) {
          TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
          Contract contract = contractRepository.findById(contractId).orElseThrow(NoSuchElementException::new);
          ta.setContract(contract);
          taRepository.save(ta);
         return Mono.just(true);
     }
+
     /**
-     * DELETE endpoint deletes a TA by id
+     * DELETE endpoint deletes a TA by id.
+     *
      * @param id of the TA
      * @return boolean representing if the deletion was successful or not
      */
@@ -132,6 +141,20 @@ public class TAController {
         taRepository.save(ta);
         return Mono.just(true);
     }
+    /**
+     * POST endpoint for adding rating to a certain TA
+     * Careful: Overwrites old rating.
+     *
+     * @param ratingDTO dto containing relevant information
+     * @return boolean indicating success of operation
+     */
+    @PostMapping("addRating")
+    Mono<Boolean> addRating(@RequestBody LeaveRatingDTO ratingDTO) {
+        if (ratingDTO.getRating().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request is incomplete");
+        }
+        return taService.addRating(ratingDTO);
+    }
 
     /**
      * GET endpoint retrieves average time spent from past TAs for a course
@@ -149,4 +172,17 @@ public class TAController {
     }
 
 
+    /**
+     * PUT endpoint for editing rating to a certain TA.
+     *
+     * @param ratingDTO dto containing relevant information.
+     * @return boolean indicating success of operation.
+     */
+    @PutMapping("setRating")
+    Mono<Boolean> setRating(@RequestBody LeaveRatingDTO ratingDTO) {
+        if (ratingDTO.getRating().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request is incomplete");
+        }
+        return taService.addRating(ratingDTO);
+    }
 }
