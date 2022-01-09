@@ -1,9 +1,9 @@
 package nl.tudelft.sem.User;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
-import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,18 +12,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static reactor.core.publisher.Mono.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,12 +59,24 @@ class UserApplicationITTests {
         mockBackEnd.shutdown();
     }
 
+    @Configuration
+    @Import(PortData.class)
+    @Getter
+    @NoArgsConstructor
+    public static class TestPorts{
+        private int applicationPort = mockBackEnd.getPort();
+        private int coursePort = mockBackEnd.getPort();
+        private int UserPort = mockBackEnd.getPort();
+        private int TAPort =  mockBackEnd.getPort();
+    }
+
     @Test
     void test() throws Exception {
-        MvcResult mvcResult = this.mockMvc.perform(get("/user/getUser/")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        UUID userId = UUID.randomUUID();
+        UUID applicationId = UUID.randomUUID();
+
+        MvcResult result = mockMvc.perform(get("/acceptApplication/" + userId + "/" + applicationId))
+                .andExpect(status().isOk()).andReturn();
 
 //        mockBackEnd.enqueue(new MockResponse()
 //                .setBody(new ObjectMapper().writeValueAsString(""))
