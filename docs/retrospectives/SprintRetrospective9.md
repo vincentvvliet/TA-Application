@@ -21,5 +21,9 @@ Ravi:
 Tasks Pauline:<br />
 - Vincent needed help resolving problems with user roles, spent about 2 hours on this but couldnt find anything. 
 - Spent alot of time resolving merge conflicts for my merge for issue 21, had done this the week before but had to redo it as the target branch was had changed significantly before I was approved.
-
+---
+Vincent:
+- This week I spent more time debugging the allocation of roles to users. I realised I needed a new perspective so I asked for some help. Unfortunately, neither Pauline or Ravi was able to identify the problem, so it remains open.
+- I also worked on integration testing together with Gijs, but unfortunately we realised that we were unable to mock our microservices due to how we created them.
+- Resolve merge conflicts for security branch
 

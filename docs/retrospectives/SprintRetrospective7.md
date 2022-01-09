@@ -19,5 +19,9 @@ Tasks Pauline:<br />
 ---
 Iarina:
 - Iarina had personal circumstances starting from this week (Course staff is aware).
-
+---
+Vincent:
+- I added the JWT token use in the spring security.
+- I updated the entire User Microservice to remove Proxy design pattern.
+- I added basic classes
 
