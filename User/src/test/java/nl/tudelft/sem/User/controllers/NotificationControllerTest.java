@@ -54,5 +54,13 @@ public class NotificationControllerTest {
         Flux<Notification> result = notificationController.getNotificationsForUser(recipientId);
         Assertions.assertEquals(result.blockFirst().getRecipientId(), recipientId);
     }
+
+    @Test
+    public void getAllTest() {
+        when(notificationRepository.findAll())
+                .thenReturn(Collections.singletonList(notification));
+        Flux<Notification> result = notificationController.getAllNotifications();
+        Assertions.assertEquals(result.blockFirst().getRecipientId(), recipientId);
+    }
 }
 
