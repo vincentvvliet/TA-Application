@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
-/**
- * The type User.
- */
 @Entity
 @Data
 @Table(name = "user", schema = "userschema")
@@ -51,16 +50,35 @@ public class User implements UserDetails {
      * @param role     the role
      */
     public User(String username, String password, Role role) {
+        super();
         this.id = UUID.randomUUID();
         this.username = username;
         this.password = password;
         this.role = role;
     }
 
+    @Override
+    public String toString() {
+        return "User [id=" + id + ", username=" + username
+                + ", password=" + password + ", role=" + role + "]";
+    }
+
+
+    /**
+     * Get authorities of a user, with authorities being the specified roles that a user has.
+     *
+     * @return list of authorities
+     */
     @JsonIgnore
     @Override
-    public Collection<GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+    public Collection<GrantedAuthority> getAuthorities() { //TODO method never called, so roles never assigned
+        List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
+        if (role != null) {
+            list.add(new SimpleGrantedAuthority(role.toString()));
+        }
+
+        System.out.println(list);
+        return list;
     }
 
     @JsonIgnore

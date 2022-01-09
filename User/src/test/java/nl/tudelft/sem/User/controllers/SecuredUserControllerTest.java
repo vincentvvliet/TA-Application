@@ -17,8 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -31,36 +32,33 @@ public class SecuredUserControllerTest {
     @MockBean
     UserRepository userRepository;
 
-    User user = new User();
+    User user = new User("username", "password", null);
     List<User> userList = new ArrayList<>();
     UUID id = UUID.randomUUID();
 
+    /**
+     * Setup.
+     */
     @BeforeEach
     public void setup() {
         userList.add(user);
-        when(userRepository.findById(id)).thenReturn(Optional.ofNullable(user));
     }
 
+    /**
+     * Test get user by id.
+     */
     @Test
-    public void findByIdTest() {
+    public void getUserByIdTest() {
+        when(userRepository.findById(id)).thenReturn(Optional.ofNullable(user));
         Assertions.assertEquals(controller.getUserById(id).block(), Optional.ofNullable(user));
     }
 
+    /**
+     * Test get users.
+     */
     @Test
-    public void findAllTest() {
+    public void getUsersTest() {
         when(userRepository.findAll()).thenReturn(userList);
-        Assertions.assertEquals(controller.getUsers(), userList);
-    }
-
-    @Test
-    public void createTest() {
-        controller.createUser(user);
-        verify(userRepository).save(any(User.class));
-    }
-
-    @Test
-    public void deleteTest() {
-        controller.deleteUser(id);
-        verify(userRepository).deleteById(id);
+        Assertions.assertEquals(controller.getUsers().toStream().collect(Collectors.toList()), userList);
     }
 }
