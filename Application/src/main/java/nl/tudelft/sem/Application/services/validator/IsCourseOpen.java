@@ -1,11 +1,10 @@
 package nl.tudelft.sem.Application.services.validator;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.services.ApplicationService;
-import nl.tudelft.sem.DTO.PortData;
+import nl.tudelft.sem.portConfiguration.PortData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
