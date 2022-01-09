@@ -77,7 +77,7 @@ public class ApplicationController {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         try {
             return Flux
-                .fromIterable(applicationService.getApplicationDetails(applications, portData.getCoursePort(), portData.getTAPort()));
+                .fromIterable(applicationService.getApplicationDetails(applications, portData.getCoursePort(), portData.getTaPort()));
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No applications found!");
         }
@@ -93,7 +93,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID studentId) {
         try {
-            return applicationService.getRatingForTA(studentId, portData.getTAPort());
+            return applicationService.getRatingForTA(studentId, portData.getTaPort());
         } catch (Exception e) {
             return null;
         }
@@ -156,11 +156,11 @@ public class ApplicationController {
         if (! applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
-        if (! applicationService.isTASpotAvailable(application.getCourseId(), portData.getTAPort())) {
+        if (! applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId(), portData.getTAPort());
+            .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
         if (!successfullyCreated) {
             return Mono.just(false);
         }
@@ -182,8 +182,8 @@ public class ApplicationController {
                                                      @PathVariable("strategy") String strategy,
                                                      @PathVariable("minimum") double minimumGrade) {
         List<RecommendationDTO> list = recommendationService
-                .getRecommendationDetailsByCourse(courseId);
-        list = list.stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
+                .getRecommendationDetailsByCourse(courseId)
+                .stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
         try {
             return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
         } catch (Exception e) {
@@ -224,8 +224,8 @@ public class ApplicationController {
                                                           @PathVariable("n") int n,
                                                           @PathVariable("minimum") double minimumGrade) {
         List<RecommendationDTO> list = recommendationService
-                .getRecommendationDetailsByCourse(courseId);
-        list = list.stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
+                .getRecommendationDetailsByCourse(courseId)
+                .stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
         try {
             return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
         } catch (Exception e) {
@@ -277,11 +277,11 @@ public class ApplicationController {
                 if (application.isAccepted()) {
                    continue;
                 }
-                if (!applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
+                if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
                   continue;
                 }
                 boolean successfullyCreated = applicationService
-                    .createTA(application.getStudentId(), application.getCourseId(), 47110);
+                    .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
                 if (!successfullyCreated) {
                     continue;
                 }
