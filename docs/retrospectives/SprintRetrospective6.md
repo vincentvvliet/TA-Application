@@ -18,6 +18,10 @@ Ravi:
 - I ended up changing a lot of controllers and services to return the Mono object instead of an optional or a primitive, since it was decided that was the better way to implement the webclient.
 
 ---
+Andrei:
+- I have spent the entire week solving issue #4. It was one of the very first issues solved and because of this a lot of the foundation code had to be laid. There were no specific impediments, but it was a lengthy process
+- I have also spent a considerable amount of time figuring out how to use web clients in the service classes
+---
 
 Tasks Pauline:<br />
 - At the start of this week we decided to divide up most the remaining tasks to be able to plan ahead more. I ended up getting alot of 'could haves ' \(25,26,27\), meaning my code was dependant on others, which I brought up during this meeting but which we decided should not end up being a big issue. 

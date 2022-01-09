@@ -9,6 +9,12 @@ Gijs:
 ---
 Ravi:
 - I still had the same issue as previous week in that the work I still needed to do relied on the work of others. And their work was not yet merged at this point in time.
+
+---
+Andrei:
+- I focused my attention on issue #16 as it has already been allocated beforehand.
+- Helped Gijs refactor some of his code regarding the TA rating, namely moving some functionality in the repository queries, since I had previously worked on this and had a bit more experience.
+
 ---
 Pauline:
 - Decided to take over and focus on issue 14 as I had already done work on this and Iarina informed us she would not be able to finish it.

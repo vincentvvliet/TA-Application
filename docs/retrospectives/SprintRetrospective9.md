@@ -18,6 +18,12 @@ Ravi:
 - This week I didn't really have any big hurdles and was able to finish the last of my issues. 
 
 ---
+Andrei:
+- I took on issue #23 initially assigned for Gijs, which I also finished, since we decided to begin integration testing and he started researching more in this direction
+- Having finally finished all the should tasks allocated, I worked this week on 2 could issues. Both of them turned out well, and I have not met any problems.
+- Small adjustments to the code before submitting the project, such as adding tests or fixing bits of code. All went smoothly
+
+---
 Tasks Pauline:<br />
 - Vincent needed help resolving problems with user roles, spent about 2 hours on this but couldnt find anything. 
 - Spent alot of time resolving merge conflicts for my merge for issue 21, had done this the week before but had to redo it as the target branch was had changed significantly before I was approved.

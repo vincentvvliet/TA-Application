@@ -21,6 +21,11 @@ Tasks Iarina:<br />
 - I also spent a lot of time in creating the microservices’ templates. I encountered problems with the build.gradle , since I never touched that beforehand. Google and stackoverflow helped me to add all modules dependancies I needed and configurate a microservice architecture.
 - For the next sprint I decided to push people to make work and give them more tasks to do together to learn.  The plans we had in mind, I found not what we needed so I also spend a lot of time to think on how microservices interact.
 
+Tasks Andrei:<br />
+- I tried to help Pauline with the class diagram, which was quite confusing and because of this it also took quite a lot of time. In the end, we got a more clear picture of what was expected from us, which unfortunately meant that a lot of the work was in vane.
+- Besides this, I was also tasked with making the lollipop diagram, which again took a bit of time because of the confusion surrounding what diagrams we need exactly.
+- Together with Iarina, we also started creating the tasks for each issue in part in GitLab, in order to make it clear for everyone what needs to be implemented and how the flow of actions in the system should look like
+
 Tasks Pauline:<br />
 - I was supposed to make a UML class diagram to show the architecture of the the whole system, because we heard from silviu this was required for assignment 1 and I imagined it would have helped us to start coding. I ended up getting overwhelmed because it is hard to determine all the classes needed for all the functionalities of the system theoretically. I contacted Andrei for help, we decided to consult the rest of the group in the thursday meeting. In the meeting we got a more clear view of the level of detail required, which turned out to be less than what we had in mind.
 
