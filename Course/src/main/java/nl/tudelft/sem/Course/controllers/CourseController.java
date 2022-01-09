@@ -55,6 +55,20 @@ public class CourseController {
     }
 
     /**
+     * GET endpoint retrieves endDate of course by id
+     * @param id (UUID) of the course
+     * @return optional of date
+     */
+    @GetMapping("/getCourseEndDate/{id}")
+    public Mono<LocalDate> getCourseEndDateById(@PathVariable(value = "id") UUID id) {
+        Optional<Course> course = courseRepository.findById(id);
+        if(course.isPresent()){
+            return Mono.just(course.get().getEndDate());
+        }
+        return Mono.empty();
+    }
+
+    /**
      * GET endpoint retrieves number of participants to course by id
      * @param id (UUID) of the course
      * @return optional of integer (nr participants)

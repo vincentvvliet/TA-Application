@@ -3,6 +3,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.LeaveRatingDTO;
+import nl.tudelft.sem.DTO.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -121,6 +123,26 @@ public class TAController {
     }
 
     /**
+     * PATCH endpoint sets actual time spent by a TA preparing for a course
+     * @param id of the TA
+     * @param timeSpent estimated average number of weekly hours spent by the TA working on the course
+     * @return true if time was added successfully, false otherwise
+     */
+    @PatchMapping("addTimeSpent/{id}/{timeSpent}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Mono<Boolean> addTimeSpent(@PathVariable (value = "id")  UUID id , @PathVariable(value = "timeSpent") Integer timeSpent) {
+        TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException("no TA was found with the given id"));
+        if (timeSpent <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "number of hours spent must be positive");
+        }
+        if (! taService.isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
+            return Mono.just(false);
+        }
+        ta.setTimeSpent(timeSpent);
+        taRepository.save(ta);
+        return Mono.just(true);
+    }
+    /**
      * POST endpoint for adding rating to a certain TA
      * Careful: Overwrites old rating.
      *
@@ -134,6 +156,22 @@ public class TAController {
         }
         return taService.addRating(ratingDTO);
     }
+
+    /**
+     * GET endpoint retrieves average time spent from past TAs for a course
+     * @param courseId (UUID) of the course
+     * @return optional of double (average time spent)
+     */
+    @GetMapping("/getAverageTimeSpent/{id}")
+    public Mono<Double> getAverageTimeSpentAsTA(@PathVariable(value = "id") UUID courseId) {
+        Optional<Double> averageTime = taRepository.getAverageTimeSpentAsTA(courseId);
+        if(averageTime.isPresent()){
+            return Mono.just(averageTime.get());
+        } else {
+            return Mono.empty();
+        }
+    }
+
 
     /**
      * PUT endpoint for editing rating to a certain TA.
