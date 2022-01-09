@@ -28,3 +28,8 @@ Tasks Pauline:<br />
 - I got message from Iarina on thursday that she needed help with her issues and assignment 1, and we decided to reallocate some of the work.I was going to help with issue 14 and she was going to take issue 25. I was going to leave issues 26,27 and take 28 and help with other issues on declaring hours. 
 - By the time of the deadline there was a big issue concerning the deadline for assignent one, namely that the implementation for the proxy pattern we had planned was not going to work, as the pattern would make the use of spring security obsolete. I heard this from Iarina on friday noon; she and gijs were working on the implementations and needed help with the assignment itself and sumbitting it. I spent that day finishing writing the assignment, by rewriting certain parts for part 1, writing about the new design pattern for part 2, and submitting everything.
 
+---
+Vincent:
+- I implemented the proxy design pattern for the user microservice.
+- I added mockito tests for the secured user controller
+- Unfortunately, after I spent a lot of time creating the Proxy design pattern, it was decided that we would remove this and create a new design pattern as this one was redundant. I did mention this from the start, however it was only realised later. Luckily, it was realised on time for the assignment deadline.

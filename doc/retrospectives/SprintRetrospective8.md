@@ -18,3 +18,7 @@ Andrei:
 ---
 Pauline:
 - Decided to take over and focus on issue 14 as I had already done work on this and Iarina informed us she would not be able to finish it.
+---
+Vincent:
+- I spent time on the security fixing the logging in of users. I decided to look into the admin functionality, for this I needed a user to be allocated a specific role. I ran into some trouble with this, so I will continue debugging next week.
+- I added tests for the user microservice

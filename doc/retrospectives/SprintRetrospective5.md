@@ -35,3 +35,5 @@ Tasks Pauline:<br />
 - Issue 2: I had a task to make a webclient to request endpoints, I struggled at the start of the week to get the spring framework for this to work so I managed by making classes that format and send http requests manually, this took more time than it should have. I saw that by the end of the week other group memebers had gotten the spring version to work), so I ended redoing it in that method for consistency. 
 - Issue 7: I had never used DTO's before and we planned on using them for this issue, so figuring out what they were and how to use them cost me alot of time.
 
+Tasks Vincent:
+- I did research on spring security and started to implement it
