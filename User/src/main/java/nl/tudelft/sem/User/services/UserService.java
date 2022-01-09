@@ -3,20 +3,12 @@ package nl.tudelft.sem.User.services;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import nl.tudelft.sem.User.entities.Notification;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.NotificationRepository;
-
-import java.util.NoSuchElementException;
-import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
-
-
 
 @Service
 public class UserService {
@@ -48,15 +40,5 @@ public class UserService {
             return ret + "none";
         }
         return ret;
-    }
-
-
-    public boolean validateRole(UUID userId, Role role) {
-        try {
-            User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
-            return user.getRole() == role;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }
