@@ -3,6 +3,8 @@ package nl.tudelft.sem.Application.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
@@ -21,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -208,21 +211,19 @@ public class ApplicationServiceMockWebServerTests {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
-    // test case requires changing LocalDate to String in Mono and endpoint
-    // not sure if this is 100% a good approach, si I left it aside for now
-    /*
     @Test
-    void getCourseStartDate_datePresent() throws EmptyResourceException {
+    void getCourseStartDate_datePresent() throws EmptyResourceException, JsonProcessingException {
         UUID courseId = UUID.randomUUID();
         LocalDate startDate = LocalDate.parse("2021-12-19");
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String json = ow.writeValueAsString(ratingDTO);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mockBackEnd.enqueue(new MockResponse()
-                .setBody("2021-12-19").addHeader("Content-Type", "application/json"));
+                .setBody(mapper.writeValueAsString(startDate)).addHeader("Content-Type", "application/json"));
 
         assertEquals(applicationService.getCourseStartDate(courseId, mockBackEnd.getPort()), startDate);
     }
-    */
+
 
     /**
      * empty response (no TA rating) -> throw exception
