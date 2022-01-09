@@ -257,16 +257,4 @@ public class ApplicationServiceMockWebServerTests {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
-    @Test
-    void getGradeByStudentAndCourse_gradePresent() throws Exception {
-        UUID studentId = UUID.randomUUID();
-        UUID courseId = UUID.randomUUID();
-        Double grade = 5.0;
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(grade.toString()).addHeader("Content-Type", "application/json"));
-
-        //assertEquals(applicationService.getGradeByCourseIdAndStudentId(courseId, studentId, mockBackEnd.getPort()).getGrade(), grade);
-    }
-
-
 }
