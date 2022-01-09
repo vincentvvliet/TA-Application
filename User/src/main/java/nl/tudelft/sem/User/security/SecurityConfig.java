@@ -55,10 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .userDetailsService(userDetailsService)
                 .authorizeRequests()
-                .antMatchers("/user/login", "/user/register")
+                .anyRequest()
                 .permitAll()
-                .antMatchers("/user/getUsers").hasAuthority("ADMIN") // TODO .permitAll() works, role doesn't
-                .antMatchers("/user/getUser").hasAuthority("ADMIN") // TODO always works
                 .and()
                 .csrf().disable()
                 .formLogin().disable()
