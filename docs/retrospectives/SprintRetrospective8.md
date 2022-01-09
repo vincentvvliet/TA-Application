@@ -7,3 +7,6 @@ Gijs:
 	Actual time spent: 8 hours.
 	
 ---
+
+Pauline:
+- Decided to take over and focus on issue 14 as I had already done work on this and Iarina informed us she would not be able to finish it.
