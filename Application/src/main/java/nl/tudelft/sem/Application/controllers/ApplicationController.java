@@ -74,7 +74,7 @@ public class ApplicationController {
 
     @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
+    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourse(
             @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         try {
