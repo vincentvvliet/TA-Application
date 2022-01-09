@@ -1,6 +1,7 @@
 package nl.tudelft.sem.Course.controllers;
 
 import nl.tudelft.sem.Course.entities.Course;
+import nl.tudelft.sem.Course.entities.Grade;
 import nl.tudelft.sem.Course.repositories.CourseRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +70,27 @@ public class CourseControllerTest {
         courseList.add(course);
         when(courseRepository.findByStartDateIsAfter(LocalDate.now().plusWeeks(3))).thenReturn(courseList);
         Assertions.assertEquals(courseList,courseController.getOpenCourses().toStream().collect(Collectors.toList()));
+    }
+
+    @Test
+    public void modifyCourseCodeTest() {
+        courseController.modifyCourseCode(id,"CSE400");
+        Assertions.assertEquals(course.getCourseCode() , "CSE400");
+    }
+
+    @Test
+    public void modifyNrParticipantsTest() {
+        courseController.modifyNrParticipants(id,35);
+        Assertions.assertEquals(course.getNrParticipants() , 35);
+    }
+
+    @Test
+    public void modifyNrParticipantsWrongTest() {
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> courseController.modifyNrParticipants(id, -8));
+        String expectedMessage = "number of participants is negative";
+        String actualMessage = exception.getMessage();
+        Assertions.assertTrue(actualMessage.contains(expectedMessage));
+        verify(courseRepository, never()).save(any(Course.class));
     }
 
     @Test
