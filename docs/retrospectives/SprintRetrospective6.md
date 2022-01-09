@@ -1,4 +1,4 @@
-Week 6
+## Week 6
 Gijs:
 - Issue 8:  Have endpoints and logic for letting lectureres rate a TA
 	Issues encountered. Finished this week.
@@ -12,3 +12,4 @@ Gijs:
 	Estimated time: 6-8 hours\
 	Actual time spent: 6 hours. (of which about half was thinking and research)
 	
+---
