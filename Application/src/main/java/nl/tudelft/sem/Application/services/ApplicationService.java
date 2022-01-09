@@ -313,12 +313,13 @@ public class ApplicationService {
      */
     public String sendContract(UUID studentId, UUID courseId, int port) throws Exception {
         WebClient webClient = WebClient.create("http://localhost:" + port);
-        Mono<String> contract = webClient.get()
+        Optional<String> contract = webClient.get()
                 .uri("/contract/sendContract/" + studentId  + "/" + courseId)
                 .retrieve()
-                .bodyToMono(String.class);
-        if (contract.blockOptional().isPresent()) {
-            return contract.blockOptional().get();
+                .bodyToMono(String.class)
+                .blockOptional();;
+        if (contract.isPresent()) {
+            return contract.get();
         }
         throw new EmptyResourceException("Could not send contract to User");
     }

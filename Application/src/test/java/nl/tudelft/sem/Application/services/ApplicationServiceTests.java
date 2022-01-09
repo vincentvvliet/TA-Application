@@ -402,7 +402,7 @@ public class ApplicationServiceTests {
         );
         // Act
         Exception exception = assertThrows(Exception.class, () -> applicationService.sendNotification(
-            UUID.randomUUID(),"You've gotten a contract!",mockBackEnd.getPort())
+            UUID.randomUUID(),"You've gotten a contract!", mockBackEnd.getPort())
         );
         // Assert
         assertEquals("Could not create notification for user.", exception.getMessage());
@@ -411,5 +411,111 @@ public class ApplicationServiceTests {
     /**
      * sendContract
      */
+    @Test
+    void sendContract_succes_returnsContract() throws Exception {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson("This is a contract, do you accept?"))
+        );
+        // Act
+        String result = applicationService.sendContract(
+            studentId,
+            courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertEquals("\"This is a contract, do you accept?\"", result);
+    }
+
+    @Test
+    void sendContract_responseEmpty_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse());
+        // Act
+        Exception exception = assertThrows(Exception.class, () -> applicationService.sendContract(
+            studentId, courseId, mockBackEnd.getPort()
+        ));
+        // Assert
+        assertEquals("Could not send contract to User", exception.getMessage());
+    }
+
+    /**
+     * createContract
+     */
+    @Test
+    void createContract_succes_returnsId() throws EmptyResourceException {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(id))
+        );
+        // Act
+        UUID result = applicationService.createContract(
+            studentId,
+            courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertEquals(id, result);
+    }
+
+    @Test
+    void createContract_responseIsEmpty_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse());
+        // Act
+        Exception exception = assertThrows(Exception.class, () -> applicationService.createContract(
+            studentId, courseId, mockBackEnd.getPort()
+        ));
+        // Assert
+        assertEquals("Contract creation failed", exception.getMessage());
+    }
+
+    /**
+     * addContract
+     */
+    @Test
+    void addContract_succes_returnsId() throws EmptyResourceException {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(true))
+        );
+        // Act
+        boolean result = applicationService.addContract(
+            studentId,
+            courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertTrue(result);
+    }
+
+    @Test
+    void addContract_noSucces_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(false))
+        );
+        // Act
+        Exception result = assertThrows(Exception.class, () ->
+            applicationService.addContract(studentId, courseId, mockBackEnd.getPort())
+        );
+        // Assert
+        assertEquals("Could not link contract to TA", result.getMessage());
+    }
+
+    @Test
+    void addContract_emptyResponse_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse());
+        // Act
+        Exception result = assertThrows(Exception.class, () ->
+            applicationService.addContract(studentId, courseId, mockBackEnd.getPort())
+        );
+        // Assert
+        assertEquals("Could not link contract to TA", result.getMessage());
+    }
+
 
 }
