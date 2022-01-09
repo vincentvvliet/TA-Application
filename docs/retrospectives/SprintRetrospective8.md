@@ -9,3 +9,6 @@ Gijs:
 ---
 Ravi:
 - I still had the same issue as previous week in that the work I still needed to do relied on the work of others. And their work was not yet merged at this point in time.
+---
+Pauline:
+- Decided to take over and focus on issue 14 as I had already done work on this and Iarina informed us she would not be able to finish it.
