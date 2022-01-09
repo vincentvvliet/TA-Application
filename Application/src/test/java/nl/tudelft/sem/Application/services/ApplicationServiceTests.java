@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import java.io.IOException;
+import java.time.LocalDate;
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.validator.IsCourseOpen;
 import nl.tudelft.sem.Application.services.validator.Validator;
@@ -15,12 +17,10 @@ import nl.tudelft.sem.DTO.RatingDTO;
 import org.junit.jupiter.api.AfterAll;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -29,7 +29,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.*;
-import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -39,12 +38,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
+
+
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @SpringBootTest
 public class ApplicationServiceTests {
 
-    @Autowired
+   @Autowired
     ApplicationService applicationService;
 
     @MockBean
@@ -89,6 +90,9 @@ public class ApplicationServiceTests {
         doNothing().when(isCourseOpen).setLast(any(Validator.class));
     }
 
+    /**
+     * Validation tests
+     */
     @Test
     public void validateSuccessfulTest() throws Exception {
         when(isCourseOpen.handle(application)).thenReturn(true);
@@ -103,6 +107,36 @@ public class ApplicationServiceTests {
 
         assertFalse(applicationService.validate(application));
         verify(e).printStackTrace();
+    }
+
+    /**
+     * createTA tests
+     */
+    @Test
+    public void createTA_succes_returnsTrue() throws Exception {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(true))
+        );
+        // Act
+        boolean result = applicationService.createTA(studentId, courseId, mockBackEnd.getPort());
+        // Assert
+        assertTrue(result);
+    }
+
+    @Test
+    public void createTA_noSucces_throwsException() throws Exception {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(false))
+        );
+        // Act
+        Exception exception = assertThrows(Exception.class,
+            () -> applicationService.createTA(studentId, courseId, mockBackEnd.getPort()));
+        // Assert
+        assertEquals("Could not create TA.", exception.getMessage());
     }
 
     @Test
@@ -139,6 +173,22 @@ public class ApplicationServiceTests {
         Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
         verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
+    /**
+     * getCourseStartDate tests
+     */
+//    @Test
+//    void getCourseStartDate_test() throws EmptyResourceException {
+//        // Arrange
+//        LocalDate date = LocalDate.now();
+//        mockBackEnd.enqueue(new MockResponse()
+//            .addHeader("Content-Type", "application/json")
+//            .setBody(gson.toJson(date))
+//        );
+//        // Act
+//        LocalDate result = applicationService.getCourseStartDate(courseId, mockBackEnd.getPort());
+//        // Assert
+//        assertEquals(date, result);
+//    }
 
     /**
      * getApplicationDetails tests
@@ -243,7 +293,8 @@ public class ApplicationServiceTests {
     void getRatingForTA_gradeNotFound_throwsException() {
         // Arrange
         mockBackEnd.enqueue(new MockResponse()
-            .setBody(gson.toJson(null)).addHeader("Content-Type", "application/json"));
+            .setBody(gson.toJson(null))
+            .addHeader("Content-Type", "application/json"));
         // Act
         Exception e = assertThrows(Exception.class,
             () -> applicationService.getRatingForTA(courseId, mockBackEnd.getPort())
@@ -251,4 +302,220 @@ public class ApplicationServiceTests {
         // Assert
         assertEquals("No TA rating found!", e.getMessage());
     }
+
+    /**
+     * getGradesByCourseId -> To Be Removed!
+     */
+
+    /**
+     * getOverlappingCourses tests
+     */
+    @Test
+    void getOverlappingCourses_empty_returnsList() {
+        // Arrange
+        List<UUID> expected = List.of();
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(expected))
+        );
+        // Act
+        List<UUID> result = applicationService.getOverlappingCourses(courseId, mockBackEnd.getPort());
+        // Assert
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getOverlappingCourses_valid_returnsList() {
+        // Arrange
+        List<UUID> expected = List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(expected))
+        );
+        // Act
+        List<UUID> result = applicationService.getOverlappingCourses(courseId, mockBackEnd.getPort());
+        // Assert
+        assertEquals(expected, result);
+    }
+
+    /**
+     * studentCanTAAnotherCourse tests
+     */
+    @Test
+    void studentCanTAAnotherCourse_positive_returnTrue() {
+        // Arrange
+        List<UUID> overlap = List.of(UUID.randomUUID(), UUID.randomUUID());
+        when(applicationRepository.coursesAcceptedAsTA(studentId))
+            .thenReturn(overlap);
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(overlap))
+        );
+        // Act
+        boolean result = applicationService.studentCanTAAnotherCourse(studentId, courseId, mockBackEnd.getPort());
+        // Assert
+        assertTrue(result);
+    }
+
+    @Test
+    void studentCanTAAnotherCourse_negative_returnsFalse() {
+        // Arrange
+        List<UUID> overlap = List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+        when(applicationRepository.coursesAcceptedAsTA(studentId))
+            .thenReturn(overlap);
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(overlap))
+        );
+        // Act
+        boolean result = applicationService.studentCanTAAnotherCourse(studentId, courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertFalse(result);
+    }
+
+    /**
+     * sendNotification tests
+     */
+    @Test
+    void sendNotifications_succes_returnsTrue() throws Exception {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(true))
+        );
+        // Act
+        boolean result = applicationService.sendNotification(
+            UUID.randomUUID(),
+            "You've gotten a contract!",
+            mockBackEnd.getPort());
+        // Assert
+        assertTrue(result);
+    }
+
+    @Test
+    void sendNotifications_noSucces_throwsException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(false))
+        );
+        // Act
+        Exception exception = assertThrows(Exception.class, () -> applicationService.sendNotification(
+            UUID.randomUUID(),"You've gotten a contract!", mockBackEnd.getPort())
+        );
+        // Assert
+        assertEquals("Could not create notification for user.", exception.getMessage());
+    }
+
+    /**
+     * sendContract
+     */
+    @Test
+    void sendContract_succes_returnsContract() throws Exception {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson("This is a contract, do you accept?"))
+        );
+        // Act
+        String result = applicationService.sendContract(
+            studentId,
+            courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertEquals("\"This is a contract, do you accept?\"", result);
+    }
+
+    @Test
+    void sendContract_responseEmpty_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse());
+        // Act
+        Exception exception = assertThrows(Exception.class, () -> applicationService.sendContract(
+            studentId, courseId, mockBackEnd.getPort()
+        ));
+        // Assert
+        assertEquals("Could not send contract to User", exception.getMessage());
+    }
+
+    /**
+     * createContract
+     */
+    @Test
+    void createContract_succes_returnsId() throws EmptyResourceException {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(id))
+        );
+        // Act
+        UUID result = applicationService.createContract(
+            studentId,
+            courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertEquals(id, result);
+    }
+
+    @Test
+    void createContract_responseIsEmpty_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse());
+        // Act
+        Exception exception = assertThrows(Exception.class, () -> applicationService.createContract(
+            studentId, courseId, mockBackEnd.getPort()
+        ));
+        // Assert
+        assertEquals("Contract creation failed", exception.getMessage());
+    }
+
+    /**
+     * addContract
+     */
+    @Test
+    void addContract_succes_returnsId() throws EmptyResourceException {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(true))
+        );
+        // Act
+        boolean result = applicationService.addContract(
+            studentId,
+            courseId,
+            mockBackEnd.getPort());
+        // Assert
+        assertTrue(result);
+    }
+
+    @Test
+    void addContract_noSucces_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse()
+            .addHeader("Content-Type", "application/json")
+            .setBody(gson.toJson(false))
+        );
+        // Act
+        Exception result = assertThrows(Exception.class, () ->
+            applicationService.addContract(studentId, courseId, mockBackEnd.getPort())
+        );
+        // Assert
+        assertEquals("Could not link contract to TA", result.getMessage());
+    }
+
+    @Test
+    void addContract_emptyResponse_throwsEmptyResourceException() {
+        // Arrange
+        mockBackEnd.enqueue(new MockResponse());
+        // Act
+        Exception result = assertThrows(Exception.class, () ->
+            applicationService.addContract(studentId, courseId, mockBackEnd.getPort())
+        );
+        // Assert
+        assertEquals("Could not link contract to TA", result.getMessage());
+    }
+
+
 }

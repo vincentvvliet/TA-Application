@@ -1,6 +1,6 @@
 package nl.tudelft.sem.TAs.controllers;
 
-import nl.tudelft.sem.DTO.PortData;
+import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.services.ContractService;

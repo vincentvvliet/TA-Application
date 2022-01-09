@@ -9,21 +9,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import nl.tudelft.sem.Application.entities.Application;
-import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.services.CollectionService;
 import nl.tudelft.sem.Application.services.RecommendationService;
-import nl.tudelft.sem.DTO.ApplyingStudentDTO;
-import nl.tudelft.sem.DTO.PortData;
+import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -79,7 +74,7 @@ public class ApplicationController {
 
     @GetMapping("/getApplicationOverview/{course_id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourseDTO(
+    public Flux<ApplyingStudentDTO> getApplicationsOverviewByCourse(
             @PathVariable(value = "course_id") UUID course) {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         try {
@@ -162,11 +157,11 @@ public class ApplicationController {
         if (application.isAccepted()) {
             throw new Exception("application is already accepted");
         }
-        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), 47112);
+        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), portData.getCoursePort());
         if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
             throw new Exception("application is still open for application");
         }
-        if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId())) {
+        if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId(), portData.getCoursePort())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
         if (LocalDate.now().isAfter(startDate)) {
@@ -182,13 +177,13 @@ public class ApplicationController {
         }
 
         try {
-            applicationService.createTA(application.getStudentId(), application.getCourseId(), 47110);
-            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), 47110);
-            applicationService.addContract(application.getStudentId(), contractId, 47110);
+            applicationService.createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            applicationService.addContract(application.getStudentId(), contractId, portData.getTaPort());
         } catch (Exception e) {
             throw new Exception("TA or contract creation failed: " + e.getMessage());
         }
-        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", 47111);
+        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", portData.getUserPort());
         application.setAccepted(true);
         applicationRepository.save(application);
         return Mono.just(true);
