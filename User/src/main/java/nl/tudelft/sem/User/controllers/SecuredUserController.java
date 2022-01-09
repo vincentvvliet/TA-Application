@@ -28,7 +28,7 @@ public class SecuredUserController {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     /**
      * GET endpoint retrieves user by id.
      *
