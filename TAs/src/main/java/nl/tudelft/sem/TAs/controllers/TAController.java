@@ -3,6 +3,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.LeaveRatingDTO;
+import nl.tudelft.sem.DTO.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
@@ -134,7 +135,7 @@ public class TAController {
         if (timeSpent <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "number of hours spent must be positive");
         }
-        if (! taService.isCourseFinished(ta.getCourseId(), 47112)) {
+        if (! taService.isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
             return Mono.just(false);
         }
         ta.setTimeSpent(timeSpent);
