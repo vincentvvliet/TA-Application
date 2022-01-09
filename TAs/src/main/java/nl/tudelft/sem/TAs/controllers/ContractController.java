@@ -44,7 +44,8 @@ public class ContractController {
     }
 
     /**
-     * POST endpoint creating a contract for a TA (identified by studentId and courseId)
+     * POST endpoint creating a contract for a TA (identified by studentId and courseId),
+     * sends notification to student of contract that it has been created.
      * @param studentId of the TA
      * @param courseId of the course the TA is hired for
      * @return true after the contract is created and saved in the database
@@ -65,10 +66,12 @@ public class ContractController {
      */
     @PatchMapping("addHours/{id}/{maxHours}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) {
+    public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setMaxHours(hours);
         contractRepository.save(contract);
+        //TODO; merge dev into this branch, dont hardcode port
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
     }
 
     /**
@@ -78,37 +81,43 @@ public class ContractController {
      */
     @PatchMapping("addTask/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addTaskById(@PathVariable (value = "id")  UUID id, @RequestBody String task) {
+    public void addTaskById(@PathVariable (value = "id")  UUID id, @RequestBody String task) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setTaskDescription(task);
         contractRepository.save(contract);
+        //TODO; merge dev into this branch, dont hardcode port
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
     }
 
     /**
      * PATCH endpoint sets the date when the contract starts?
-     * @param id of the contract
+     * @param id of the contract.
      * @param date representing the start time of the contract
      */
     @PatchMapping("addDate/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addDateById(@PathVariable (value = "id")  UUID id, @RequestBody String date) throws ParseException {
+    public void addDateById(@PathVariable (value = "id")  UUID id, @RequestBody String date) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         Date d = new SimpleDateFormat("dd/MM/yyyy").parse(date);
         contract.setDate(d);
         contractRepository.save(contract);
+        //TODO; merge dev into this branch, dont hardcode port
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
     }
 
     /**
      * PATCH endpoint sets the salary the TA will get per hour
-     * @param id of the contract
+     * @param id of the contract.
      * @param salary (per hour) the TA will get
      */
     @PatchMapping("addSalary/{id}/{salary}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addSalaryById(@PathVariable (value = "id")  UUID id, @PathVariable(value = "salary") double salary) {
+    public void addSalaryById(@PathVariable (value = "id")  UUID id, @PathVariable(value = "salary") double salary) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setSalaryPerHour(salary);
         contractRepository.save(contract);
+        //TODO; merge dev into this branch, dont hardcode port
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
     }
 
     /**

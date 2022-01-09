@@ -56,9 +56,13 @@ public class ContractControllerTest {
     }
 
     @Test
-    public void findAllTest() {
+    public void findAllTest() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
         when(contractRepository.findAll()).thenReturn(contractList);
-        Assertions.assertEquals(contractController.getContracts().block(),contractList);
+        contractService.sendContractNotification(studentId, courseId, 47111);
+        Assertions.assertEquals(contractController.getContracts().block(), contractList);
+
     }
 
     @Test
@@ -66,7 +70,7 @@ public class ContractControllerTest {
         UUID studentId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         when(contractService.sendContractNotification(studentId, courseId, 47111)).thenReturn(true);
-        contractController.createContract(UUID.randomUUID(), UUID.randomUUID());
+        contractController.createContract(studentId, courseId);
         verify(contractRepository).save(any(Contract.class));
     }
 
@@ -77,20 +81,20 @@ public class ContractControllerTest {
     }
 
     @Test
-    public void addHoursTest() {
+    public void addHoursTest() throws Exception {
         contractController.addHoursById(id,42);
         Assertions.assertEquals(42,contract.getMaxHours());
     }
 
     @Test
-    public void addTaskTest() {
+    public void addTaskTest() throws Exception {
         String task = "TA needs to grade exam";
         contractController.addTaskById(id,task);
         Assertions.assertEquals(task , contract.getTaskDescription());
     }
 
     @Test
-    public void addSalaryTest() {
+    public void addSalaryTest() throws Exception {
         double salary = 13.5;
         contractController.addSalaryById(id,salary);
         Assertions.assertEquals(salary , contract.getSalaryPerHour());

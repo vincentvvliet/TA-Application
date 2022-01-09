@@ -26,16 +26,14 @@ public class ContractService {
         if (c.isEmpty()) {
             return false;
         }
-        String message = "You have been hired for a TA position. Here is your contract: " + c.get().toString();
+        String message = "Your TA contract has been updated. Here is your new contract: " + c.get().toString();
         WebClient webClient = WebClient.create("http://localhost:" + port); // 47111
-        Mono<Boolean> accepted = webClient.post()
+        Boolean accepted = webClient.post()
                 .uri("/notification/createNotification" + studentId + "/" + message)
                 .retrieve()
-                .bodyToMono(Boolean.class);
-        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
-            return false;
-        }
-        return true;
+                .bodyToMono(Boolean.class)
+                .block();
+        return accepted;
 
     }
 }

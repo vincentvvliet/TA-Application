@@ -7,6 +7,7 @@ import nl.tudelft.sem.User.repositories.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/notification/")
@@ -23,11 +24,12 @@ public class NotificationController {
      */
 
     @PostMapping("/createNotification/{recipientId}/{message}")
-    public void createNotification(
+    public Mono<Boolean> createNotification(
             @PathVariable(value = "recipientId") UUID recipientId,
             @PathVariable(value = "message") String message) {
         Notification notification = new Notification(recipientId, message);
         notificationRepository.save(notification);
+        return Mono.just(true);
     }
 
     /**

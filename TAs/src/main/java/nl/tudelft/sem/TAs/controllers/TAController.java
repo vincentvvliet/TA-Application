@@ -54,7 +54,7 @@ public class TAController {
     @GetMapping("/getTA/{id}")
     public Mono<TA> getTAById(@PathVariable(value = "id") UUID id) {
         Optional<TA> ta = taRepository.findById(id);
-        if(ta.isEmpty()){
+        if(ta.isEmpty()) {
             return Mono.empty();
         }
         return Mono.just(ta.get());
