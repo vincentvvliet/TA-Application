@@ -107,8 +107,7 @@ public class TAController {
     }
 
     /**
-     * DELETE endpoint deletes a TA by id.
-     *
+     * DELETE endpoint deletes a TA by id
      * @param id of the TA
      * @return boolean representing if the deletion was successful or not
      */

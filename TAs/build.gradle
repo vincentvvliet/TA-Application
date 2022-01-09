@@ -60,6 +60,7 @@ dependencies {
 	implementation project(':shared')
 	testImplementation project(':shared')
 	compile group: 'com.itextpdf', name: 'itextpdf', version: '5.5.9'
+	testImplementation group: 'com.squareup.okhttp', name: 'mockwebserver', version: '2.7.5'
 
 }
 
