@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.DTO.PortData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,8 @@ public class IsCourseOpen extends BaseValidator {
 
     @Autowired
     private ApplicationService applicationServices;
+
+    private PortData portData = new PortData();
 
     /** Checks if the application is made in the application period of the course.
      *
@@ -29,7 +32,7 @@ public class IsCourseOpen extends BaseValidator {
         }
         LocalDate current = LocalDate.now(); // get current date
         LocalDate startCourse = applicationServices
-                .getCourseStartDate(application.getCourseId(), 47112); // get startDate course from the course microservice
+                .getCourseStartDate(application.getCourseId(), portData.getCoursePort()); // get startDate course from the course microservice
         if (startCourse == null) {
             throw new Exception("Could not retrieve startDate that was linked to the given courseId");
         }
