@@ -1,5 +1,6 @@
 package nl.tudelft.sem.TAs.controllers;
 
+import nl.tudelft.sem.DTO.PortData;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.services.ContractService;
@@ -16,6 +17,9 @@ import java.util.*;
 @RequestMapping("/contract/")
 @Controller
 public class ContractController {
+
+    private PortData portData = new PortData();
+
     @Autowired
     private ContractRepository contractRepository;
 
@@ -65,13 +69,12 @@ public class ContractController {
     public Mono<UUID> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) throws Exception {
         Contract c = new Contract(studentId,courseId);
         contractRepository.save(c);
-        //TODO; merge dev into this branch, dont hardcode port
-        contractService.sendContractNotification(c.getStudentId(), c.getCourseId(), 47111);
+        contractService.sendContractNotification(c.getStudentId(), c.getCourseId(), portData.getUserPort());
         return Mono.just(c.getId());
     }
 
     /**
-     * PATCH endpoint sets maxHours a TA can work on the contract
+     * PATCH endpoint sets maxHours a TA can work on the contract, sends notification to user about updated contract.
      * @param id of the contract to be updated
      * @param  hours a TA can work
      */
@@ -81,12 +84,11 @@ public class ContractController {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setMaxHours(hours);
         contractRepository.save(contract);
-        //TODO; merge dev into this branch, dont hardcode port
-        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
-     * PATCH endpoint sets task description for contract
+     * PATCH endpoint sets task description for contract, sends notification to user about updated contract.
      * @param id of the contract
      * @param task description
      */
@@ -96,12 +98,11 @@ public class ContractController {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setTaskDescription(task);
         contractRepository.save(contract);
-        //TODO; merge dev into this branch, dont hardcode port
-        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
-     * PATCH endpoint sets the date when the contract starts?
+     * PATCH endpoint sets the date when the contract starts, sends notification to user about updated contract.
      * @param id of the contract.
      * @param date representing the start time of the contract
      */
@@ -112,8 +113,7 @@ public class ContractController {
         Date d = new SimpleDateFormat("dd/MM/yyyy").parse(date);
         contract.setDate(d);
         contractRepository.save(contract);
-        //TODO; merge dev into this branch, dont hardcode port
-        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
@@ -127,8 +127,7 @@ public class ContractController {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setSalaryPerHour(salary);
         contractRepository.save(contract);
-        //TODO; merge dev into this branch, dont hardcode port
-        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), 47111);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
