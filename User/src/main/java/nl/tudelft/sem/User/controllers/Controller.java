@@ -14,9 +14,5 @@ public interface Controller {
 
     boolean logout(User user);
 
-    public Mono<Boolean> acceptApplication(UUID userId, UUID applicationId) throws Exception;
-
-    public Mono<Boolean> createApplication(UUID userId, UUID courseId) throws Exception;
-
     public Mono<Boolean> deleteUser(UUID id);
 }
