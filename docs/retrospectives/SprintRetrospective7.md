@@ -22,4 +22,8 @@ Andrei:
 Tasks Pauline:<br />
 - Issue 8: This issue should have been completed but it turned out that a method I wrote has gotten lost so I redid it, and there was some testing missing, so I spent some time testing.
 
+---
+Iarina:
+- Iarina had personal circumstances starting from this week (Course staff is aware).
+
 
