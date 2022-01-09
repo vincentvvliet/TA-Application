@@ -9,6 +9,7 @@ import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -240,6 +241,18 @@ public class ApplicationServiceMockWebServerTests {
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
+    @Test
+    void getRatingForTA_successful() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        RatingDTO rating = new RatingDTO(studentId, 8);
+        ObjectMapper mapper = new ObjectMapper();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(mapper.writeValueAsString(rating)).addHeader("Content-Type", "application/json"));
+
+        RatingDTO result = applicationService.getRatingForTA(studentId, mockBackEnd.getPort());
+        assertEquals(rating, result);
+    }
+
     /**
      * empty response (no grade) -> throw exception
      */
@@ -256,6 +269,19 @@ public class ApplicationServiceMockWebServerTests {
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getGradeByStudentAndCourse_successful() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        GradeDTO grade = new GradeDTO(studentId, 8);
+        ObjectMapper mapper = new ObjectMapper();
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(mapper.writeValueAsString(grade)).addHeader("Content-Type", "application/json"));
+
+        GradeDTO result = applicationService.getGradeByCourseIdAndStudentId(UUID.randomUUID(), studentId, mockBackEnd.getPort());
+        assertEquals(grade, result);
     }
 
 }
