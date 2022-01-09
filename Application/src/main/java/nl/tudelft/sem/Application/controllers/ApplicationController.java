@@ -172,7 +172,7 @@ public class ApplicationController {
         if (LocalDate.now().isAfter(startDate)) {
             throw new Exception("course has already started");
         }
-        if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
+        if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getCoursePort())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
