@@ -7,3 +7,5 @@ Gijs:
 	Actual time spent: 8 hours.
 	
 ---
+Ravi:
+- I still had the same issue as previous week in that the work I still needed to do relied on the work of others. And their work was not yet merged at this point in time.

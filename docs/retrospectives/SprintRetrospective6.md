@@ -13,6 +13,11 @@ Gijs:
 	Actual time spent: 6 hours. (of which about half was thinking and research)
 	
 ---
+Ravi:
+- This week I found out that I had been misunderstanding some stuff about when exactly people could apply for a course. I always thought it was that a student could apply in the three week before the course start date. But it actually turned out to be that that is the end deadline. So I went back in the code to fix this issue by changing the if statements and tests that test for that thing.
+- I ended up changing a lot of controllers and services to return the Mono object instead of an optional or a primitive, since it was decided that was the better way to implement the webclient.
+
+---
 
 Tasks Pauline:<br />
 - At the start of this week we decided to divide up most the remaining tasks to be able to plan ahead more. I ended up getting alot of 'could haves ' \(25,26,27\), meaning my code was dependant on others, which I brought up during this meeting but which we decided should not end up being a big issue. 

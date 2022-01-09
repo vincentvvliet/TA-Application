@@ -14,7 +14,10 @@ Gijs:
     Actual Time spent: 1 hour
 
 ---
+Ravi:
+- This week I didn't really have any big hurdles and was able to finish the last of my issues. 
 
+---
 Tasks Pauline:<br />
 - Vincent needed help resolving problems with user roles, spent about 2 hours on this but couldnt find anything. 
 - Spent alot of time resolving merge conflicts for my merge for issue 21, had done this the week before but had to redo it as the target branch was had changed significantly before I was approved.
