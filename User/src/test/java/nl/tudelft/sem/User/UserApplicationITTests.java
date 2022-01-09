@@ -77,10 +77,6 @@ class UserApplicationITTests {
 
         MvcResult result = mockMvc.perform(get("/acceptApplication/" + userId + "/" + applicationId))
                 .andExpect(status().is(404)).andReturn();
-
-//        mockBackEnd.enqueue(new MockResponse()
-//                .setBody(new ObjectMapper().writeValueAsString(""))
-//                .addHeader("Content-Type", "application/json"));
     }
 
 }
