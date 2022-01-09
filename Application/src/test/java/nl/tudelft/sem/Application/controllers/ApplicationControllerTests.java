@@ -9,6 +9,9 @@ import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.Application.services.RecommendationService;
+import nl.tudelft.sem.DTO.ApplicationDTO;
+import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -128,9 +131,9 @@ public class ApplicationControllerTests {
     public void acceptApplicationSuccessfully() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.studentCanTAAnotherCourse(studentId,courseId)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId,courseId, 47112)).thenReturn(true);
         when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
-        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
         when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
         when(applicationService.getCourseStartDate(courseId,47112)).thenReturn(startDateClosed);
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), true);
@@ -164,7 +167,7 @@ public class ApplicationControllerTests {
     public void acceptApplicationMaximumTAsReached() throws EmptyResourceException {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(false);
         when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
 
@@ -180,7 +183,7 @@ public class ApplicationControllerTests {
     public void acceptApplicationAlreadyTAFor3CoursesPerQuarter() throws EmptyResourceException {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(false);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(false);
         when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "a student can TA a maximum of 3 courses per quarter";
@@ -194,7 +197,7 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        when(applicationService.studentCanTAAnotherCourse(studentId,courseId)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
         when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
         when(applicationService.createTA(studentId, courseId, 47110)).thenThrow(new Exception("Could not create TA."));
         when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
@@ -491,6 +494,7 @@ public class ApplicationControllerTests {
     /**
      * hireN tests
      */
+
     @Test
     void hireN_ExistantStrategy_makeHiringRequests() throws Exception {
         // Arrange
@@ -564,6 +568,68 @@ public class ApplicationControllerTests {
     }
 
     @Test
+    void hireN_skipAlreadyAccepted() throws Exception {
+        // Arrange
+        UUID courseId = UUID.randomUUID();
+        //      Set Service behaviour
+        when(recommendationService.getRecommendationDetailsByCourse(any()))
+            .thenReturn(List.of(recommendation1, recommendation2, recommendation3));
+        when(recommendationService.recommendNStudents(any(), any(), anyInt()))
+            .thenReturn(List.of(recommendation1));
+        when(applicationService.isTASpotAvailable(any(), eq(47110)))
+            .thenReturn(true);
+        when(applicationService.createTA(any(), any(), eq(47110)))
+            .thenReturn(true);
+        Application acceptedApp = new Application(courseId, studentId);
+        acceptedApp.setAccepted(true);
+        //      Set Database behaviour
+        when(applicationRepository.findByStudentIdAndCourseId(any(), any())).thenReturn(Optional.of(acceptedApp));
+        // Assert
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    void hireN_skipsTASpotNotAvailable() throws Exception {
+        // Arrange
+        UUID courseId = UUID.randomUUID();
+        //      Set Service behaviour
+        when(recommendationService.getRecommendationDetailsByCourse(any()))
+            .thenReturn(List.of(recommendation1, recommendation2, recommendation3));
+        when(recommendationService.recommendNStudents(any(), any(), anyInt()))
+            .thenReturn(List.of(recommendation1));
+        when(applicationService.isTASpotAvailable(any(), eq(47110)))
+            .thenReturn(false);
+        //      Set Database behaviour
+        when(applicationRepository.findByStudentIdAndCourseId(any(), any()))
+            .thenReturn(Optional.of(rec_app1));
+        // Assert
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    void hireN_skipsNotSuccesfullyCreated() throws Exception {
+        // Arrange
+        UUID courseId = UUID.randomUUID();
+        //      Set Service behaviour
+        when(recommendationService.getRecommendationDetailsByCourse(any()))
+            .thenReturn(List.of(recommendation1, recommendation2, recommendation3));
+        when(recommendationService.recommendNStudents(any(), any(), anyInt()))
+            .thenReturn(List.of(recommendation1));
+        when(applicationService.isTASpotAvailable(any(), eq(47110)))
+            .thenReturn(true);
+        when(applicationService.createTA(any(), any(), eq(47110)))
+            .thenReturn(false);
+        //      Set Database behaviour
+        when(applicationRepository.findByStudentIdAndCourseId(any(), any()))
+            .thenReturn(Optional.of(rec_app1));
+        // Assert
+        verify(applicationRepository, never()).save(any());
+    }
+
+    /**
+     * acceptApplication tests
+     */
+    @Test
     void acceptApplicationCourseStillOpen() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
@@ -583,7 +649,7 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
         when(applicationService.createTA(studentId, courseId, 47110)).thenReturn(true);
         when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(LocalDate.now().minusWeeks(1));
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
@@ -592,5 +658,76 @@ public class ApplicationControllerTests {
         assertTrue(actualMessage.contains(expectedMessage));
         verify(applicationRepository, never()).save(any(Application.class));
     }
+
+
+    /**
+     * getApplicationsOverviewByCourse tests
+     */
+    @Test
+    void getApplicationsOverviewByCourse_serviceSucces_returnsFlux() throws Exception {
+        // Arrange
+        List<Application> list = List.of(
+            new Application(courseId, UUID.randomUUID()),
+            new Application(courseId, UUID.randomUUID()),
+            new Application(courseId, UUID.randomUUID())
+        );
+        List<ApplyingStudentDTO> applying = List.of(
+            new ApplyingStudentDTO(list.get(0).getStudentId(), 8.0d, Optional.of(4)),
+            new ApplyingStudentDTO(list.get(1).getStudentId(), 6.6d, Optional.empty()),
+            new ApplyingStudentDTO(list.get(2).getStudentId(), 8.9d, Optional.of(5))
+        );
+        when(applicationRepository.findApplicationsByCourseId(any()))
+            .thenReturn(list);
+        when(applicationService.getApplicationDetails(any(), anyInt(), anyInt()))
+            .thenReturn(applying);
+        // Act
+        Flux<ApplyingStudentDTO> result = applicationController.getApplicationsOverviewByCourse(courseId);
+        // Assert
+        assertEquals(applying, result.toStream().collect(Collectors.toList()));
+    }
+
+    @Test
+    void getApplicationsOverviewByCourse_serviceFailure_throwsException() throws Exception {
+        // Arrange
+        when(applicationRepository.findApplicationsByCourseId(any()))
+            .thenReturn(List.of());
+        when(applicationService.getApplicationDetails(any(), anyInt(), anyInt()))
+            .thenThrow(new Exception("Massive error here!"));
+        // Act
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () ->
+            applicationController.getApplicationsOverviewByCourse(courseId)
+        );
+        // Assert
+        assertEquals("No applications found!", e.getReason());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+
+    /**
+     * getRating tests
+     */
+    @Test
+    void getRating_serviceSucces_returnsRatingDTO() throws Exception {
+        // Arrange
+        RatingDTO dto = new RatingDTO(studentId, 3);
+        when(applicationService.getRatingForTA(any(), anyInt()))
+            .thenReturn(dto);
+        // Act
+        RatingDTO result = applicationController.getRating(studentId);
+        // Assert
+        assertEquals(result, dto);
+    }
+
+    @Test
+    void getRating_serviceFails_returnsNull() throws Exception {
+        // Arrange
+        RatingDTO dto = new RatingDTO(studentId, 3);
+        when(applicationService.getRatingForTA(any(), anyInt()))
+            .thenThrow(new Exception("Massive error here!"));
+        // Act
+        RatingDTO result = applicationController.getRating(studentId);
+        // Assert
+        assertEquals(result, null);
+    }
+
 
 }
