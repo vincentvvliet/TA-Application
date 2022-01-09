@@ -32,8 +32,8 @@ class UserApplicationITTests {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private UserRepository userRepository;
+//    @Autowired
+//    private UserRepository userRepository;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -76,7 +76,7 @@ class UserApplicationITTests {
         UUID applicationId = UUID.randomUUID();
 
         MvcResult result = mockMvc.perform(get("/acceptApplication/" + userId + "/" + applicationId))
-                .andExpect(status().isOk()).andReturn();
+                .andExpect(status().is(404)).andReturn();
 
 //        mockBackEnd.enqueue(new MockResponse()
 //                .setBody(new ObjectMapper().writeValueAsString(""))

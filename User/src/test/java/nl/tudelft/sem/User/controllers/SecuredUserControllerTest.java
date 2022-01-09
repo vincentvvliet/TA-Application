@@ -17,8 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -41,7 +42,6 @@ public class SecuredUserControllerTest {
     @BeforeEach
     public void setup() {
         userList.add(user);
-        when(userRepository.findById(id)).thenReturn(Optional.ofNullable(user));
     }
 
     /**
@@ -49,7 +49,8 @@ public class SecuredUserControllerTest {
      */
     @Test
     public void getUserByIdTest() {
-        Assertions.assertEquals(controller.getUserById(id), Optional.ofNullable(user));
+        when(userRepository.findById(id)).thenReturn(Optional.ofNullable(user));
+        Assertions.assertEquals(controller.getUserById(id).block(), Optional.ofNullable(user));
     }
 
     /**
@@ -58,6 +59,6 @@ public class SecuredUserControllerTest {
     @Test
     public void getUsersTest() {
         when(userRepository.findAll()).thenReturn(userList);
-        Assertions.assertEquals(controller.getUsers(), userList);
+        Assertions.assertEquals(controller.getUsers().toStream().collect(Collectors.toList()), userList);
     }
 }
