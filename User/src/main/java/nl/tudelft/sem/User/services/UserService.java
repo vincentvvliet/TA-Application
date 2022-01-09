@@ -12,6 +12,9 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import nl.tudelft.sem.DTO.ApplicationDTO;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.LeaveRatingDTO;
+import nl.tudelft.sem.User.entities.Role;
+import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -144,5 +147,39 @@ public class UserService {
                 .retrieve()
                 .bodyToMono(Boolean.class);
         return application.block();
+    }
+
+    /** Add rating to TA by making a request to the TA microservice
+     *
+     * @param id        ID of TA we want to rate
+     * @param rating    rating we would like to add.
+     * @return bool that is true iff operation was successful.
+     * @throws Exception if TA microservice does not respond.
+     */
+    public boolean addRatingByTAId(UUID id, int rating) throws Exception {
+        // Create DTO to be body of request
+        LeaveRatingDTO dto = new LeaveRatingDTO(id, Optional.of(rating));
+        // Make request to TA microservice (port: 47110)
+        WebClient webClient = WebClient.create("localhost:47110");
+        Mono<Boolean> result = webClient.post()
+                .uri("TA/addRating/")
+                .body(Mono.just(dto), LeaveRatingDTO.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        Optional<Boolean> success = result.blockOptional();
+        if(success.isPresent()) {
+            return success.get();
+        } else {
+            throw new Exception("No response from microservice!");
+        }
+    }
+
+    public boolean validateRole(UUID userId, Role role) {
+        try {
+            User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+            return user.getRole() == role;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
