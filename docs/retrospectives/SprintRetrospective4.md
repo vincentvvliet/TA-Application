@@ -24,3 +24,6 @@ Tasks Iarina:<br />
 Tasks Pauline:<br />
 - I was supposed to make a UML class diagram to show the architecture of the the whole system, because we heard from silviu this was required for assignment 1 and I imagined it would have helped us to start coding. I ended up getting overwhelmed because it is hard to determine all the classes needed for all the functionalities of the system theoretically. I contacted Andrei for help, we decided to consult the rest of the group in the thursday meeting. In the meeting we got a more clear view of the level of detail required, which turned out to be less than what we had in mind.
 
+Tasks Vincent:
+- This week I fixed some problems in the build.gradle and the application.properties halting everyone from doing their work
+- I also added controllers, entities and repositories for the user microservice

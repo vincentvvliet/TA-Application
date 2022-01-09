@@ -26,4 +26,5 @@ Vincent:
 - This week I spent more time debugging the allocation of roles to users. I realised I needed a new perspective so I asked for some help. Unfortunately, neither Pauline or Ravi was able to identify the problem, so it remains open.
 - I also worked on integration testing together with Gijs, but unfortunately we realised that we were unable to mock our microservices due to how we created them.
 - Resolve merge conflicts for security branch
+- Unfortunately, I was sick in the second part of the week due to COVID and had trouble completing my tasks for this week.
 
