@@ -1,21 +1,21 @@
 package nl.tudelft.sem.User.controllers;
 
 import lombok.NonNull;
-import nl.tudelft.sem.User.entities.Role;
 import nl.tudelft.sem.User.entities.User;
 import nl.tudelft.sem.User.repositories.UserRepository;
 import nl.tudelft.sem.User.security.UserAuthenticationService;
 import nl.tudelft.sem.User.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@Controller
 public class SecuredUserController {
 
     @NonNull
@@ -47,22 +47,6 @@ public class SecuredUserController {
         return true;
     }
 
-    public boolean acceptApplication(UUID userId, UUID applicationId) throws Exception {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
-        if (user.getRole() != Role.LECTURER) {
-            throw new Exception("invalid role: only lecturers can accept applications");
-        }
-        return userService.acceptTaApplication(applicationId);
-    }
-
-    public boolean createApplication(UUID userId, UUID courseId) throws Exception {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
-        if (user.getRole() != Role.STUDENT) {
-            throw new Exception("invalid role: only students can create applications");
-        }
-        return userService.createApplication(userId, courseId);
-    }
-
     public boolean deleteUser(UUID id) {
         try {
             userRepository.deleteById(id);
@@ -71,4 +55,6 @@ public class SecuredUserController {
             return false;
         }
     }
+
 }
+

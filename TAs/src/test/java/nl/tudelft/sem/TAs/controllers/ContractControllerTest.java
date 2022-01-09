@@ -2,6 +2,7 @@ package nl.tudelft.sem.TAs.controllers;
 
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
+import nl.tudelft.sem.TAs.services.ContractService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ public class ContractControllerTest {
     @MockBean
     ContractRepository contractRepository;
 
+    @MockBean
+    ContractService contractService;
+
     Contract contract = new Contract();
     List<Contract> contractList = new ArrayList<>();
     UUID id = UUID.randomUUID();
@@ -52,14 +56,21 @@ public class ContractControllerTest {
     }
 
     @Test
-    public void findAllTest() {
+    public void findAllTest() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
         when(contractRepository.findAll()).thenReturn(contractList);
-        Assertions.assertEquals(contractController.getContracts().block(),contractList);
+        contractService.sendContractNotification(studentId, courseId, 47111);
+        Assertions.assertEquals(contractController.getContracts().block(), contractList);
+
     }
 
     @Test
-    public void createTest() {
-        contractController.createContract(UUID.randomUUID(),UUID.randomUUID());
+    public void createTest() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        when(contractService.sendContractNotification(studentId, courseId, 47111)).thenReturn(true);
+        contractController.createContract(studentId, courseId);
         verify(contractRepository).save(any(Contract.class));
     }
 
@@ -70,20 +81,20 @@ public class ContractControllerTest {
     }
 
     @Test
-    public void addHoursTest() {
+    public void addHoursTest() throws Exception {
         contractController.addHoursById(id,42);
         Assertions.assertEquals(42,contract.getMaxHours());
     }
 
     @Test
-    public void addTaskTest() {
+    public void addTaskTest() throws Exception {
         String task = "TA needs to grade exam";
         contractController.addTaskById(id,task);
         Assertions.assertEquals(task , contract.getTaskDescription());
     }
 
     @Test
-    public void addSalaryTest() {
+    public void addSalaryTest() throws Exception {
         double salary = 13.5;
         contractController.addSalaryById(id,salary);
         Assertions.assertEquals(salary , contract.getSalaryPerHour());

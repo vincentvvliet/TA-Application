@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
@@ -17,6 +18,7 @@ import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.services.CollectionService;
 import nl.tudelft.sem.Application.services.RecommendationService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
+import nl.tudelft.sem.DTO.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,11 @@ public class ApplicationController {
     @Autowired
     RecommendationService recommendationService;
 
+    @Autowired
+    CollectionService collectionService;
+
+    private PortData portData = new PortData();
+
     /**
      * GET endpoint to retrieve an application based on studentId and courseId.
      *
@@ -77,7 +84,7 @@ public class ApplicationController {
         List<Application> applications = applicationRepository.findApplicationsByCourseId(course);
         try {
             return Flux
-                    .fromIterable(applicationService.getApplicationDetails(applications, 47112, 47110));
+                .fromIterable(applicationService.getApplicationDetails(applications, portData.getCoursePort(), portData.getTaPort()));
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No applications found!");
         }
@@ -94,7 +101,7 @@ public class ApplicationController {
     @ResponseStatus(value = HttpStatus.OK)
     public RatingDTO getRating(@PathVariable(value = "student_id") UUID studentId) {
         try {
-            return applicationService.getRatingForTA(studentId, 47110);
+            return applicationService.getRatingForTA(studentId, portData.getTaPort());
         } catch (Exception e) {
             return null;
         }
@@ -165,11 +172,11 @@ public class ApplicationController {
         if (LocalDate.now().isAfter(startDate)) {
             throw new Exception("course has already started");
         }
-        if (!applicationService.isTASpotAvailable(application.getCourseId(), 47112)) {
+        if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getCoursePort())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
         boolean successfullyCreated = applicationService
-                .createTA(application.getStudentId(), application.getCourseId(), 47110);
+            .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
         if (!successfullyCreated) {
             return Mono.just(false);
         }
@@ -187,7 +194,34 @@ public class ApplicationController {
         return Mono.just(true);
     }
 
+    /**
+     * GET endpoint to get all the applications of a course and return them ordered using the specified strategy.
+     * It also filters out all the grades that are below the given minimum.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @param minimumGrade The minimum all grades need to be above
+     * @return A sorted and filtered list of applications.
+     */
+    @GetMapping("/getSortedListWithMinimumGrade/{course_id}/{strategy}/{minimum}")
+    Flux<RecommendationDTO> getSortedListWithMinimumGrade(@PathVariable("course_id") UUID courseId,
+                                                     @PathVariable("strategy") String strategy,
+                                                     @PathVariable("minimum") double minimumGrade) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId)
+                .stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
+        try {
+            return Flux.fromIterable(recommendationService.sortOnStrategy(list, strategy));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
+        }
+    }
 
+    /**
+     * GET endpoint to get all the applications of a course and return them ordered using the specified strategy.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @return A sorted list of applications.
+     */
     @GetMapping("/getSortedList/{course_id}/{strategy}")
     Flux<RecommendationDTO> getSortedList(@PathVariable("course_id") UUID courseId,
                                           @PathVariable("strategy") String strategy) {
@@ -200,6 +234,37 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * GET endpoint to get n applications of a course and return them ordered using the specified strategy.
+     * It also filters out all the grades that are below the given minimum.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @param n The number of applications that need to be returned.
+     * @param minimumGrade The minimum all grades need to be above
+     * @return A sorted and filtered list of n applications.
+     */
+    @GetMapping("/recommendNStudentsWithMinimumGrade/{course_id}/{n}/{strategy}/{minimum}")
+    Flux<RecommendationDTO> recommendNStudentsWithMinimumGrade(@PathVariable("course_id") UUID courseId,
+                                                          @PathVariable("strategy") String strategy,
+                                                          @PathVariable("n") int n,
+                                                          @PathVariable("minimum") double minimumGrade) {
+        List<RecommendationDTO> list = recommendationService
+                .getRecommendationDetailsByCourse(courseId)
+                .stream().filter(x -> x.getGrade() >= minimumGrade).collect(Collectors.toList());
+        try {
+            return Flux.fromIterable(recommendationService.recommendNStudents(list, strategy, n));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
+        }
+    }
+
+    /**
+     * GET endpoint to get n applications of a course and return them ordered using the specified strategy.
+     * @param courseId The id of the course all the returned applications are for.
+     * @param strategy The strategy the list need to be ordered on. (check the Strategy class for more information)
+     * @param n The number of applications that need to be returned.
+     * @return A sorted and filtered list of n applications.
+     */
     @GetMapping("/recommendNStudents/{course_id}/{n}/{strategy}")
     Flux<RecommendationDTO> recommendNStudents(@PathVariable("course_id") UUID courseId,
                                                @PathVariable("strategy") String strategy,
@@ -213,6 +278,13 @@ public class ApplicationController {
         }
     }
 
+    /**
+     * PATCH endpoint to accept the top n applications of a given course using the specified strategy.
+     * @param courseId The id of the course that the applications are to.
+     * @param strategy The strategy used to get the top n aplications. (check the Strategy class for more information)
+     * @param n The amount of applications that need to be accepted
+     * @return a true in case everything works or a bad response status in case it doesn't.
+     */
     @PatchMapping("/hireRecommendedN/{course_id}/{n}/{strategy}")
     Mono<Boolean> hireNStudents(@PathVariable("course_id") UUID courseId,
                                 @PathVariable("strategy") String strategy,
@@ -230,11 +302,11 @@ public class ApplicationController {
                 if (application.isAccepted()) {
                     continue;
                 }
-                if (!applicationService.isTASpotAvailable(application.getCourseId(), 47110)) {
-                    continue;
+                if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
+                  continue;
                 }
                 boolean successfullyCreated = applicationService
-                        .createTA(application.getStudentId(), application.getCourseId(), 47110);
+                    .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
                 if (!successfullyCreated) {
                     continue;
                 }
