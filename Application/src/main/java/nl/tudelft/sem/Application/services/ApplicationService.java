@@ -81,13 +81,16 @@ public class ApplicationService {
      *
      * @return true if the TA was successfully created.
      */
-    public boolean createTA(UUID studentId, UUID courseId, int port) {
+    public boolean createTA(UUID studentId, UUID courseId, int port) throws Exception {
         WebClient webClient = WebClient.create("http://localhost:" + port);
         Mono<Boolean> accepted = webClient.get()
-            .uri("/TA/createTA/" + studentId + "/" + courseId)
-            .retrieve()
-            .bodyToMono(Boolean.class);
-        return accepted.blockOptional().orElse(false);
+                .uri("/TA/createTA/" + studentId  + "/" + courseId)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+            throw new Exception("Could not create TA.");
+        }
+        return true;
     }
 
     /**
@@ -300,6 +303,84 @@ public class ApplicationService {
                 .retrieve()
                 .bodyToFlux(UUID.class);
         return overlappingCourses.toStream().collect(Collectors.toList());
+    }
+
+    /** Sends notification to User microservice for a specified user.
+     *
+     * @param recipientId user to recieve notification.
+     * @param message of notification.
+     * @param port of MS to send request to.
+     */
+    public boolean sendNotification(UUID recipientId, String message, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<Boolean> accepted = webClient.post()
+                .uri("/notification/createNotification" + recipientId  + "/" + message)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        if (accepted.blockOptional().isEmpty() || !accepted.blockOptional().get()) {
+            throw new Exception("Could not create notification for user.");
+        }
+        return  true;
+    }
+
+    /** Requests for contract to be sent to TA.
+     *
+     * @param studentId of TA.
+     * @param courseId of course student is TAing.
+     * @param port of MS to send request to.
+     */
+    public String sendContract(UUID studentId, UUID courseId, int port) throws Exception {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Mono<String> contract = webClient.get()
+                .uri("/contract/sendContract/" + studentId  + "/" + courseId)
+                .retrieve()
+                .bodyToMono(String.class);
+        if (contract.blockOptional().isPresent()) {
+            return contract.blockOptional().get();
+        }
+        throw new EmptyResourceException("Could not send contract to User");
+    }
+
+    /**
+     * Create contract when a TA is hired.
+     * @param studentId of the student hired.
+     * @param courseId of the course the student is hired for.
+     * @param port of the microservice.
+     * @return the id of the contract created.
+     * @throws EmptyResourceException if the contract creation failed.
+     */
+    public UUID createContract(UUID studentId, UUID courseId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Optional<UUID> contractId = webClient.post()
+                .uri("/contract/createContract/" + studentId  + "/" + courseId)
+                .retrieve()
+                .bodyToMono(UUID.class)
+                .blockOptional();
+        if (contractId.isPresent()) {
+            return contractId.get();
+        }
+        throw new EmptyResourceException("Contract creation failed");
+    }
+
+    /**
+     * Add contract to a TA (links the two of them).
+     * @param studentId of the student hired
+     * @param contractId of the contract
+     * @param port of the microservice
+     * @return true if the action was performed.
+     */
+    public boolean addContract(UUID studentId, UUID contractId, int port) throws EmptyResourceException {
+        WebClient webClient = WebClient.create("http://localhost:" + port);
+        Optional<Boolean> accepted = webClient.patch()
+                .uri("/TA/addContract" + studentId  + "/" + contractId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .blockOptional();
+        if (accepted.isEmpty() || !accepted.get()) {
+            throw new EmptyResourceException("Could not link contract to TA");
+        }
+        return  true;
+
     }
 
 }

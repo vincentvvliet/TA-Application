@@ -1,6 +1,11 @@
 package nl.tudelft.sem.Application.controllers;
 
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.Application.services.RecommendationService;
@@ -19,9 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,6 +58,8 @@ public class ApplicationControllerTests {
     UUID courseId;
     UUID studentId;
     Application application;
+    LocalDate startDateOpen;
+    LocalDate startDateClosed;
 
     public final Application rec_app1 = new Application(UUID.randomUUID(), UUID.randomUUID());
     public final Application rec_app2 = new Application(UUID.randomUUID(), UUID.randomUUID());
@@ -63,12 +67,11 @@ public class ApplicationControllerTests {
     public final Application rec_app4NoGrade = new Application(UUID.randomUUID(), UUID.randomUUID());
 
     RecommendationDTO recommendation1 =
-        new RecommendationDTO(rec_app1.getStudentId(), Optional.of(4), 8.8d);
+            new RecommendationDTO(rec_app1.getStudentId(), Optional.of(4), 8.8d);
     RecommendationDTO recommendation2 =
-        new RecommendationDTO(rec_app2.getStudentId(), Optional.of(3), 7.5d);
+            new RecommendationDTO(rec_app2.getStudentId(), Optional.of(3), 7.5d);
     RecommendationDTO recommendation3 =
-        new RecommendationDTO(rec_app3.getStudentId(), Optional.of(5), 6.5d);
-
+            new RecommendationDTO(rec_app3.getStudentId(), Optional.of(5), 6.5d);
 
 
     @BeforeEach
@@ -82,10 +85,13 @@ public class ApplicationControllerTests {
         app1 = new Application(courseId, student1Id);
         app2 = new Application(courseId, student2Id);
         list = List.of(app1, app2);
+        startDateOpen = LocalDate.now().plusWeeks(4);
+        startDateClosed = LocalDate.now().plusWeeks(2);
     }
 
     @Test
     public void getApplicationsByCourseTest() {
+        when(applicationService.getApplicationsByCourse(courseId)).thenReturn(applicationList);
         when(applicationService.getApplicationsByCourse(courseId)).thenReturn(applicationList);
         Flux<Application> flux = applicationController.getApplicationsByCourse(courseId);
         List<Application> result = flux.toStream().collect(Collectors.toList());
@@ -122,10 +128,11 @@ public class ApplicationControllerTests {
     public void acceptApplicationSuccessfully() throws Exception {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId,courseId)).thenReturn(true);
+        when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
         when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
         when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
-
+        when(applicationService.getCourseStartDate(courseId,47112)).thenReturn(startDateClosed);
         Assertions.assertEquals(applicationController.acceptApplication(id).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
@@ -154,11 +161,12 @@ public class ApplicationControllerTests {
     }
 
     @Test
-    public void acceptApplicationMaximumTAsReached() {
+    public void acceptApplicationMaximumTAsReached() throws EmptyResourceException {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(false);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
 
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "maximum number of TA's was already reached for this course";
@@ -169,14 +177,14 @@ public class ApplicationControllerTests {
     }
 
     @Test
-    public void acceptApplicationAlreadyTAFor3CoursesPerQuarter() {
+    public void acceptApplicationAlreadyTAFor3CoursesPerQuarter() throws EmptyResourceException {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(false);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
         Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
         String expectedMessage = "a student can TA a maximum of 3 courses per quarter";
         String actualMessage = exception.getMessage();
-
         assertTrue(actualMessage.contains(expectedMessage));
         verify(applicationRepository, never()).save(any(Application.class));
     }
@@ -186,10 +194,17 @@ public class ApplicationControllerTests {
         application.setAccepted(false);
         when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
         when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
-        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(false);
-
-        Assertions.assertEquals(applicationController.acceptApplication(id).block(), false);
+        when(applicationService.studentCanTAAnotherCourse(studentId,courseId)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
+        when(applicationService.createTA(studentId, courseId, 47110)).thenThrow(new Exception("Could not create TA."));
+        when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
+        Exception thrown =
+                Assertions.assertThrows(Exception.class, () -> {
+                    applicationController.acceptApplication(id);
+                });
+        String expectedMessage = "Could not create TA.";
+        String actualMessage = thrown.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
         verify(applicationRepository, never()).save(any(Application.class));
     }
 
@@ -546,6 +561,36 @@ public class ApplicationControllerTests {
         // Assert
         assertEquals("StudentId in recommendationDTO not found!", e.getReason());
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+
+    @Test
+    void acceptApplicationCourseStillOpen() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
+        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateOpen);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "application is still open for application";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    void acceptApplicationCourseHasStarted() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId)).thenReturn(true);
+        when(applicationService.createTA(studentId, courseId, 47110)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(LocalDate.now().minusWeeks(1));
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "course has already started";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
     }
 
 }
