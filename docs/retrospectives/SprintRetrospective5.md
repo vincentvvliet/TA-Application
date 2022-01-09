@@ -26,3 +26,8 @@ Tasks Iarina:<br />
 - I did not have too many tasks since my collegues needed code contribution. I tried to plan next sprint for everybody and give people related issues with their previous work. I also tried to see if the application is working and I discovered that a lot of my collegues code was not doing the desired functionalities. I tried to help them fix that. I also fixed other people pipelines and spent a lot of time reviewing their code. I also started working on the final version of the first assignment , since I could’t code because I needed other people’s part.
 - I found that the draft was not quite to the standard and I polished it a lot. I encountered the problem of realising the diagrams we have are not what is expected. I tried to think for that , but I did not finish it yet.
 - For the next sprint, we saw that assigning tasks and not issues for one person is a bit confusing since you depend on someone’s work. We are trying from now to do issues entirely. We also need to improve communication since we had a lot of problems because code was not connected.
+
+Tasks Pauline:<br />
+- Issue 2: I had a task to make a webclient to request endpoints, I struggled at the start of the week to get the spring framework for this to work so I managed by making classes that format and send http requests manually, this took more time than it should have. I saw that by the end of the week other group memebers had gotten the spring version to work), so I ended redoing it in that method for consistency. 
+- Issue 7: I had never used DTO's before and we planned on using them for this issue, so figuring out what they were and how to use them cost me alot of time.
+

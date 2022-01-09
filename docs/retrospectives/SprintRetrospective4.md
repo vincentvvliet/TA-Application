@@ -20,3 +20,7 @@ Tasks Iarina:<br />
 - I encountered problems in creating the entities at some point because the way I configurated the database needed me to add all columns manually. I had some problems with naming for some columns as well. I solved this problems by googling the errors and  adding some basic controllers to test in postman (for seeing if the databases connection is fine)
 - I also spent a lot of time in creating the microservices’ templates. I encountered problems with the build.gradle , since I never touched that beforehand. Google and stackoverflow helped me to add all modules dependancies I needed and configurate a microservice architecture.
 - For the next sprint I decided to push people to make work and give them more tasks to do together to learn.  The plans we had in mind, I found not what we needed so I also spend a lot of time to think on how microservices interact.
+
+Tasks Pauline:<br />
+- I was supposed to make a UML class diagram to show the architecture of the the whole system, because we heard from silviu this was required for assignment 1 and I imagined it would have helped us to start coding. I ended up getting overwhelmed because it is hard to determine all the classes needed for all the functionalities of the system theoretically. I contacted Andrei for help, we decided to consult the rest of the group in the thursday meeting. In the meeting we got a more clear view of the level of detail required, which turned out to be less than what we had in mind.
+
