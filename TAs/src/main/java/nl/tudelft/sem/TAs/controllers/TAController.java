@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -60,7 +61,7 @@ public class TAController {
     @GetMapping("/getTA/{id}")
     public Mono<TA> getTAById(@PathVariable(value = "id") UUID id) {
         Optional<TA> ta = taRepository.findById(id);
-        if (ta.isEmpty()) {
+        if(ta.isEmpty()){
             return Mono.empty();
         }
         return Mono.just(ta.get());
@@ -71,8 +72,8 @@ public class TAController {
      * @return list of TAs
      */
     @GetMapping("/getTAs")
-    public Mono<List<TA>> getTAs() {
-        return Mono.just(taRepository.findAll());
+    public Flux<TA> getTAs() {
+        return Flux.fromStream(taRepository.findAll().stream());
     }
 
     /**

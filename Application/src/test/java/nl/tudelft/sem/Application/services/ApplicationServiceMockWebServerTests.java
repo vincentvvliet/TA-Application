@@ -1,9 +1,15 @@
 package nl.tudelft.sem.Application.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
+import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -185,6 +191,18 @@ public class ApplicationServiceMockWebServerTests {
         String expectedMessage = "No TA rating found!";
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void getRatingForTA_successful() throws Exception {
+        UUID studentId = UUID.randomUUID();
+        RatingDTO rating = new RatingDTO(studentId, 8);
+        ObjectMapper mapper = new ObjectMapper();
+        mockBackEnd.enqueue(new MockResponse()
+                .setBody(mapper.writeValueAsString(rating)).addHeader("Content-Type", "application/json"));
+
+        RatingDTO result = applicationService.getRatingForTA(studentId, mockBackEnd.getPort());
+        assertEquals(rating, result);
     }
 
     /**
