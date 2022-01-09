@@ -70,4 +70,10 @@ public class CourseControllerTest {
         when(courseRepository.findByStartDateIsAfter(LocalDate.now().plusWeeks(3))).thenReturn(courseList);
         Assertions.assertEquals(courseList,courseController.getOpenCourses().toStream().collect(Collectors.toList()));
     }
+
+    @Test
+    public void deleteTest() {
+        courseController.deleteCourse(id);
+        verify(courseRepository).deleteById(id);
+    }
 }
