@@ -1,14 +1,15 @@
 package nl.tudelft.sem.TAs.controllers;
 
+import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
+import nl.tudelft.sem.TAs.services.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -16,8 +17,14 @@ import java.util.*;
 @RequestMapping("/contract/")
 @Controller
 public class ContractController {
+
+    private PortData portData = new PortData();
+
     @Autowired
     private ContractRepository contractRepository;
+
+    @Autowired
+    private ContractService contractService;
 
     /**
      * GET endpoint retrieves contract by id
@@ -31,6 +38,18 @@ public class ContractController {
     }
 
     /**
+     * Send contract gets the contract by using the combination of studentId and courseId.
+     * @param studentId of the student hired
+     * @param courseId of the course the student is hired for
+     * @return the contract.
+     */
+    @GetMapping("/sendContract/{studentId}/{courseId}")
+    public Mono<String> sendContract(@PathVariable (value = "studentId") UUID studentId, @PathVariable (value = "courseId") UUID courseId) {
+        Contract contract = contractRepository.findByStudentIdAndCourseId(studentId, courseId).orElseThrow(NoSuchElementException::new);
+        return Mono.just(contract.toString());
+    }
+
+    /**
      * GET endpoint retrieves all existing contracts
      * @return list of contracts
      */
@@ -40,69 +59,75 @@ public class ContractController {
     }
 
     /**
-     * POST endpoint creating a contract for a TA (identified by studentId and courseId)
+     * POST endpoint creating a contract for a TA (identified by studentId and courseId),
+     * sends notification to student of contract that it has been created.
      * @param studentId of the TA
      * @param courseId of the course the TA is hired for
-     * @return true after the contract is created and saved in the database
+     * @return the id of the contract saved in the database
      */
     @PostMapping("/createContract/{studentid}/{courseid}")
-    public Mono<Boolean> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) {
+    public Mono<UUID> createContract(@PathVariable(value = "studentid") UUID studentId , @PathVariable(value = "courseid") UUID courseId) throws Exception {
         Contract c = new Contract(studentId,courseId);
         contractRepository.save(c);
-        return Mono.just(true);
+        contractService.sendContractNotification(c.getStudentId(), c.getCourseId(), portData.getUserPort());
+        return Mono.just(c.getId());
     }
 
     /**
-     * PATCH endpoint sets maxHours a TA can work on the contract
+     * PATCH endpoint sets maxHours a TA can work on the contract, sends notification to user about updated contract.
      * @param id of the contract to be updated
      * @param  hours a TA can work
      */
     @PatchMapping("addHours/{id}/{maxHours}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) {
+    public void addHoursById(@PathVariable (value = "id")  UUID id , @PathVariable(value = "maxHours") Integer hours) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setMaxHours(hours);
         contractRepository.save(contract);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
-     * PATCH endpoint sets task description for contract
+     * PATCH endpoint sets task description for contract, sends notification to user about updated contract.
      * @param id of the contract
      * @param task description
      */
     @PatchMapping("addTask/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addTaskById(@PathVariable (value = "id")  UUID id, @RequestBody String task) {
+    public void addTaskById(@PathVariable (value = "id")  UUID id, @RequestBody String task) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setTaskDescription(task);
         contractRepository.save(contract);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
-     * PATCH endpoint sets the date when the contract starts?
-     * @param id of the contract
+     * PATCH endpoint sets the date when the contract starts, sends notification to user about updated contract.
+     * @param id of the contract.
      * @param date representing the start time of the contract
      */
     @PatchMapping("addDate/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addDateById(@PathVariable (value = "id")  UUID id, @RequestBody String date) throws ParseException {
+    public void addDateById(@PathVariable (value = "id")  UUID id, @RequestBody String date) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         Date d = new SimpleDateFormat("dd/MM/yyyy").parse(date);
         contract.setDate(d);
         contractRepository.save(contract);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**
      * PATCH endpoint sets the salary the TA will get per hour
-     * @param id of the contract
+     * @param id of the contract.
      * @param salary (per hour) the TA will get
      */
     @PatchMapping("addSalary/{id}/{salary}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void addSalaryById(@PathVariable (value = "id")  UUID id, @PathVariable(value = "salary") double salary) {
+    public void addSalaryById(@PathVariable (value = "id")  UUID id, @PathVariable(value = "salary") double salary) throws Exception {
         Contract contract = contractRepository.findById(id).orElseThrow(NoSuchElementException::new);
         contract.setSalaryPerHour(salary);
         contractRepository.save(contract);
+        contractService.sendContractNotification(contract.getStudentId(), contract.getCourseId(), portData.getUserPort());
     }
 
     /**

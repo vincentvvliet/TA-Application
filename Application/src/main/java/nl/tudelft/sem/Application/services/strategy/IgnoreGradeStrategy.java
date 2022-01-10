@@ -1,5 +1,6 @@
 package nl.tudelft.sem.Application.services.strategy;
 
+import java.util.Collections;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 
 import java.util.Comparator;
@@ -15,7 +16,11 @@ public class IgnoreGradeStrategy implements Strategy {
      */
     @Override
     public List<RecommendationDTO> recommend(List<RecommendationDTO> list) {
-        Stream<RecommendationDTO> recommendationStream = list.stream().filter(x -> x.getRating().isPresent()).sorted(Comparator.comparingInt(x -> x.getRating().orElse(0)));
-        return recommendationStream.collect(Collectors.toList());
+        List<RecommendationDTO> recommendationList= list.stream()
+            .filter(x -> x.getRating().isPresent())
+            .sorted(Comparator.comparingInt(x -> x.getRating().orElse(0)))
+            .collect(Collectors.toList());
+        Collections.reverse(recommendationList);
+        return recommendationList;
     }
 }

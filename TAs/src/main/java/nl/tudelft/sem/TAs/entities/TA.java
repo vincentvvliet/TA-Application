@@ -29,6 +29,10 @@ public class TA {
     @JsonProperty(value = "rating")
     @Getter @Setter private int rating;
 
+    @Column(name = "timespent")
+    @JsonProperty(value = "timeSpent")
+    @Getter @Setter private int timeSpent;
+
     @OneToOne(targetEntity = Contract.class, cascade = CascadeType.ALL)
     private Contract contract;
 

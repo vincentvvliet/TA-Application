@@ -3,6 +3,7 @@ package nl.tudelft.sem.Application.services.validator;
 
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.services.ApplicationService;
+import nl.tudelft.sem.portConfiguration.PortData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 public class IsGradeSufficient extends BaseValidator {
     @Autowired
     private ApplicationService applicationServices;
+
+    private PortData portData = new PortData();
 
     /** Checks if the grade for the course meets the requirements.
      *
@@ -21,7 +24,7 @@ public class IsGradeSufficient extends BaseValidator {
     @Override
     public Boolean handle(Application application) throws Exception {
         Double grade = applicationServices
-                .getGrade(application.getStudentId(), application.getCourseId());
+                .getGrade(application.getStudentId(), application.getCourseId(), portData.getCoursePort());
         if (grade == null) {
             throw new Exception("could not retrieve course grade with the given student and course IDs");
         }
