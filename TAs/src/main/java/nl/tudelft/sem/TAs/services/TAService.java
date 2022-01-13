@@ -4,9 +4,12 @@ import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
 import nl.tudelft.sem.TAs.entities.TA;
 import nl.tudelft.sem.TAs.repositories.TARepository;
+import nl.tudelft.sem.portConfiguration.PortData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -53,6 +56,28 @@ public class TAService {
         } else {
             return endDate.get().isBefore(LocalDate.now());
         }
+    }
+
+    /**
+     * Adds the average time spent by a TA on a course
+     * @param optionalTA TA who adds the time spent (or possibly null)
+     * @param timeSpent average number of hours spent per week
+     * @return Mono of true if time added successfully, false otherwise
+     */
+    public Mono<Boolean> addTimeSpent(Optional<TA> optionalTA, Integer timeSpent) {
+        if (timeSpent == null || timeSpent <= 0) {
+            return Mono.just(false);
+        }
+        if (optionalTA.isEmpty()) {
+            return Mono.just(false);
+        }
+        TA ta = optionalTA.get();
+        if (! isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
+            return Mono.just(false);
+        }
+        ta.setTimeSpent(timeSpent);
+        taRepository.save(ta);
+        return Mono.just(true);
     }
 
     public Mono<Boolean> addRating(LeaveRatingDTO ratingDTO) {

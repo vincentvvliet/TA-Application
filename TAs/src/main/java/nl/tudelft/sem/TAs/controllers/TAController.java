@@ -127,16 +127,8 @@ public class TAController {
     @PatchMapping("addTimeSpent/{id}/{timeSpent}")
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> addTimeSpent(@PathVariable (value = "id")  UUID id , @PathVariable(value = "timeSpent") Integer timeSpent) {
-        TA ta = taRepository.findById(id).orElseThrow(() -> new NoSuchElementException("no TA was found with the given id"));
-        if (timeSpent <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "number of hours spent must be positive");
-        }
-        if (! taService.isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
-            return Mono.just(false);
-        }
-        ta.setTimeSpent(timeSpent);
-        taRepository.save(ta);
-        return Mono.just(true);
+        Optional<TA> ta = taRepository.findById(id);
+        return taService.addTimeSpent(ta, timeSpent);
     }
     /**
      * POST endpoint for adding rating to a certain TA
