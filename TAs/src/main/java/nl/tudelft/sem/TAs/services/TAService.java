@@ -61,7 +61,7 @@ public class TAService {
         Optional<TA> rated = taRepository.findById(taId);
         if (rated.isPresent()) {
             TA ta = rated.get();
-            ta.setRating(rating);
+            ta.getTaDetail().setRating(rating);
             taRepository.save(ta);
             return Mono.just(true);
         }

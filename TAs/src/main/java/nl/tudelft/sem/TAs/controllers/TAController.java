@@ -134,7 +134,7 @@ public class TAController {
         if (! taService.isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
             return Mono.just(false);
         }
-        ta.setTimeSpent(timeSpent);
+        ta.getTaDetail().setTimeSpent(timeSpent);
         taRepository.save(ta);
         return Mono.just(true);
     }
