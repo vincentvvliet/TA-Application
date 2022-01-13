@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.services.ValidatorService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
@@ -35,6 +36,8 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/application/")
 public class ApplicationController {
+    @Autowired
+    ValidatorService validatorService;
 
     @Autowired
     ApplicationRepository applicationRepository;
@@ -135,7 +138,7 @@ public class ApplicationController {
             @PathVariable(value = "student_id") UUID studentId,
             @PathVariable(value = "course_id") UUID courseId) {
         Application application = new Application(courseId, studentId);
-        if (applicationService.validate(application)) {
+        if (validatorService.validate(application)) {
             applicationRepository.save(application);
             return Mono.just(true);
         }
