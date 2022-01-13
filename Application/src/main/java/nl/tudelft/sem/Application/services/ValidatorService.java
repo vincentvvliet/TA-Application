@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ValidatorService {
-    @Autowired
-    private ApplicationRepository applicationRepository;
 
     @Autowired
     private IsCourseOpen isCourseOpen;
