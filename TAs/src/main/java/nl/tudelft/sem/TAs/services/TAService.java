@@ -64,27 +64,6 @@ public class TAService {
         }
     }
 
-    /**
-     * Adds the average time spent by a TA on a course
-     * @param optionalTA TA who adds the time spent (or possibly null)
-     * @param timeSpent average number of hours spent per week
-     * @return Mono of true if time added successfully, false otherwise
-     */
-    public Mono<Boolean> addTimeSpent(Optional<TA> optionalTA, Integer timeSpent) {
-        if (timeSpent == null || timeSpent <= 0) {
-            return Mono.just(false);
-        }
-        if (optionalTA.isEmpty()) {
-            return Mono.just(false);
-        }
-        TA ta = optionalTA.get();
-        if (! isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
-            return Mono.just(false);
-        }
-        ta.setTimeSpent(timeSpent);
-        taRepository.save(ta);
-        return Mono.just(true);
-    }
 
     /**
      * Adds the hiring contract for a TA
