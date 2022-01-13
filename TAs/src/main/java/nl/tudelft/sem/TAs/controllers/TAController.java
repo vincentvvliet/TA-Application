@@ -29,9 +29,6 @@ import java.util.UUID;
 public class TAController {
 
     @Autowired
-    private ContractRepository contractRepository;
-
-    @Autowired
     private TAService taService;
 
     @Autowired
@@ -96,11 +93,7 @@ public class TAController {
     @PostMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> addContract(@PathVariable(value = "id") UUID id, @PathVariable(value = "contractId") UUID contractId) {
-         TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
-         Contract contract = contractRepository.findById(contractId).orElseThrow(NoSuchElementException::new);
-         ta.setContract(contract);
-         taRepository.save(ta);
-        return Mono.just(true);
+        return taService.addContract(id, contractId);
     }
 
     /**
