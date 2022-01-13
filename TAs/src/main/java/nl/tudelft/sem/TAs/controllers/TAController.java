@@ -93,7 +93,8 @@ public class TAController {
     @PostMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> addContract(@PathVariable(value = "id") UUID id, @PathVariable(value = "contractId") UUID contractId) {
-        return taService.addContract(id, contractId);
+        Optional<TA> ta = taRepository.findById(id);
+        return taService.addContract(ta, contractId);
     }
 
     /**

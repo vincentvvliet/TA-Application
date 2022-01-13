@@ -88,12 +88,11 @@ public class TAService {
 
     /**
      * Adds the hiring contract for a TA
-     * @param idTA id of TA whose contract is added
+     * @param optionalTA TA whose contract is added
      * @param idContract id of contract to add
      * @return Mono of true if contract added successfully, false otherwise
      */
-    public Mono<Boolean> addContract(UUID idTA, UUID idContract) {
-        Optional<TA> optionalTA = taRepository.findById(idTA);
+    public Mono<Boolean> addContract(Optional<TA> optionalTA, UUID idContract) {
         Optional<Contract> optionalContract = contractRepository.findById(idContract);
         if (optionalTA.isEmpty() || optionalContract.isEmpty()) {
             return Mono.just(false);
