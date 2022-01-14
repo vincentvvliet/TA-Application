@@ -638,40 +638,6 @@ public class ApplicationControllerTests {
     }
 
     /**
-     * acceptApplication tests
-     */
-    @Test
-    void acceptApplicationCourseStillOpen() throws Exception {
-        application.setAccepted(false);
-        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        when(applicationService.createTA(studentId,courseId, 47110)).thenReturn(true);
-        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateOpen);
-        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
-        String expectedMessage = "application is still open for application";
-        String actualMessage = exception.getMessage();
-
-        assertTrue(actualMessage.contains(expectedMessage));
-        verify(applicationRepository, never()).save(any(Application.class));
-    }
-
-    @Test
-    void acceptApplicationCourseHasStarted() throws Exception {
-        application.setAccepted(false);
-        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
-        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
-        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
-        when(applicationService.createTA(studentId, courseId, 47110)).thenReturn(true);
-        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(LocalDate.now().minusWeeks(1));
-        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
-        String expectedMessage = "course has already started";
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
-        verify(applicationRepository, never()).save(any(Application.class));
-    }
-
-
-    /**
      * getApplicationsOverviewByCourse tests
      */
     @Test
