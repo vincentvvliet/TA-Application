@@ -14,6 +14,7 @@ import nl.tudelft.sem.Application.services.validator.Validator;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.portConfiguration.PortData;
 import org.junit.jupiter.api.AfterAll;
 
 import org.junit.jupiter.api.Assertions;
@@ -173,22 +174,6 @@ public class ApplicationServiceTests {
         Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
         verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
-    /**
-     * getCourseStartDate tests
-     */
-//    @Test
-//    void getCourseStartDate_test() throws EmptyResourceException {
-//        // Arrange
-//        LocalDate date = LocalDate.now();
-//        mockBackEnd.enqueue(new MockResponse()
-//            .addHeader("Content-Type", "application/json")
-//            .setBody(gson.toJson(date))
-//        );
-//        // Act
-//        LocalDate result = applicationService.getCourseStartDate(courseId, mockBackEnd.getPort());
-//        // Assert
-//        assertEquals(date, result);
-//    }
 
     /**
      * getApplicationDetails tests
@@ -517,5 +502,22 @@ public class ApplicationServiceTests {
         assertEquals("Could not link contract to TA", result.getMessage());
     }
 
+    @Test
+    void isSelectionPeriodOpen_yes() {
+        LocalDate startDate = LocalDate.now().plusWeeks(2);
+        assertTrue(applicationService.isSelectionPeriodOpen(startDate));
+    }
+
+    @Test
+    void isSelectionPeriodOpen_stillAccepting() {
+        LocalDate startDate = LocalDate.now().plusWeeks(5);
+        assertFalse(applicationService.isSelectionPeriodOpen(startDate));
+    }
+
+    @Test
+    void isSelectionPeriodOpen_courseStarted() {
+        LocalDate startDate = LocalDate.now().minusWeeks(1);
+        assertFalse(applicationService.isSelectionPeriodOpen(startDate));
+    }
 
 }
