@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -80,9 +82,9 @@ public class TAControllerTests {
     void addContractTest() {
         UUID contractId = UUID.randomUUID();
         Contract contract = new Contract();
-        when(contractRepository.findById(contractId)).thenReturn(Optional.ofNullable(contract));
-        taController.addContract(studentId,contractId);
-        Assertions.assertEquals(contract,ta.getContract());
+        when(taRepository.findById(ta.getId())).thenReturn(Optional.of(ta));
+        when(taService.addContract(Optional.of(ta), contractId)).thenReturn(Mono.just(true));
+        Assertions.assertEquals(true, taController.addContract(ta.getId(), contractId).block());
     }
     @Test
     public void deleteTest() {
