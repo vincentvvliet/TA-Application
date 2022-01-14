@@ -7,12 +7,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import static java.util.Objects.requireNonNull;
 
@@ -20,36 +16,46 @@ import static java.util.Objects.requireNonNull;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserDetailsServiceImplementation userDetailsService;
 
+    /**
+     * The Token Provider.
+     */
     TokenAuthenticationProvider provider;
 
+    /**
+     * Instantiates a new Security config.
+     *
+     * @param provider the token provider
+     */
     SecurityConfig(final TokenAuthenticationProvider provider) {
-//        super();
+        super();
         this.provider = requireNonNull(provider);
     }
 
+    /**
+     * Configure the authentication provider.
+     *
+     * @param auth the authentication manager builder
+     */
     @Override
-    protected void configure(final AuthenticationManagerBuilder auth) {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(provider);
     }
 
+    /**
+     * Configure the http security, with required roles for specified endpoints.
+     *
+     * @param http HttpSecurity object
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .userDetailsService(userDetailsService)
                 .authorizeRequests()
-//                .anyRequest().authenticated()
-                .antMatchers("/user/login", "/user/register")
+                .anyRequest()
                 .permitAll()
-//                .antMatchers("/user/register")
-//                .permitAll()
-//                .hasRole("ADMIN")
-//                .antMatchers("/protected/**")
-//                .hasRole("USER");
-//                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .permitAll()
                 .and()
                 .csrf().disable()
                 .formLogin().disable()
@@ -57,9 +63,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout().disable();
     }
 
+    /**
+     * Configure the userdetails of the authentication.
+     *
+     * @param auth the auth
+     * @throws Exception
+     */
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authProvider());
+        auth.userDetailsService(this.userDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Bean
@@ -70,21 +82,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return authProvider;
     }
 
+    /**
+     * Password encoder to encode password using BCrypt.
+     *
+     * @return the password encoder
+     */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-        UserDetails user =
-                User.withDefaultPasswordEncoder()
-                        .username("user")
-                        .password("password")
-                        .roles("USER")
-                        .build();
-
-        return new InMemoryUserDetailsManager(user);
     }
 }
