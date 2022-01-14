@@ -39,12 +39,10 @@ public class JWTTokenService implements Clock {
      * @param issuer        the issuer
      * @param expirationSec the expiration sec
      * @param clockSkewSec  the clock skew sec
-     * @param secret        the secret
      */
     JWTTokenService(@Value("${jwt.issuer:sem-group-17a}") final String issuer,
                     @Value("${jwt.expiration-sec:86400}") final int expirationSec,
-                    @Value("${jwt.clock-skew-sec:300}") final int clockSkewSec,
-                    @Value("${jwt.secret:secret}") final String secret) {
+                    @Value("${jwt.clock-skew-sec:300}") final int clockSkewSec) {
         super();
         this.issuer = requireNonNull(issuer);
         this.expirationSec = expirationSec;
@@ -80,20 +78,15 @@ public class JWTTokenService implements Clock {
      * @return token
      */
     private String newToken(final Map<String, String> attributes, final int expiresInSec) {
-        final DateTime now = DateTime.now();
         final Claims claims = Jwts
                 .claims()
                 .setIssuer(issuer)
-                .setIssuedAt(now.toDate());
+                .setIssuedAt(DateTime.now().toDate());
 
         if (expiresInSec > 0) {
-            final DateTime expiresAt = now.plusSeconds(expiresInSec);
-            claims.setExpiration(expiresAt.toDate());
+            claims.setExpiration(DateTime.now().plusSeconds(expiresInSec).toDate());
         }
         claims.putAll(attributes);
-
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        Key key = Keys.secretKeyFor(HS256);
 
         return Jwts
                 .builder()
