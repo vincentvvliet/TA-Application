@@ -366,4 +366,42 @@ public class ApplicationService {
 
     }
 
+    /**
+     * Check if the period in which TAs can be accepted is open
+     * @param startDate date in which course starts
+     * @return true if period is open, false otherwise
+     */
+    public boolean isSelectionPeriodOpen(LocalDate startDate) {
+        // course is still open for applications
+        if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
+            return false;
+        }
+        // course has already started
+        if (LocalDate.now().isAfter(startDate)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Carry out the steps involved in accepting an application
+     *  - create TA
+     *  - create contract for TA
+     *  - send acceptance notification
+     * @param application the application to be accepted
+     * @return Mono of true if process finished successfully, false otherwise
+     */
+    public Mono<Boolean> acceptApplication(Application application) {
+        try {
+            createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            UUID contractId = createContract(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            addContract(application.getStudentId(), contractId, portData.getTaPort());
+            sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", portData.getUserPort());
+        } catch (Exception e) {
+            return Mono.just(false);
+        }
+        application.setAccepted(true);
+        applicationRepository.save(application);
+        return Mono.just(true);
+    }
 }

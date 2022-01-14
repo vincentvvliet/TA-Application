@@ -158,35 +158,16 @@ public class ApplicationController {
             throw new Exception("application is already accepted");
         }
         LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), portData.getCoursePort());
-        if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
-            throw new Exception("application is still open for application");
+        if (! applicationService.isSelectionPeriodOpen(startDate)) {
+            throw new Exception("TA selection period is not open now");
         }
         if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId(), portData.getCoursePort())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
-        if (LocalDate.now().isAfter(startDate)) {
-            throw new Exception("course has already started");
-        }
         if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getCoursePort())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
-        boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-        if (!successfullyCreated) {
-            return Mono.just(false);
-        }
-
-        try {
-            applicationService.createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-            applicationService.addContract(application.getStudentId(), contractId, portData.getTaPort());
-        } catch (Exception e) {
-            throw new Exception("TA or contract creation failed: " + e.getMessage());
-        }
-        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", portData.getUserPort());
-        application.setAccepted(true);
-        applicationRepository.save(application);
-        return Mono.just(true);
+        return applicationService.acceptApplication(application);
     }
 
     /**
