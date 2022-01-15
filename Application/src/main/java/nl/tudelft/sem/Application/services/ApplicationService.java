@@ -32,6 +32,8 @@ public class ApplicationService {
     @Autowired
     private IsCourseOpen isCourseOpen;
 
+    private PortData portData = new PortData();
+
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
      *
