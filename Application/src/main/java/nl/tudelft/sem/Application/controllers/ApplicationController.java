@@ -274,30 +274,34 @@ public class ApplicationController {
             List<RecommendationDTO> recommended =
                     recommendationService.recommendNStudents(list, strategy, n);
             // Hire all n recommended students
-            for (RecommendationDTO rec : recommended) {
-                Application application =
-                        applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
-                                .orElseThrow(() -> new NoSuchElementException("application does not exist"));
-                if (application.isAccepted()) {
-                    continue;
-                }
-                if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
-                  continue;
-                }
-                boolean successfullyCreated = applicationService
-                    .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-                if (!successfullyCreated) {
-                    continue;
-                }
-                // Save accepted application to database.
-                application.setAccepted(true);
-                applicationRepository.save(application);
-            }
-            return Mono.just(true);
+            return hireStudents(recommended, courseId);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentId in recommendationDTO not found!");
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }
+    }
+
+    private Mono<Boolean> hireStudents(List<RecommendationDTO> recommended, UUID courseId) throws Exception{
+        for (RecommendationDTO rec : recommended) {
+            Application application =
+                    applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
+                            .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+            if (application.isAccepted()) {
+                continue;
+            }
+            if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
+                continue;
+            }
+            boolean successfullyCreated = applicationService
+                    .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            if (!successfullyCreated) {
+                continue;
+            }
+            // Save accepted application to database.
+            application.setAccepted(true);
+            applicationRepository.save(application);
+        }
+        return Mono.just(true);
     }
 }
