@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -66,6 +67,9 @@ public class ApplicationServiceTests {
     UUID courseId;
     UUID studentId;
     Application application;
+    LocalDate startDateClosed;
+    LocalDate startDateOpen;
+    ApplicationService applicationServiceSpy;
 
     public static MockWebServer mockBackEnd;
 
@@ -91,6 +95,9 @@ public class ApplicationServiceTests {
         application = new Application(courseId, studentId);
         applicationList.add(application);
         doNothing().when(isCourseOpen).setLast(any(Validator.class));
+        startDateClosed = LocalDate.now().plusWeeks(2);
+        startDateOpen = LocalDate.now().plusWeeks(4);
+        applicationServiceSpy = spy(applicationService);
     }
 
     /**
@@ -518,6 +525,126 @@ public class ApplicationServiceTests {
         );
         // Assert
         assertEquals("Could not link contract to TA", result.getMessage());
+    }
+
+    /**
+     * acceptApplication tests
+     */
+    @Test
+    void acceptApplicationCourseStillOpen() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        doReturn(true).when(applicationServiceSpy).isTASpotAvailable(courseId, 47112);
+        doReturn(true).when(applicationServiceSpy).createTA(studentId,courseId, 47110);
+        doReturn(startDateOpen).when(applicationServiceSpy).getCourseStartDate(courseId, 47112);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationServiceSpy.acceptApplication(id));
+        String expectedMessage = "application is still open for application";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    void acceptApplicationCourseHasStarted() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        doReturn(true).when(applicationServiceSpy).isTASpotAvailable(courseId, 47110);
+        doReturn(true).when(applicationServiceSpy).studentCanTAAnotherCourse(studentId, courseId, 47112);
+        doReturn(true).when(applicationServiceSpy).createTA(studentId,courseId, 47110);
+        doReturn(LocalDate.now().minusWeeks(1)).when(applicationServiceSpy).getCourseStartDate(courseId, 47112);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationServiceSpy.acceptApplication(id));
+        String expectedMessage = "course has already started";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationSuccessfully() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        doReturn(true).when(applicationServiceSpy).studentCanTAAnotherCourse(studentId,courseId, 47112);
+        doReturn(true).when(applicationServiceSpy).isTASpotAvailable(courseId, 47112);
+        doReturn(true).when(applicationServiceSpy).studentCanTAAnotherCourse(studentId, courseId, 47112);
+        doReturn(true).when(applicationServiceSpy).createTA(studentId,courseId, 47110);
+        doReturn(startDateClosed).when(applicationServiceSpy).getCourseStartDate(courseId,47112);
+        doReturn(id).when(applicationServiceSpy).createContract(studentId,courseId,47110);
+        doReturn(true).when(applicationServiceSpy).addContract(studentId,id,47110);
+        doReturn(true).when(applicationServiceSpy).sendNotification(studentId,"You have been accepted for a TA position, you can expect a contract shortly.",47111);
+        Assertions.assertEquals(applicationServiceSpy.acceptApplication(id).block(), true);
+        verify(applicationRepository).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationAlreadyAccepted() {
+        application.setAccepted(true);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        Exception exception = assertThrows(Exception.class, () -> applicationService.acceptApplication(id));
+        String expectedMessage = "application is already accepted";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationNoApplicationInRepository() {
+        when(applicationRepository.findById(id)).thenReturn(Optional.empty());
+        Exception exception = assertThrows(NoSuchElementException.class, () -> applicationService.acceptApplication(id));
+        String expectedMessage = "application does not exist";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationMaximumTAsReached() throws EmptyResourceException {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        doReturn(true).when(applicationServiceSpy).studentCanTAAnotherCourse(studentId, courseId, 47112);
+        doReturn(false).when(applicationServiceSpy).isTASpotAvailable(courseId, 47112);
+        doReturn(startDateClosed).when(applicationServiceSpy).getCourseStartDate(courseId, 47112);
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationServiceSpy.acceptApplication(id));
+        String expectedMessage = "maximum number of TA's was already reached for this course";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationAlreadyTAFor3CoursesPerQuarter() throws EmptyResourceException {
+        application.setAccepted(false);
+        doReturn(Optional.ofNullable(application)).when(applicationRepository).findById(id);
+        doReturn(false).when(applicationServiceSpy).studentCanTAAnotherCourse(studentId, courseId, 47112);
+        doReturn(startDateClosed).when(applicationServiceSpy).getCourseStartDate(courseId, 47112);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationServiceSpy.acceptApplication(id));
+        String expectedMessage = "a student can TA a maximum of 3 courses per quarter";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationCreationFault() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        doReturn(true).when(applicationServiceSpy).isTASpotAvailable(courseId, 47110);
+        doReturn(true).when(applicationServiceSpy).studentCanTAAnotherCourse(studentId, courseId, 47112);
+        doReturn(startDateClosed).when(applicationServiceSpy).getCourseStartDate(courseId, 47112);
+        doThrow(new Exception("Could not create TA.")).when(applicationServiceSpy).createTA(studentId, courseId, 47110);
+        doReturn(true).when(applicationServiceSpy).isTASpotAvailable(courseId, 47112);
+        Exception thrown =
+                Assertions.assertThrows(Exception.class, () -> {
+                    applicationServiceSpy.acceptApplication(id);
+                });
+        String expectedMessage = "Could not create TA.";
+        String actualMessage = thrown.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
     }
 
 

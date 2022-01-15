@@ -2,10 +2,7 @@ package nl.tudelft.sem.Application.services;
 
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
@@ -19,8 +16,10 @@ import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -311,11 +310,6 @@ public class ApplicationService {
 
     }
 
-    /**
-     * getGradesByCourseId
-     * @param courseId the id of the course
-     * @return a list of all the grades students received for this course
-     */
     /** Removes an application from the repository if it is actually there and
      *
      * @param studentId The ID of the student linked to the application.
@@ -337,4 +331,40 @@ public class ApplicationService {
         return true;
     }
 
+    public Mono<Boolean> acceptApplication(UUID id) throws Exception {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+        if (application.isAccepted()) {
+            throw new Exception("application is already accepted");
+        }
+        LocalDate startDate = getCourseStartDate(application.getCourseId(), portData.getCoursePort());
+        if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
+            throw new Exception("application is still open for application");
+        }
+        if (!studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId(), portData.getCoursePort())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
+        }
+        if (LocalDate.now().isAfter(startDate)) {
+            throw new Exception("course has already started");
+        }
+        if (!isTASpotAvailable(application.getCourseId(), portData.getCoursePort())) {
+            throw new Exception("maximum number of TA's was already reached for this course");
+        }
+        boolean successfullyCreated = createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+        if (!successfullyCreated) {
+            return Mono.just(false);
+        }
+
+        try {
+            createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            UUID contractId = createContract(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            addContract(application.getStudentId(), contractId, portData.getTaPort());
+        } catch (Exception e) {
+            throw new Exception("TA or contract creation failed: " + e.getMessage());
+        }
+        sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", portData.getUserPort());
+        application.setAccepted(true);
+        applicationRepository.save(application);
+        return Mono.just(true);
+    }
 }
