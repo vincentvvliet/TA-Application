@@ -155,7 +155,22 @@ public class ApplicationController {
     @PatchMapping("/acceptApplication/{id}")
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> acceptApplication(@PathVariable(value = "id") UUID id) throws Exception {
-        return applicationService.acceptApplication(id);
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+        if (application.isAccepted()) {
+            throw new Exception("application is already accepted");
+        }
+        LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), portData.getCoursePort());
+        if (! applicationService.isSelectionPeriodOpen(startDate)) {
+            throw new Exception("TA selection period is not open now");
+        }
+        if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId(), portData.getCoursePort())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
+        }
+        if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getCoursePort())) {
+            throw new Exception("maximum number of TA's was already reached for this course");
+        }
+        return applicationService.acceptApplication(application);
     }
 
     /**

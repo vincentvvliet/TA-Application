@@ -131,6 +131,100 @@ public class ApplicationControllerTests {
         Assertions.assertFalse(applicationController.removeApplication(studentId,courseId).block());
     }
 
+    @Test
+    public void acceptApplicationSuccessfully() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.isSelectionPeriodOpen(startDateClosed)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId,courseId, 47112)).thenReturn(true);
+        when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId,47112)).thenReturn(startDateClosed);
+        when(applicationService.acceptApplication(application)).thenReturn(Mono.just(true));
+        Assertions.assertEquals(true, applicationController.acceptApplication(id).block());
+    }
+
+    @Test
+    public void acceptApplicationAlreadyAccepted() {
+        application.setAccepted(true);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        Exception exception = assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "application is already accepted";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationNoApplicationInRepository() {
+        when(applicationRepository.findById(id)).thenReturn(Optional.empty());
+        Exception exception = assertThrows(NoSuchElementException.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "application does not exist";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationMaximumTAsReached() throws EmptyResourceException {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(false);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
+        when(applicationService.isSelectionPeriodOpen(startDateClosed)).thenReturn(true);
+
+
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "maximum number of TA's was already reached for this course";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationAlreadyTAFor3CoursesPerQuarter() throws EmptyResourceException {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(false);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
+        when(applicationService.isSelectionPeriodOpen(startDateClosed)).thenReturn(true);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "a student can TA a maximum of 3 courses per quarter";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationCreationFault() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.isTASpotAvailable(courseId, 47110)).thenReturn(true);
+        when(applicationService.studentCanTAAnotherCourse(studentId, courseId, 47112)).thenReturn(true);
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
+        when(applicationService.isSelectionPeriodOpen(startDateClosed)).thenReturn(true);
+        when(applicationService.isTASpotAvailable(courseId, 47112)).thenReturn(true);
+        when(applicationService.acceptApplication(application)).thenReturn(Mono.just(false));
+
+        assertEquals(false, applicationController.acceptApplication(id).block());
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
+
+    @Test
+    public void acceptApplicationSelectionPeriodIsClosed() throws Exception {
+        application.setAccepted(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.ofNullable(application));
+        when(applicationService.getCourseStartDate(courseId, 47112)).thenReturn(startDateClosed);
+        when(applicationService.isSelectionPeriodOpen(startDateClosed)).thenReturn(false);
+        Exception exception = Assertions.assertThrows(Exception.class, () -> applicationController.acceptApplication(id));
+        String expectedMessage = "TA selection period is not open now";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        verify(applicationRepository, never()).save(any(Application.class));
+    }
 
     @Test
     void getApplication_existent_returnsApplication() {
@@ -546,8 +640,6 @@ public class ApplicationControllerTests {
         // Assert
         verify(applicationRepository, never()).save(any());
     }
-
-
 
     /**
      * getApplicationsOverviewByCourse tests
