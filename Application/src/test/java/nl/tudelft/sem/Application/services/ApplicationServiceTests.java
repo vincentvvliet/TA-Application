@@ -54,6 +54,9 @@ public class ApplicationServiceTests {
     @MockBean
     IsCourseOpen isCourseOpen;
 
+    @Autowired
+    ValidatorService validatorService;
+
     private static final Gson gson = new GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
         .create();
@@ -97,7 +100,7 @@ public class ApplicationServiceTests {
     public void validateSuccessfulTest() throws Exception {
         when(isCourseOpen.handle(application)).thenReturn(true);
 
-        assertTrue(applicationService.validate(application));
+        assertTrue(validatorService.validate(application));
     }
 
     @Test
@@ -105,7 +108,7 @@ public class ApplicationServiceTests {
         Exception e = mock(Exception.class);
         when(isCourseOpen.handle(application)).thenThrow(e);
 
-        assertFalse(applicationService.validate(application));
+        assertFalse(validatorService.validate(application));
         verify(e).printStackTrace();
     }
 

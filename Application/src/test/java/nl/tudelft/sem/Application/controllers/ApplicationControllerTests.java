@@ -9,6 +9,7 @@ import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
 import nl.tudelft.sem.Application.services.RecommendationService;
+import nl.tudelft.sem.Application.services.ValidatorService;
 import nl.tudelft.sem.DTO.ApplicationDTO;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
@@ -50,6 +51,9 @@ public class ApplicationControllerTests {
 
     @MockBean
     RecommendationService recommendationService;
+
+    @MockBean
+    ValidatorService validatorService;
 
     UUID student1Id = UUID.randomUUID();
     UUID student2Id = UUID.randomUUID();
@@ -103,14 +107,14 @@ public class ApplicationControllerTests {
 
     @Test
     public void createApplicationByStudentAndCourseIsNotValidTest() {
-        when(applicationService.validate(any(Application.class))).thenReturn(false);
+        when(validatorService.validate(any(Application.class))).thenReturn(false);
         Assertions.assertEquals(applicationController.createApplicationByStudentAndCourse(studentId,courseId).block(), false);
         verify(applicationRepository, never()).save(any(Application.class));
     }
 
     @Test
     public void createApplicationByStudentAndCourseIsValidTest() {
-        when(applicationService.validate(any(Application.class))).thenReturn(true);
+        when(validatorService.validate(any(Application.class))).thenReturn(true);
         Assertions.assertEquals(applicationController.createApplicationByStudentAndCourse(studentId,courseId).block(), true);
         verify(applicationRepository).save(any(Application.class));
     }
