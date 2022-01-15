@@ -2,10 +2,14 @@ package nl.tudelft.sem.Application.services.strategy;
 
 import java.util.*;
 import java.util.stream.*;
+
+import lombok.NoArgsConstructor;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 
+@NoArgsConstructor
+public class IgnoreRatingStrategy extends Strategy {
 
-public class IgnoreRatingStrategy implements Strategy {
+    public static String canonicalName = "IgnoreRating";
 
     /**Recommend method applies the sort on the list of applicants.
      * @param list of applicants.
@@ -19,4 +23,6 @@ public class IgnoreRatingStrategy implements Strategy {
         Collections.reverse(recommendationList);
         return recommendationList;
     }
+
+
 }

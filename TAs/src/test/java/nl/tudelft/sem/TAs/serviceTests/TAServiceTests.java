@@ -1,16 +1,14 @@
 package nl.tudelft.sem.TAs.serviceTests;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.gson.Gson;
-import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import java.util.*;
-import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
+import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.repositories.TARepository;
 import nl.tudelft.sem.TAs.services.TAService;
 import org.junit.jupiter.api.AfterAll;
@@ -24,13 +22,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -41,6 +34,9 @@ public class TAServiceTests {
 
     @MockBean
     TARepository taRepository;
+
+    @MockBean
+    ContractRepository contractRepository;
 
     public static MockWebServer mockBackEnd;
     public static ObjectMapper mapper;
@@ -99,5 +95,30 @@ public class TAServiceTests {
         RatingDTO result = Objects.requireNonNull(mono.block());
         assertEquals(result.getStudentId(), student);
         assertEquals(result.getRating(), averageRatingTA);
+    }
+
+    @Test
+    void addContract_successful() {
+        UUID idContract = UUID.randomUUID();
+        Contract contract = new Contract();
+        TA ta = new TA();
+        when(contractRepository.findById(idContract)).thenReturn(Optional.of(contract));
+        assertEquals(true, taService.addContract(Optional.of(ta), idContract).block());
+    }
+
+    @Test
+    void addContract_emptyTA() {
+        UUID idContract = UUID.randomUUID();
+        Contract contract = new Contract();
+        when(contractRepository.findById(idContract)).thenReturn(Optional.of(contract));
+        assertEquals(false, taService.addContract(Optional.empty(), idContract).block());
+    }
+
+    @Test
+    void addContract_emptyContract() {
+        UUID idContract = UUID.randomUUID();
+        TA ta = new TA();
+        when(contractRepository.findById(idContract)).thenReturn(Optional.empty());
+        assertEquals(false, taService.addContract(Optional.of(ta), idContract).block());
     }
 }

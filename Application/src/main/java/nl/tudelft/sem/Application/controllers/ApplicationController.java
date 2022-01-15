@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import nl.tudelft.sem.Application.entities.Application;
+import nl.tudelft.sem.Application.services.ValidatorService;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.Application.repositories.ApplicationRepository;
 import nl.tudelft.sem.Application.services.ApplicationService;
@@ -35,6 +36,8 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/application/")
 public class ApplicationController {
+    @Autowired
+    ValidatorService validatorService;
 
     @Autowired
     ApplicationRepository applicationRepository;
@@ -135,7 +138,7 @@ public class ApplicationController {
             @PathVariable(value = "student_id") UUID studentId,
             @PathVariable(value = "course_id") UUID courseId) {
         Application application = new Application(courseId, studentId);
-        if (applicationService.validate(application)) {
+        if (validatorService.validate(application)) {
             applicationRepository.save(application);
             return Mono.just(true);
         }
@@ -158,35 +161,16 @@ public class ApplicationController {
             throw new Exception("application is already accepted");
         }
         LocalDate startDate = applicationService.getCourseStartDate(application.getCourseId(), portData.getCoursePort());
-        if (LocalDate.now().isBefore(startDate.minusWeeks(3))) {
-            throw new Exception("application is still open for application");
+        if (! applicationService.isSelectionPeriodOpen(startDate)) {
+            throw new Exception("TA selection period is not open now");
         }
         if (!applicationService.studentCanTAAnotherCourse(application.getStudentId(), application.getCourseId(), portData.getCoursePort())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "a student can TA a maximum of 3 courses per quarter");
         }
-        if (LocalDate.now().isAfter(startDate)) {
-            throw new Exception("course has already started");
-        }
         if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getCoursePort())) {
             throw new Exception("maximum number of TA's was already reached for this course");
         }
-        boolean successfullyCreated = applicationService
-            .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-        if (!successfullyCreated) {
-            return Mono.just(false);
-        }
-
-        try {
-            applicationService.createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-            UUID contractId = applicationService.createContract(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-            applicationService.addContract(application.getStudentId(), contractId, portData.getTaPort());
-        } catch (Exception e) {
-            throw new Exception("TA or contract creation failed: " + e.getMessage());
-        }
-        applicationService.sendNotification(application.getStudentId(), "You have been accepted for a TA position, you can expect a contract shortly.", portData.getUserPort());
-        application.setAccepted(true);
-        applicationRepository.save(application);
-        return Mono.just(true);
+        return applicationService.acceptApplication(application);
     }
 
     /**
@@ -290,30 +274,34 @@ public class ApplicationController {
             List<RecommendationDTO> recommended =
                     recommendationService.recommendNStudents(list, strategy, n);
             // Hire all n recommended students
-            for (RecommendationDTO rec : recommended) {
-                Application application =
-                        applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
-                                .orElseThrow(() -> new NoSuchElementException("application does not exist"));
-                if (application.isAccepted()) {
-                    continue;
-                }
-                if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
-                  continue;
-                }
-                boolean successfullyCreated = applicationService
-                    .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
-                if (!successfullyCreated) {
-                    continue;
-                }
-                // Save accepted application to database.
-                application.setAccepted(true);
-                applicationRepository.save(application);
-            }
-            return Mono.just(true);
+            return hireStudents(recommended, courseId);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentId in recommendationDTO not found!");
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested Strategy not found!");
         }
+    }
+
+    private Mono<Boolean> hireStudents(List<RecommendationDTO> recommended, UUID courseId) throws Exception{
+        for (RecommendationDTO rec : recommended) {
+            Application application =
+                    applicationRepository.findByStudentIdAndCourseId(rec.getStudentId(), courseId)
+                            .orElseThrow(() -> new NoSuchElementException("application does not exist"));
+            if (application.isAccepted()) {
+                continue;
+            }
+            if (!applicationService.isTASpotAvailable(application.getCourseId(), portData.getTaPort())) {
+                continue;
+            }
+            boolean successfullyCreated = applicationService
+                    .createTA(application.getStudentId(), application.getCourseId(), portData.getTaPort());
+            if (!successfullyCreated) {
+                continue;
+            }
+            // Save accepted application to database.
+            application.setAccepted(true);
+            applicationRepository.save(application);
+        }
+        return Mono.just(true);
     }
 }

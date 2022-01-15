@@ -34,6 +34,9 @@ public class ContractControllerTest {
     @Autowired
     ContractController contractController;
 
+    @Autowired
+    ContractModificationController contractModificationController;
+
     @MockBean
     ContractRepository contractRepository;
 
@@ -82,21 +85,21 @@ public class ContractControllerTest {
 
     @Test
     public void addHoursTest() throws Exception {
-        contractController.addHoursById(id,42);
+        contractModificationController.addHoursById(id,42);
         Assertions.assertEquals(42,contract.getMaxHours());
     }
 
     @Test
     public void addTaskTest() throws Exception {
         String task = "TA needs to grade exam";
-        contractController.addTaskById(id,task);
+        contractModificationController.addTaskById(id,task);
         Assertions.assertEquals(task , contract.getTaskDescription());
     }
 
     @Test
     public void addSalaryTest() throws Exception {
         double salary = 13.5;
-        contractController.addSalaryById(id,salary);
+        contractModificationController.addSalaryById(id, salary);
         Assertions.assertEquals(salary , contract.getSalaryPerHour());
 
     }
