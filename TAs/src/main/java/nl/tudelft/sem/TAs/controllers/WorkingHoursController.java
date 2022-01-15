@@ -6,6 +6,7 @@ import nl.tudelft.sem.TAs.entities.WorkingHour;
 import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.repositories.TARepository;
 import nl.tudelft.sem.TAs.repositories.WorkingHoursRepository;
+import nl.tudelft.sem.TAs.services.WorkingHoursService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,9 @@ import java.util.UUID;
 @RequestMapping("/hours/")
 @Controller
 public class WorkingHoursController {
+
+    @Autowired
+    WorkingHoursService workingHoursService;
 
     @Autowired
     WorkingHoursRepository workingHoursRepository;
@@ -44,15 +48,8 @@ public class WorkingHoursController {
     public Mono<Boolean> declareHours(@PathVariable(value = "TAid") UUID TAId , @PathVariable(value = "date") String date, @PathVariable(value = "hours") int hours) {
         TA ta = taRepository.findById(TAId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "given TA id does not exist"));
-        if (hours <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "number of hours must be positive");
-        }
         // Check if hours exceed contract hours
-       Contract contract = contractRepository.findByStudentIdAndCourseId(ta.getStudentId(), ta.getCourseId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "TA does not have a contract"));
-        if (hours > contract.getMaxHours()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "number of hours must not exceed hours on contract");
-        }
+        Contract contract = workingHoursService.checkContract(ta, hours);
         LocalDate parsedDate;
         try {
             parsedDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
