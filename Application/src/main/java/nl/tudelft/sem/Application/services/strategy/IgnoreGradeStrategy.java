@@ -1,6 +1,8 @@
 package nl.tudelft.sem.Application.services.strategy;
 
 import java.util.Collections;
+
+import lombok.NoArgsConstructor;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 
 import java.util.Comparator;
@@ -8,7 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class IgnoreGradeStrategy implements Strategy {
+@NoArgsConstructor
+public class IgnoreGradeStrategy extends Strategy {
+
+    public static String canonicalName = "IgnoreGrade";
 
     /**Recommend method applies the sort on the list of applicants.
      * @param list of applicants.

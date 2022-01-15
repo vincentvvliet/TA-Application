@@ -51,6 +51,7 @@ dependencies {
 	compileOnly 'org.springframework.boot:spring-boot-starter-webflux'
 	annotationProcessor 'org.projectlombok:lombok:1.18.8'
 	compileOnly 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.reflections:reflections:0.9.11'
 
 	// https://mvnrepository.com/artifact/com.squareup.okhttp/mockwebserver
 	testImplementation group: 'com.squareup.okhttp', name: 'mockwebserver', version: '2.7.5'

@@ -29,9 +29,6 @@ import java.util.UUID;
 public class TAController {
 
     @Autowired
-    private ContractRepository contractRepository;
-
-    @Autowired
     private TAService taService;
 
     @Autowired
@@ -96,11 +93,8 @@ public class TAController {
     @PostMapping("/addContract/{id}/{contractId}")
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Boolean> addContract(@PathVariable(value = "id") UUID id, @PathVariable(value = "contractId") UUID contractId) {
-         TA ta = taRepository.findById(id).orElseThrow(NoSuchElementException::new);
-         Contract contract = contractRepository.findById(contractId).orElseThrow(NoSuchElementException::new);
-         ta.setContract(contract);
-         taRepository.save(ta);
-        return Mono.just(true);
+        Optional<TA> ta = taRepository.findById(id);
+        return taService.addContract(ta, contractId);
     }
 
     /**
@@ -131,7 +125,7 @@ public class TAController {
         if (timeSpent <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "number of hours spent must be positive");
         }
-        if (! taService.isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
+        if (taService.isCourseFinished(ta.getCourseId(), new PortData().getCoursePort())) {
             return Mono.just(false);
         }
         ta.setTimeSpent(timeSpent);

@@ -2,10 +2,7 @@ package nl.tudelft.sem.Application.services;
 
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.Application.entities.Application;
 import nl.tudelft.sem.Application.exceptions.EmptyResourceException;
@@ -19,8 +16,10 @@ import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.portConfiguration.PortData;
 import nl.tudelft.sem.DTO.RatingDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,17 +32,7 @@ public class ApplicationService {
     @Autowired
     private IsCourseOpen isCourseOpen;
 
-    @Autowired
-    private IsUniqueApplication isUniqueApplication;
-
-    @Autowired
-    private IsGradeSufficient isGradeSufficient;
-
     private PortData portData = new PortData();
-
-    private Validator validator;
-
-
 
     /**
      * Check if the ration of 1 TA for every 20 students is already met.
@@ -134,24 +123,6 @@ public class ApplicationService {
     }
 
     /**
-     * Check if the application is valid.
-     *
-     * @return true if valid, false if not.
-     */
-    public boolean validate(Application application) {
-        validator = isCourseOpen; // create chain of responsibility
-        validator.setLast(isGradeSufficient);
-        validator.setLast(isUniqueApplication);
-        Boolean isValid = false;
-        try {
-            isValid = validator.handle(application);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return isValid;
-    }
-
-    /**
      * Get a list of applications by CourseId.
      *
      * @return List of Applications
@@ -169,7 +140,7 @@ public class ApplicationService {
      * @param applications List of bare applications.
      * @return List of detailed applications.
      */
-    public List<ApplyingStudentDTO> getApplicationDetails(List<Application> applications, int gradePort, int taPort) throws Exception{
+    public List<ApplyingStudentDTO> getApplicationDetails(List<Application> applications, int gradePort, int taPort) throws Exception {
         List<ApplyingStudentDTO> ret = new ArrayList<>();
         for (Application a : applications) {
             ret.add(new ApplyingStudentDTO(
@@ -228,31 +199,6 @@ public class ApplicationService {
         return result.get();
     }
 
-    /**
-     * getGradesByCourseId
-     * @param courseId the id of the course
-     * @return a list of all the grades students received for this course
-     */
-    /** Removes an application from the repository if it is actually there and
-     *
-     * @param studentId The ID of the student linked to the application.
-     * @param courseId The ID of the course linked to the application.
-     * @return A boolean of value true if it was a success and false if not
-     */
-    public Boolean removeApplication(UUID studentId, UUID courseId) {
-        Optional<Application> application = applicationRepository
-                .findByStudentIdAndCourseId(studentId, courseId);
-        if (application.isEmpty()) {
-            return false;
-        }
-        try {
-            isCourseOpen.handle(application.get()); // this always throws an exception when false
-        } catch (Exception exception) {
-            return false;
-        }
-        applicationRepository.deleteApplicationByStudentIdAndCourseId(studentId,courseId);
-        return true;
-    }
 
     /**
      * Get list of courses that overlap with a certain course
@@ -380,6 +326,27 @@ public class ApplicationService {
         if (LocalDate.now().isAfter(startDate)) {
             return false;
         }
+        return true;
+    }
+
+    /** Removes an application from the repository if it is actually there and
+     *
+     * @param studentId The ID of the student linked to the application.
+     * @param courseId The ID of the course linked to the application.
+     * @return A boolean of value true if it was a success and false if not
+     */
+    public Boolean removeApplication(UUID studentId, UUID courseId) {
+        Optional<Application> application = applicationRepository
+                .findByStudentIdAndCourseId(studentId, courseId);
+        if (application.isEmpty()) {
+            return false;
+        }
+        try {
+            isCourseOpen.handle(application.get()); // this always throws an exception when false
+        } catch (Exception exception) {
+            return false;
+        }
+        applicationRepository.deleteApplicationByStudentIdAndCourseId(studentId,courseId);
         return true;
     }
 

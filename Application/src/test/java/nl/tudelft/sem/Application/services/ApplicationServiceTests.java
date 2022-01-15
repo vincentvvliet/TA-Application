@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -55,6 +56,9 @@ public class ApplicationServiceTests {
     @MockBean
     IsCourseOpen isCourseOpen;
 
+    @Autowired
+    ValidatorService validatorService;
+
     private static final Gson gson = new GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
         .create();
@@ -64,6 +68,9 @@ public class ApplicationServiceTests {
     UUID courseId;
     UUID studentId;
     Application application;
+    LocalDate startDateClosed;
+    LocalDate startDateOpen;
+    ApplicationService applicationServiceSpy;
 
     public static MockWebServer mockBackEnd;
 
@@ -89,6 +96,9 @@ public class ApplicationServiceTests {
         application = new Application(courseId, studentId);
         applicationList.add(application);
         doNothing().when(isCourseOpen).setLast(any(Validator.class));
+        startDateClosed = LocalDate.now().plusWeeks(2);
+        startDateOpen = LocalDate.now().plusWeeks(4);
+        applicationServiceSpy = spy(applicationService);
     }
 
     /**
@@ -98,7 +108,7 @@ public class ApplicationServiceTests {
     public void validateSuccessfulTest() throws Exception {
         when(isCourseOpen.handle(application)).thenReturn(true);
 
-        assertTrue(applicationService.validate(application));
+        assertTrue(validatorService.validate(application));
     }
 
     @Test
@@ -106,7 +116,7 @@ public class ApplicationServiceTests {
         Exception e = mock(Exception.class);
         when(isCourseOpen.handle(application)).thenThrow(e);
 
-        assertFalse(applicationService.validate(application));
+        assertFalse(validatorService.validate(application));
         verify(e).printStackTrace();
     }
 

@@ -4,13 +4,17 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.Tuple;
+
+import lombok.NoArgsConstructor;
 import nl.tudelft.sem.DTO.RecommendationDTO;
 
 import java.util.Collections;
 import java.util.List;
 
+@NoArgsConstructor
+public class EqualStrategy extends Strategy {
 
-public class EqualStrategy implements Strategy {
+    public static String canonicalName = "Grade&Rating";
 
     /**Recommend method applies the sort on the list of applicants.
      * @param list of applicants.
