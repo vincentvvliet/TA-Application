@@ -2,15 +2,21 @@ package nl.tudelft.sem.TAs.services;
 
 import nl.tudelft.sem.DTO.LeaveRatingDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.TAs.entities.Contract;
 import nl.tudelft.sem.TAs.entities.TA;
+import nl.tudelft.sem.TAs.repositories.ContractRepository;
 import nl.tudelft.sem.TAs.repositories.TARepository;
+import nl.tudelft.sem.portConfiguration.PortData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +24,9 @@ import java.util.UUID;
 public class TAService {
     @Autowired
     TARepository taRepository;
+
+    @Autowired
+    private ContractRepository contractRepository;
 
     /**
      * Gets the average TA rating for a given student
@@ -53,6 +62,23 @@ public class TAService {
         } else {
             return endDate.get().isBefore(LocalDate.now());
         }
+    }
+
+
+    /**
+     * Adds the hiring contract for a TA
+     * @param optionalTA TA whose contract is added
+     * @param idContract id of contract to add
+     * @return Mono of true if contract added successfully, false otherwise
+     */
+    public Mono<Boolean> addContract(Optional<TA> optionalTA, UUID idContract) {
+        Optional<Contract> optionalContract = contractRepository.findById(idContract);
+        if (optionalTA.isEmpty() || optionalContract.isEmpty()) {
+            return Mono.just(false);
+        }
+        optionalTA.get().setContract(optionalContract.get());
+        taRepository.save(optionalTA.get());
+        return Mono.just(true);
     }
 
     public Mono<Boolean> addRating(LeaveRatingDTO ratingDTO) {
