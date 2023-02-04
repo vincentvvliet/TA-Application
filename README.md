@@ -1,4 +1,6 @@
-# CSE2115 - Project
+# Teaching Assistant Application
+
+A Gradle Spring boot project for Teaching Assistant application using Microservice architecture for CSE2115 Software Engineering Methods.  
 
 ### Running 
 `gradle bootRun`
