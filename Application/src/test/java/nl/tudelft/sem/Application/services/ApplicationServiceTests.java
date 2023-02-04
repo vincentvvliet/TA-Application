@@ -14,6 +14,7 @@ import nl.tudelft.sem.Application.services.validator.Validator;
 import nl.tudelft.sem.DTO.ApplyingStudentDTO;
 import nl.tudelft.sem.DTO.GradeDTO;
 import nl.tudelft.sem.DTO.RatingDTO;
+import nl.tudelft.sem.portConfiguration.PortData;
 import org.junit.jupiter.api.AfterAll;
 
 import org.junit.jupiter.api.Assertions;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -54,6 +56,9 @@ public class ApplicationServiceTests {
     @MockBean
     IsCourseOpen isCourseOpen;
 
+    @Autowired
+    ValidatorService validatorService;
+
     private static final Gson gson = new GsonBuilder()
         .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
         .create();
@@ -63,6 +68,9 @@ public class ApplicationServiceTests {
     UUID courseId;
     UUID studentId;
     Application application;
+    LocalDate startDateClosed;
+    LocalDate startDateOpen;
+    ApplicationService applicationServiceSpy;
 
     public static MockWebServer mockBackEnd;
 
@@ -88,6 +96,9 @@ public class ApplicationServiceTests {
         application = new Application(courseId, studentId);
         applicationList.add(application);
         doNothing().when(isCourseOpen).setLast(any(Validator.class));
+        startDateClosed = LocalDate.now().plusWeeks(2);
+        startDateOpen = LocalDate.now().plusWeeks(4);
+        applicationServiceSpy = spy(applicationService);
     }
 
     /**
@@ -97,7 +108,7 @@ public class ApplicationServiceTests {
     public void validateSuccessfulTest() throws Exception {
         when(isCourseOpen.handle(application)).thenReturn(true);
 
-        assertTrue(applicationService.validate(application));
+        assertTrue(validatorService.validate(application));
     }
 
     @Test
@@ -105,7 +116,7 @@ public class ApplicationServiceTests {
         Exception e = mock(Exception.class);
         when(isCourseOpen.handle(application)).thenThrow(e);
 
-        assertFalse(applicationService.validate(application));
+        assertFalse(validatorService.validate(application));
         verify(e).printStackTrace();
     }
 
@@ -173,22 +184,6 @@ public class ApplicationServiceTests {
         Assertions.assertFalse(applicationService.removeApplication(studentId,courseId));
         verify(applicationRepository, never()).deleteApplicationByStudentIdAndCourseId(studentId,courseId);
     }
-    /**
-     * getCourseStartDate tests
-     */
-//    @Test
-//    void getCourseStartDate_test() throws EmptyResourceException {
-//        // Arrange
-//        LocalDate date = LocalDate.now();
-//        mockBackEnd.enqueue(new MockResponse()
-//            .addHeader("Content-Type", "application/json")
-//            .setBody(gson.toJson(date))
-//        );
-//        // Act
-//        LocalDate result = applicationService.getCourseStartDate(courseId, mockBackEnd.getPort());
-//        // Assert
-//        assertEquals(date, result);
-//    }
 
     /**
      * getApplicationDetails tests
@@ -517,5 +512,22 @@ public class ApplicationServiceTests {
         assertEquals("Could not link contract to TA", result.getMessage());
     }
 
+    @Test
+    void isSelectionPeriodOpen_yes() {
+        LocalDate startDate = LocalDate.now().plusWeeks(2);
+        assertTrue(applicationService.isSelectionPeriodOpen(startDate));
+    }
+
+    @Test
+    void isSelectionPeriodOpen_stillAccepting() {
+        LocalDate startDate = LocalDate.now().plusWeeks(5);
+        assertFalse(applicationService.isSelectionPeriodOpen(startDate));
+    }
+
+    @Test
+    void isSelectionPeriodOpen_courseStarted() {
+        LocalDate startDate = LocalDate.now().minusWeeks(1);
+        assertFalse(applicationService.isSelectionPeriodOpen(startDate));
+    }
 
 }

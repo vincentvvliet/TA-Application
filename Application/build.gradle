@@ -26,7 +26,7 @@ plugins {
 	id 'info.solidsoft.pitest'
 }
 
-group = 'nl.tudelft.sem'
+group = 'nl.tudelft.sem.Application.*'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -51,6 +51,7 @@ dependencies {
 	compileOnly 'org.springframework.boot:spring-boot-starter-webflux'
 	annotationProcessor 'org.projectlombok:lombok:1.18.8'
 	compileOnly 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.reflections:reflections:0.9.11'
 
 	// https://mvnrepository.com/artifact/com.squareup.okhttp/mockwebserver
 	testImplementation group: 'com.squareup.okhttp', name: 'mockwebserver', version: '2.7.5'
@@ -67,7 +68,7 @@ test {
 	useJUnitPlatform()
 	jacoco {
 		enabled = true
-		includes = ['nl.tudelft.sem']
+		includes = ['nl.tudelft.sem.Application.*']
 		excludes = []
 	}
 }
@@ -82,7 +83,7 @@ jacocoTestCoverageVerification() {
 		rule {
 			enabled = true
 			element = 'CLASS'
-			includes = ['nl.tudelft.sem']
+			includes = ['nl.tudelft.sem.Application.*']
 
 			limit {
 				counter = 'BRANCH'
@@ -110,7 +111,7 @@ pitest {
 	//adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
 	junit5PluginVersion = '0.12'
 
-	targetClasses = ['nl.tudelft.sem']  //by default "${project.group}.*"
+	targetClasses = ['nl.tudelft.sem.Application.*']  //by default "${project.group}.*"
 	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
 	threads = 4
 	outputFormats = ['XML', 'HTML']
